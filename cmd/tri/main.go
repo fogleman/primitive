@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	// rand.Seed(time.Now().UTC().UnixNano())
 	flag.Parse()
 	args := flag.Args()
 	if len(args) != 1 {
@@ -18,5 +19,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	tri.Run(im)
+	model := tri.NewModel(im)
+	model.Run()
 }

@@ -1,41 +1,48 @@
 package tri
 
-import (
-	"image"
-	"image/color"
-	"math"
-	"math/rand"
-)
+import "math/rand"
 
 type Triangle struct {
+	W, H   int
 	X1, Y1 int
 	X2, Y2 int
 	X3, Y3 int
 }
 
-func RandomTriangle(w, h int) Triangle {
+func NewRandomTriangle(w, h int) *Triangle {
 	x1 := rand.Intn(w)
 	y1 := rand.Intn(h)
 	x2 := rand.Intn(w)
 	y2 := rand.Intn(h)
 	x3 := rand.Intn(w)
 	y3 := rand.Intn(h)
-	return Triangle{x1, y1, x2, y2, x3, y3}
+	return &Triangle{w, h, x1, y1, x2, y2, x3, y3}
 }
 
-func (t *Triangle) BoundingBox() (x1, y1, x2, y2 int) {
-	x1 = int(math.Min(float64(t.X1), math.Min(float64(t.X2), float64(t.X3))))
-	x2 = int(math.Max(float64(t.X1), math.Max(float64(t.X2), float64(t.X3))))
-	y1 = int(math.Min(float64(t.Y1), math.Min(float64(t.Y2), float64(t.Y3))))
-	y2 = int(math.Max(float64(t.Y1), math.Max(float64(t.Y2), float64(t.Y3))))
-	return
+func (t *Triangle) Copy() Shape {
+	a := *t
+	return &a
 }
 
-func (t *Triangle) Draw(im *image.RGBA, c Color) {
-	fillTriangle(im, c.Color(), t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3)
+func (t *Triangle) Mutate() {
+	switch rand.Intn(3) {
+	case 0:
+		t.X1 = clampInt(t.X1+rand.Intn(21)-10, 0, t.W-1)
+		t.Y1 = clampInt(t.Y1+rand.Intn(21)-10, 0, t.H-1)
+	case 1:
+		t.X2 = clampInt(t.X2+rand.Intn(21)-10, 0, t.W-1)
+		t.Y2 = clampInt(t.Y2+rand.Intn(21)-10, 0, t.H-1)
+	case 2:
+		t.X3 = clampInt(t.X3+rand.Intn(21)-10, 0, t.W-1)
+		t.Y3 = clampInt(t.Y3+rand.Intn(21)-10, 0, t.H-1)
+	}
 }
 
-func fillTriangle(im *image.RGBA, c color.Color, x1, y1, x2, y2, x3, y3 int) {
+func (t *Triangle) Rasterize() []Scanline {
+	return rasterizeTriangle(t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3)
+}
+
+func rasterizeTriangle(x1, y1, x2, y2, x3, y3 int) []Scanline {
 	if y1 > y3 {
 		x1, x3 = x3, x1
 		y1, y3 = y3, y1
@@ -49,56 +56,46 @@ func fillTriangle(im *image.RGBA, c color.Color, x1, y1, x2, y2, x3, y3 int) {
 		y2, y3 = y3, y2
 	}
 	if y2 == y3 {
-		flatBottom(im, c, x1, y1, x2, y2, x3, y3)
+		return rasterizeTriangleBottom(x1, y1, x2, y2, x3, y3)
 	} else if y1 == y2 {
-		flatTop(im, c, x1, y1, x2, y2, x3, y3)
+		return rasterizeTriangleTop(x1, y1, x2, y2, x3, y3)
 	} else {
 		x4 := x1 + int((float64(y2-y1)/float64(y3-y1))*float64(x3-x1))
 		y4 := y2
-		flatBottom(im, c, x1, y1, x2, y2, x4, y4)
-		flatTop(im, c, x2, y2, x4, y4, x3, y3)
+		bottom := rasterizeTriangleBottom(x1, y1, x2, y2, x4, y4)
+		top := rasterizeTriangleTop(x2, y2, x4, y4, x3, y3)
+		return append(bottom, top...)
 	}
 }
 
-func flatBottom(im *image.RGBA, c color.Color, x1, y1, x2, y2, x3, y3 int) {
-	const m = 1<<16 - 1
-	sr, sg, sb, sa := c.RGBA()
-	aa := (m - sa) * 0x101
+func rasterizeTriangleBottom(x1, y1, x2, y2, x3, y3 int) []Scanline {
 	s1 := float64(x2-x1) / float64(y2-y1)
 	s2 := float64(x3-x1) / float64(y3-y1)
 	ax := float64(x1)
 	bx := float64(x1)
+	lines := make([]Scanline, y2-y1+1)
+	i := 0
 	for y := y1; y <= y2; y++ {
 		a := int(ax)
 		b := int(bx)
+		ax += s1
+		bx += s2
 		if a > b {
 			a, b = b, a
 		}
-		i := im.PixOffset(a, y)
-		for x := a; x <= b; x++ {
-			dr := &im.Pix[i+0]
-			dg := &im.Pix[i+1]
-			db := &im.Pix[i+2]
-			da := &im.Pix[i+3]
-			i += 4
-			*dr = uint8((uint32(*dr)*aa/m + sr) >> 8)
-			*dg = uint8((uint32(*dg)*aa/m + sg) >> 8)
-			*db = uint8((uint32(*db)*aa/m + sb) >> 8)
-			*da = uint8((uint32(*da)*aa/m + sa) >> 8)
-		}
-		ax += s1
-		bx += s2
+		lines[i] = Scanline{y, a, b}
+		i++
 	}
+	return lines
 }
 
-func flatTop(im *image.RGBA, c color.Color, x1, y1, x2, y2, x3, y3 int) {
-	const m = 1<<16 - 1
-	sr, sg, sb, sa := c.RGBA()
-	aa := (m - sa) * 0x101
+func rasterizeTriangleTop(x1, y1, x2, y2, x3, y3 int) []Scanline {
 	s1 := float64(x3-x1) / float64(y3-y1)
 	s2 := float64(x3-x2) / float64(y3-y2)
 	ax := float64(x3)
 	bx := float64(x3)
+	lines := make([]Scanline, y3-y1+1)
+	i := 0
 	for y := y3; y > y1; y-- {
 		ax -= s1
 		bx -= s2
@@ -107,17 +104,8 @@ func flatTop(im *image.RGBA, c color.Color, x1, y1, x2, y2, x3, y3 int) {
 		if a > b {
 			a, b = b, a
 		}
-		i := im.PixOffset(a, y)
-		for x := a; x <= b; x++ {
-			dr := &im.Pix[i+0]
-			dg := &im.Pix[i+1]
-			db := &im.Pix[i+2]
-			da := &im.Pix[i+3]
-			i += 4
-			*dr = uint8((uint32(*dr)*aa/m + sr) >> 8)
-			*dg = uint8((uint32(*dg)*aa/m + sg) >> 8)
-			*db = uint8((uint32(*db)*aa/m + sb) >> 8)
-			*da = uint8((uint32(*da)*aa/m + sa) >> 8)
-		}
+		lines[i] = Scanline{y, a, b}
+		i++
 	}
+	return lines
 }

@@ -46,7 +46,26 @@ func uniformRGBA(r image.Rectangle, c color.Color) *image.RGBA {
 	return im
 }
 
-func ClampInt(x, lo, hi int) int {
+func averageImageColor(im image.Image) color.Color {
+	rgba := imageToRGBA(im)
+	size := rgba.Bounds().Size()
+	w, h := size.X, size.Y
+	var r, g, b int
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			c := rgba.RGBAAt(x, y)
+			r += int(c.R)
+			g += int(c.G)
+			b += int(c.B)
+		}
+	}
+	r /= w * h
+	g /= w * h
+	b /= w * h
+	return color.NRGBA{uint8(r), uint8(g), uint8(b), 255}
+}
+
+func clampInt(x, lo, hi int) int {
 	if x < lo {
 		return lo
 	}
