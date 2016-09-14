@@ -3,10 +3,13 @@ package primitive
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"time"
 
 	"github.com/fogleman/gg"
 )
+
+const Scale = 4
 
 type Model struct {
 	W, H    int
@@ -19,6 +22,8 @@ type Model struct {
 
 func NewModel(target image.Image) *Model {
 	c := averageImageColor(target)
+	c = color.White
+	// c = color.Black
 	size := target.Bounds().Size()
 	model := &Model{}
 	model.W = size.X
@@ -27,8 +32,8 @@ func NewModel(target image.Image) *Model {
 	model.Current = uniformRGBA(target.Bounds(), c)
 	model.Buffer = uniformRGBA(target.Bounds(), c)
 	model.Score = differenceFull(model.Target, model.Current)
-	model.Context = gg.NewContext(model.W*4, model.H*4)
-	model.Context.Scale(4, 4)
+	model.Context = gg.NewContext(model.W*Scale, model.H*Scale)
+	model.Context.Scale(Scale, Scale)
 	model.Context.SetColor(c)
 	model.Context.Clear()
 	return model
@@ -55,7 +60,7 @@ func (model *Model) Step() {
 	// state := NewState(model, NewRandomRectangle(model.W, model.H))
 	state := NewState(model, NewRandomCircle(model.W, model.H))
 	// fmt.Println(PreAnneal(state, 10000))
-	state = Anneal(state, 0.2, 0.0001, 10000).(*State)
+	state = Anneal(state, 0.2, 0.0001, 50000).(*State)
 	model.Add(state.Shape)
 }
 
