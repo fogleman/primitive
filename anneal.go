@@ -30,7 +30,7 @@ func Anneal(state Annealable, maxTemp, minTemp float64, steps int) Annealable {
 			previousEnergy = energy
 			if energy < bestEnergy {
 				// pct := float64(step*100) / float64(steps)
-				// fmt.Printf("step: %d of %d (%.1f%%), temp: %.3f, energy: %.3f\n",
+				// fmt.Printf("step: %d of %d (%.1f%%), temp: %.3f, energy: %.6f\n",
 				// 	step, steps, pct, temp, energy)
 				bestEnergy = energy
 				bestState = state.Copy()
