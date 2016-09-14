@@ -1,4 +1,4 @@
-package tri
+package primitive
 
 type State struct {
 	Model *Model

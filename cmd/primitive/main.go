@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/fogleman/tri"
+	"github.com/fogleman/primitive"
 )
 
 func main() {
@@ -14,13 +14,13 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 	if len(args) != 1 {
-		fmt.Println("Usage: tri input")
+		fmt.Println("Usage: primitive input")
 		return
 	}
-	im, err := tri.LoadImage(args[0])
+	im, err := primitive.LoadImage(args[0])
 	if err != nil {
 		panic(err)
 	}
-	model := tri.NewModel(im)
+	model := primitive.NewModel(im)
 	model.Run()
 }

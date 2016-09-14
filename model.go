@@ -1,4 +1,4 @@
-package tri
+package primitive
 
 import (
 	"fmt"
@@ -55,7 +55,7 @@ func (model *Model) Step() {
 	// state := NewState(model, NewRandomRectangle(model.W, model.H))
 	state := NewState(model, NewRandomCircle(model.W, model.H))
 	// fmt.Println(PreAnneal(state, 10000))
-	state = Anneal(state, 0.2, 0.0001, 100000).(*State)
+	state = Anneal(state, 0.2, 0.0001, 10000).(*State)
 	model.Add(state.Shape)
 }
 

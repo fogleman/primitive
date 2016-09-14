@@ -1,4 +1,4 @@
-package tri
+package primitive
 
 import "github.com/fogleman/gg"
 
