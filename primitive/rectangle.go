@@ -30,6 +30,7 @@ func (r *Rectangle) Draw(dc *gg.Context) {
 		y1, y2 = y2, y1
 	}
 	dc.DrawRectangle(pt(x1), pt(y1), pt(x2-x1+1), pt(y2-y1+1))
+	dc.Fill()
 }
 
 func (r *Rectangle) Copy() Shape {
@@ -59,7 +60,7 @@ func (r *Rectangle) Rasterize() []Scanline {
 	}
 	lines := make([]Scanline, y2-y1+1)
 	i := 0
-	for y := y1; y < y2; y++ {
+	for y := y1; y <= y2; y++ {
 		lines[i] = Scanline{y, x1, x2}
 		i++
 	}

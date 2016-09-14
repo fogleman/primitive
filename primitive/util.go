@@ -6,7 +6,6 @@ import (
 	"image/draw"
 	_ "image/jpeg"
 	"image/png"
-	"math/rand"
 	"os"
 )
 
@@ -52,6 +51,8 @@ func averageImageColor(im image.Image) color.Color {
 	size := rgba.Bounds().Size()
 	w, h := size.X, size.Y
 	var r, g, b int
+	w = 20
+	h = 20
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
 			c := rgba.RGBAAt(x, y)
@@ -77,5 +78,5 @@ func clampInt(x, lo, hi int) int {
 }
 
 func pt(x int) float64 {
-	return float64(x) + rand.Float64()
+	return float64(x) // + rand.Float64()
 }

@@ -3,13 +3,12 @@ package primitive
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"time"
 
 	"github.com/fogleman/gg"
 )
 
-const Scale = 4
+const Scale = 1
 
 type Model struct {
 	W, H    int
@@ -22,7 +21,7 @@ type Model struct {
 
 func NewModel(target image.Image) *Model {
 	c := averageImageColor(target)
-	c = color.White
+	// c = color.White
 	// c = color.Black
 	size := target.Bounds().Size()
 	model := &Model{}
@@ -40,28 +39,59 @@ func NewModel(target image.Image) *Model {
 }
 
 func (model *Model) Run() {
-	frame := 0
+	frame := 1
 	start := time.Now()
 	for {
 		model.Step()
 		elapsed := time.Since(start).Seconds()
 		fmt.Printf("%d, %.3f, %.6f\n", frame, elapsed, model.Score)
-		if frame%1 == 0 {
+		if frame%10 == 0 {
 			path := fmt.Sprintf("out%03d.png", frame)
-			// SavePNG(path, model.Current)
+			SavePNG("out.png", model.Current)
 			model.Context.SavePNG(path)
 		}
 		frame++
+		if frame > 100 {
+			break
+		}
 	}
 }
 
 func (model *Model) Step() {
-	// state := NewState(model, NewRandomTriangle(model.W, model.H))
-	// state := NewState(model, NewRandomRectangle(model.W, model.H))
-	state := NewState(model, NewRandomCircle(model.W, model.H))
+	state := model.CreateState()
+	// state := model.RandomState()
 	// fmt.Println(PreAnneal(state, 10000))
-	state = Anneal(state, 0.2, 0.0001, 50000).(*State)
+	// state = Anneal(state, 0.1, 0.00001, 10000).(*State)
+	state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape)
+}
+
+func (model *Model) CreateState() *State {
+	var bestEnergy float64
+	var bestState *State
+	for i := 0; i < 100; i++ {
+		state := model.RandomState()
+		energy := state.Energy()
+		if i == 0 || energy < bestEnergy {
+			bestEnergy = energy
+			bestState = state
+		}
+	}
+	return bestState
+}
+
+func (model *Model) RandomState() *State {
+	return NewState(model, NewRandomTriangle(model.W, model.H))
+	// return NewState(model, NewRandomRectangle(model.W, model.H))
+	// return NewState(model, NewRandomCircle(model.W, model.H))
+	// return NewState(model, NewRandomEllipse(model.W, model.H))
+	// switch rand.Intn(2) {
+	// case 0:
+	// 	return NewState(model, NewRandomRectangle(model.W, model.H))
+	// case 1:
+	// 	return NewState(model, NewRandomEllipse(model.W, model.H))
+	// }
+	// return nil
 }
 
 func (model *Model) Add(shape Shape) {
@@ -70,9 +100,8 @@ func (model *Model) Add(shape Shape) {
 	s := model.computeScore(lines, c)
 	Draw(model.Current, c, lines)
 	model.Score = s
-	shape.Draw(model.Context)
 	model.Context.SetRGBA255(c.R, c.G, c.B, c.A)
-	model.Context.Fill()
+	shape.Draw(model.Context)
 }
 
 func (model *Model) computeColor(lines []Scanline, alpha int) Color {

@@ -27,7 +27,7 @@ func (t *Triangle) Draw(dc *gg.Context) {
 	dc.LineTo(pt(t.X1), pt(t.Y1))
 	dc.LineTo(pt(t.X2), pt(t.Y2))
 	dc.LineTo(pt(t.X3), pt(t.Y3))
-	dc.ClosePath()
+	dc.Fill()
 }
 
 func (t *Triangle) Copy() Shape {

@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/fogleman/primitive"
+	"github.com/fogleman/primitive/primitive"
 )
 
 func main() {

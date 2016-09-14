@@ -12,6 +12,19 @@ type Annealable interface {
 	Copy() Annealable
 }
 
+func PreAnneal(state Annealable, iterations int) float64 {
+	state = state.Copy()
+	previous := state.Energy()
+	var total float64
+	for i := 0; i < iterations; i++ {
+		state.DoMove()
+		energy := state.Energy()
+		total += math.Abs(energy - previous)
+		previous = energy
+	}
+	return total / float64(iterations)
+}
+
 func Anneal(state Annealable, maxTemp, minTemp float64, steps int) Annealable {
 	factor := -math.Log(maxTemp / minTemp)
 	state = state.Copy()
@@ -40,15 +53,23 @@ func Anneal(state Annealable, maxTemp, minTemp float64, steps int) Annealable {
 	return bestState
 }
 
-func PreAnneal(state Annealable, iterations int) float64 {
+func HillClimb(state Annealable, maxAge int) Annealable {
 	state = state.Copy()
-	previous := state.Energy()
-	var total float64
-	for i := 0; i < iterations; i++ {
-		state.DoMove()
+	bestState := state.Copy()
+	bestEnergy := state.Energy()
+	step := 0
+	for age := 0; age < maxAge; age++ {
+		undo := state.DoMove()
 		energy := state.Energy()
-		total += math.Abs(energy - previous)
-		previous = energy
+		if energy >= bestEnergy {
+			state.UndoMove(undo)
+		} else {
+			// fmt.Printf("step: %d, energy: %.6f\n", step, energy)
+			bestEnergy = energy
+			bestState = state.Copy()
+			age = -1
+		}
+		step++
 	}
-	return total / float64(iterations)
+	return bestState
 }
