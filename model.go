@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image"
 	"time"
+
+	"github.com/fogleman/gg"
 )
 
 type Model struct {
@@ -12,6 +14,7 @@ type Model struct {
 	Current *image.RGBA
 	Buffer  *image.RGBA
 	Score   float64
+	Context *gg.Context
 }
 
 func NewModel(target image.Image) *Model {
@@ -24,6 +27,10 @@ func NewModel(target image.Image) *Model {
 	model.Current = uniformRGBA(target.Bounds(), c)
 	model.Buffer = uniformRGBA(target.Bounds(), c)
 	model.Score = differenceFull(model.Target, model.Current)
+	model.Context = gg.NewContext(model.W*4, model.H*4)
+	model.Context.Scale(4, 4)
+	model.Context.SetColor(c)
+	model.Context.Clear()
 	return model
 }
 
@@ -36,7 +43,8 @@ func (model *Model) Run() {
 		fmt.Printf("%d, %.3f, %.6f\n", frame, elapsed, model.Score)
 		if frame%1 == 0 {
 			path := fmt.Sprintf("out%03d.png", frame)
-			SavePNG(path, model.Current)
+			// SavePNG(path, model.Current)
+			model.Context.SavePNG(path)
 		}
 		frame++
 	}
@@ -44,6 +52,7 @@ func (model *Model) Run() {
 
 func (model *Model) Step() {
 	state := NewState(model, NewRandomTriangle(model.W, model.H))
+	// state := NewState(model, NewRandomRectangle(model.W, model.H))
 	// fmt.Println(PreAnneal(state, 10000))
 	state = Anneal(state, 0.2, 0.0001, 10000).(*State)
 	model.Add(state.Shape)
@@ -55,6 +64,9 @@ func (model *Model) Add(shape Shape) {
 	s := model.computeScore(lines, c)
 	Draw(model.Current, c, lines)
 	model.Score = s
+	shape.Draw(model.Context)
+	model.Context.SetRGBA255(c.R, c.G, c.B, c.A)
+	model.Context.Fill()
 }
 
 func (model *Model) computeColor(lines []Scanline, alpha int) Color {

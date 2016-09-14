@@ -1,6 +1,10 @@
 package tri
 
-import "math/rand"
+import (
+	"math/rand"
+
+	"github.com/fogleman/gg"
+)
 
 type Triangle struct {
 	W, H   int
@@ -17,6 +21,13 @@ func NewRandomTriangle(w, h int) *Triangle {
 	x3 := rand.Intn(w)
 	y3 := rand.Intn(h)
 	return &Triangle{w, h, x1, y1, x2, y2, x3, y3}
+}
+
+func (t *Triangle) Draw(dc *gg.Context) {
+	dc.LineTo(pt(t.X1), pt(t.Y1))
+	dc.LineTo(pt(t.X2), pt(t.Y2))
+	dc.LineTo(pt(t.X3), pt(t.Y3))
+	dc.ClosePath()
 }
 
 func (t *Triangle) Copy() Shape {

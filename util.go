@@ -6,6 +6,7 @@ import (
 	"image/draw"
 	_ "image/jpeg"
 	"image/png"
+	"math/rand"
 	"os"
 )
 
@@ -73,4 +74,8 @@ func clampInt(x, lo, hi int) int {
 		return hi
 	}
 	return x
+}
+
+func pt(x int) float64 {
+	return float64(x) + rand.Float64()
 }
