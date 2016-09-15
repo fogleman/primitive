@@ -3,6 +3,7 @@ package primitive
 import (
 	"fmt"
 	"image"
+	"math/rand"
 	"time"
 
 	"github.com/fogleman/gg"
@@ -10,6 +11,16 @@ import (
 
 const Scale = 4
 const Alpha = 128
+
+type ShapeType int
+
+const (
+	ShapeTypeAny ShapeType = iota
+	ShapeTypeTriangle
+	ShapeTypeRectangle
+	ShapeTypeEllipse
+	ShapeTypeCircle
+)
 
 type Model struct {
 	W, H    int
@@ -43,8 +54,8 @@ func (model *Model) Run() {
 	frame := 1
 	start := time.Now()
 	for {
-		// model.Step()
-		model.GoStep()
+		model.Step()
+		// model.GoStep()
 		elapsed := time.Since(start).Seconds()
 		fmt.Printf("%d, %.3f, %.6f\n", frame, elapsed, model.Score)
 		if frame%1 == 0 {
@@ -57,8 +68,8 @@ func (model *Model) Run() {
 }
 
 func (model *Model) Step() {
-	state := model.CreateState(model.Buffer)
-	// state := model.RandomState(model.Buffer)
+	state := model.BestRandomState(model.Buffer, ShapeTypeAny, 100)
+	// state := model.RandomState(model.Buffer, ShapeTypeAny)
 	// fmt.Println(PreAnneal(state, 10000))
 	state = Anneal(state, 0.1, 0.00001, 20000).(*State)
 	// state = HillClimb(state, 1000).(*State)
@@ -67,17 +78,11 @@ func (model *Model) Step() {
 
 func (model *Model) worker(i int, ch chan *State) {
 	buffer := image.NewRGBA(model.Target.Bounds())
-	var state *State
-	switch i {
-	case 0:
-		state = NewState(model, buffer, NewRandomRectangle(model.W, model.H))
-	case 1:
-		// state = NewState(model, buffer, NewRandomEllipse(model.W, model.H))
-		state = NewState(model, buffer, NewRandomCircle(model.W, model.H))
-	case 2:
-		state = NewState(model, buffer, NewRandomTriangle(model.W, model.H))
-	}
-	state = Anneal(state, 0.1, 0.00001, 50000).(*State)
+	t := ShapeType(i + 1)
+	// t = ShapeTypeAny
+	state := model.BestRandomState(buffer, t, 1000)
+	state = Anneal(state, 0.1, 0.00001, 40000).(*State)
+	// state = HillClimb(state, 2000).(*State)
 	ch <- state
 }
 
@@ -93,6 +98,7 @@ func (model *Model) GoStep() {
 		state := <-ch
 		shape := state.Shape
 		energy := model.Energy(shape, model.Buffer)
+		fmt.Printf("%.6f\n", energy)
 		if i == 0 || energy < bestEnergy {
 			bestEnergy = energy
 			bestShape = shape
@@ -101,11 +107,11 @@ func (model *Model) GoStep() {
 	model.Add(bestShape)
 }
 
-func (model *Model) CreateState(buffer *image.RGBA) *State {
+func (model *Model) BestRandomState(buffer *image.RGBA, t ShapeType, n int) *State {
 	var bestEnergy float64
 	var bestState *State
-	for i := 0; i < 100; i++ {
-		state := model.RandomState(buffer)
+	for i := 0; i < n; i++ {
+		state := model.RandomState(buffer, t)
 		energy := state.Energy()
 		if i == 0 || energy < bestEnergy {
 			bestEnergy = energy
@@ -115,11 +121,19 @@ func (model *Model) CreateState(buffer *image.RGBA) *State {
 	return bestState
 }
 
-func (model *Model) RandomState(buffer *image.RGBA) *State {
-	return NewState(model, buffer, NewRandomTriangle(model.W, model.H))
-	// return NewState(model, buffer, NewRandomRectangle(model.W, model.H))
-	// return NewState(model, buffer, NewRandomCircle(model.W, model.H))
-	// return NewState(model, buffer, NewRandomEllipse(model.W, model.H))
+func (model *Model) RandomState(buffer *image.RGBA, t ShapeType) *State {
+	switch t {
+	default:
+		return model.RandomState(buffer, ShapeType(rand.Intn(3)+1))
+	case ShapeTypeTriangle:
+		return NewState(model, buffer, NewRandomTriangle(model.W, model.H))
+	case ShapeTypeRectangle:
+		return NewState(model, buffer, NewRandomRectangle(model.W, model.H))
+	case ShapeTypeCircle:
+		return NewState(model, buffer, NewRandomCircle(model.W, model.H))
+	case ShapeTypeEllipse:
+		return NewState(model, buffer, NewRandomEllipse(model.W, model.H))
+	}
 }
 
 func (model *Model) Add(shape Shape) {
