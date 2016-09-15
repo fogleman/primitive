@@ -9,8 +9,7 @@ import (
 	"github.com/fogleman/gg"
 )
 
-const Scale = 4
-const Alpha = 128
+const SaveFrames = false
 
 type ShapeType int
 
@@ -29,9 +28,12 @@ type Model struct {
 	Buffer  *image.RGBA
 	Score   float64
 	Context *gg.Context
+	Alpha   int
+	Scale   int
+	Mode    ShapeType
 }
 
-func NewModel(target image.Image) *Model {
+func NewModel(target image.Image, alpha, scale int, mode ShapeType) *Model {
 	c := averageImageColor(target)
 	// c = color.White
 	// c = color.Black
@@ -43,35 +45,36 @@ func NewModel(target image.Image) *Model {
 	model.Current = uniformRGBA(target.Bounds(), c)
 	model.Buffer = uniformRGBA(target.Bounds(), c)
 	model.Score = differenceFull(model.Target, model.Current)
-	model.Context = gg.NewContext(model.W*Scale, model.H*Scale)
-	model.Context.Scale(Scale, Scale)
+	model.Context = gg.NewContext(model.W*scale, model.H*scale)
+	model.Context.Scale(float64(scale), float64(scale))
 	model.Context.SetColor(c)
 	model.Context.Clear()
+	model.Alpha = alpha
+	model.Scale = scale
+	model.Mode = mode
 	return model
 }
 
-func (model *Model) Run() {
-	frame := 1
+func (model *Model) Run(n int) image.Image {
 	start := time.Now()
-	for {
+	for i := 1; i <= n; i++ {
 		model.Step()
 		// model.GoStep()
 		elapsed := time.Since(start).Seconds()
-		fmt.Printf("%d, %.3f, %.6f\n", frame, elapsed, model.Score)
-		if frame%1 == 0 {
-			path := fmt.Sprintf("out%03d.png", frame)
+		fmt.Printf("%d, %.3f, %.6f\n", i, elapsed, model.Score)
+		if SaveFrames {
 			SavePNG("out.png", model.Current)
-			model.Context.SavePNG(path)
+			model.Context.SavePNG(fmt.Sprintf("out%03d.png", i))
 		}
-		frame++
 	}
+	return model.Context.Image()
 }
 
 func (model *Model) Step() {
-	state := model.BestRandomState(model.Buffer, ShapeTypeAny, 100)
+	state := model.BestRandomState(model.Buffer, model.Mode, 100)
 	// state := model.RandomState(model.Buffer, ShapeTypeAny)
 	// fmt.Println(PreAnneal(state, 10000))
-	state = Anneal(state, 0.1, 0.00001, 20000).(*State)
+	state = Anneal(state, 0.1, 0.00001, 25000).(*State)
 	// state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape)
 }
@@ -81,7 +84,7 @@ func (model *Model) worker(i int, ch chan *State) {
 	t := ShapeType(i + 1)
 	// t = ShapeTypeAny
 	state := model.BestRandomState(buffer, t, 1000)
-	state = Anneal(state, 0.1, 0.00001, 40000).(*State)
+	state = Anneal(state, 0.1, 0.00001, 25000).(*State)
 	// state = HillClimb(state, 2000).(*State)
 	ch <- state
 }
@@ -138,7 +141,7 @@ func (model *Model) RandomState(buffer *image.RGBA, t ShapeType) *State {
 
 func (model *Model) Add(shape Shape) {
 	lines := shape.Rasterize()
-	c := model.computeColor(lines, Alpha)
+	c := model.computeColor(lines, model.Alpha)
 	s := model.computeScore(lines, c, model.Buffer)
 	Draw(model.Current, c, lines)
 	model.Score = s
@@ -183,7 +186,7 @@ func (model *Model) computeScore(lines []Scanline, c Color, buffer *image.RGBA) 
 
 func (model *Model) Energy(shape Shape, buffer *image.RGBA) float64 {
 	lines := shape.Rasterize()
-	c := model.computeColor(lines, Alpha)
+	c := model.computeColor(lines, model.Alpha)
 	s := model.computeScore(lines, c, buffer)
 	return s
 }

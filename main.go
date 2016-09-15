@@ -4,23 +4,60 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/fogleman/primitive/primitive"
 )
 
+var (
+	Input  string
+	Output string
+	Number int
+	Alpha  int
+	Scale  int
+	Mode   int
+)
+
+func init() {
+	flag.StringVar(&Input, "i", "", "input image path")
+	flag.StringVar(&Output, "o", "", "output image path")
+	flag.IntVar(&Number, "n", 0, "number of primitives")
+	flag.IntVar(&Alpha, "a", 128, "alpha value")
+	flag.IntVar(&Scale, "s", 1, "output image scale")
+	flag.IntVar(&Mode, "m", 1, "mode: 0=combo, 1=triangle, 2=rectangle, 3=ellipse, 4=circle")
+}
+
+func errorMessage(message string) bool {
+	fmt.Fprintln(os.Stderr, message)
+	return false
+}
+
 func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
 	flag.Parse()
-	args := flag.Args()
-	if len(args) != 1 {
-		fmt.Println("Usage: primitive input")
-		return
+	ok := true
+	if Input == "" {
+		ok = errorMessage("input argument required")
 	}
-	im, err := primitive.LoadImage(args[0])
+	if Output == "" {
+		ok = errorMessage("output argument required")
+	}
+	if Number == 0 {
+		ok = errorMessage("number argument required")
+	}
+	if !ok {
+		fmt.Println("Usage:")
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+
+	rand.Seed(time.Now().UTC().UnixNano())
+	input, err := primitive.LoadImage(Input)
 	if err != nil {
 		panic(err)
 	}
-	model := primitive.NewModel(im)
-	model.Run()
+	mode := primitive.ShapeType(Mode)
+	model := primitive.NewModel(input, Alpha, Scale, mode)
+	output := model.Run(Number)
+	primitive.SavePNG(Output, output)
 }
