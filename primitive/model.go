@@ -9,6 +9,7 @@ import (
 )
 
 const Scale = 4
+const Alpha = 128
 
 type Model struct {
 	W, H    int
@@ -42,7 +43,8 @@ func (model *Model) Run() {
 	frame := 1
 	start := time.Now()
 	for {
-		model.Step()
+		// model.Step()
+		model.GoStep()
 		elapsed := time.Since(start).Seconds()
 		fmt.Printf("%d, %.3f, %.6f\n", frame, elapsed, model.Score)
 		if frame%1 == 0 {
@@ -55,19 +57,55 @@ func (model *Model) Run() {
 }
 
 func (model *Model) Step() {
-	state := model.CreateState()
-	// state := model.RandomState()
+	state := model.CreateState(model.Buffer)
+	// state := model.RandomState(model.Buffer)
 	// fmt.Println(PreAnneal(state, 10000))
-	state = Anneal(state, 0.1, 0.00001, 30000).(*State)
+	state = Anneal(state, 0.1, 0.00001, 20000).(*State)
 	// state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape)
 }
 
-func (model *Model) CreateState() *State {
+func (model *Model) worker(i int, ch chan *State) {
+	buffer := image.NewRGBA(model.Target.Bounds())
+	var state *State
+	switch i {
+	case 0:
+		state = NewState(model, buffer, NewRandomRectangle(model.W, model.H))
+	case 1:
+		// state = NewState(model, buffer, NewRandomEllipse(model.W, model.H))
+		state = NewState(model, buffer, NewRandomCircle(model.W, model.H))
+	case 2:
+		state = NewState(model, buffer, NewRandomTriangle(model.W, model.H))
+	}
+	state = Anneal(state, 0.1, 0.00001, 50000).(*State)
+	ch <- state
+}
+
+func (model *Model) GoStep() {
+	n := 3
+	ch := make(chan *State, n)
+	for i := 0; i < n; i++ {
+		go model.worker(i, ch)
+	}
+	var bestShape Shape
+	var bestEnergy float64
+	for i := 0; i < n; i++ {
+		state := <-ch
+		shape := state.Shape
+		energy := model.Energy(shape, model.Buffer)
+		if i == 0 || energy < bestEnergy {
+			bestEnergy = energy
+			bestShape = shape
+		}
+	}
+	model.Add(bestShape)
+}
+
+func (model *Model) CreateState(buffer *image.RGBA) *State {
 	var bestEnergy float64
 	var bestState *State
 	for i := 0; i < 100; i++ {
-		state := model.RandomState()
+		state := model.RandomState(buffer)
 		energy := state.Energy()
 		if i == 0 || energy < bestEnergy {
 			bestEnergy = energy
@@ -77,24 +115,17 @@ func (model *Model) CreateState() *State {
 	return bestState
 }
 
-func (model *Model) RandomState() *State {
-	return NewState(model, NewRandomTriangle(model.W, model.H))
-	// return NewState(model, NewRandomRectangle(model.W, model.H))
-	// return NewState(model, NewRandomCircle(model.W, model.H))
-	// return NewState(model, NewRandomEllipse(model.W, model.H))
-	// switch rand.Intn(2) {
-	// case 0:
-	// 	return NewState(model, NewRandomRectangle(model.W, model.H))
-	// case 1:
-	// 	return NewState(model, NewRandomEllipse(model.W, model.H))
-	// }
-	// return nil
+func (model *Model) RandomState(buffer *image.RGBA) *State {
+	return NewState(model, buffer, NewRandomTriangle(model.W, model.H))
+	// return NewState(model, buffer, NewRandomRectangle(model.W, model.H))
+	// return NewState(model, buffer, NewRandomCircle(model.W, model.H))
+	// return NewState(model, buffer, NewRandomEllipse(model.W, model.H))
 }
 
 func (model *Model) Add(shape Shape) {
 	lines := shape.Rasterize()
-	c := model.computeColor(lines, 128)
-	s := model.computeScore(lines, c)
+	c := model.computeColor(lines, Alpha)
+	s := model.computeScore(lines, c, model.Buffer)
 	Draw(model.Current, c, lines)
 	model.Score = s
 	model.Context.SetRGBA255(c.R, c.G, c.B, c.A)
@@ -130,8 +161,15 @@ func (model *Model) computeColor(lines []Scanline, alpha int) Color {
 	return Color{r, g, b, alpha}
 }
 
-func (model *Model) computeScore(lines []Scanline, c Color) float64 {
-	copy(model.Buffer.Pix, model.Current.Pix)
-	Draw(model.Buffer, c, lines)
-	return differencePartial(model.Target, model.Current, model.Buffer, model.Score, lines)
+func (model *Model) computeScore(lines []Scanline, c Color, buffer *image.RGBA) float64 {
+	copy(buffer.Pix, model.Current.Pix)
+	Draw(buffer, c, lines)
+	return differencePartial(model.Target, model.Current, buffer, model.Score, lines)
+}
+
+func (model *Model) Energy(shape Shape, buffer *image.RGBA) float64 {
+	lines := shape.Rasterize()
+	c := model.computeColor(lines, Alpha)
+	s := model.computeScore(lines, c, buffer)
+	return s
 }

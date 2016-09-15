@@ -1,19 +1,19 @@
 package primitive
 
+import "image"
+
 type State struct {
-	Model *Model
-	Shape Shape
+	Model  *Model
+	Buffer *image.RGBA
+	Shape  Shape
 }
 
-func NewState(model *Model, shape Shape) *State {
-	return &State{model, shape}
+func NewState(model *Model, buffer *image.RGBA, shape Shape) *State {
+	return &State{model, buffer, shape}
 }
 
 func (state *State) Energy() float64 {
-	lines := state.Shape.Rasterize()
-	c := state.Model.computeColor(lines, 128)
-	s := state.Model.computeScore(lines, c)
-	return s
+	return state.Model.Energy(state.Shape, state.Buffer)
 }
 
 func (state *State) DoMove() interface{} {
@@ -27,5 +27,5 @@ func (state *State) UndoMove(undo interface{}) {
 }
 
 func (state *State) Copy() Annealable {
-	return &State{state.Model, state.Shape.Copy()}
+	return &State{state.Model, state.Buffer, state.Shape.Copy()}
 }

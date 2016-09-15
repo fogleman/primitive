@@ -58,7 +58,7 @@ func (t *Triangle) Mutate() {
 }
 
 func (t *Triangle) Valid() bool {
-	const minDegrees = 30
+	const minDegrees = 55
 	var a1, a2, a3 float64
 	{
 		x1 := float64(t.X2 - t.X1)
