@@ -74,10 +74,13 @@ def run():
     url = photo_url(photo, 'm')
     print 'downloading', url
     download_photo(url, in_path)
-    n = 100
+    n = random.choice([50, 100, 150])
     a = 128
     s = 4
     m = random.randint(1, 4)
+    if random.random() < 0.5:
+        a /= 2
+        n *= 2
     print 'running algorithm, n=%d, a=%d, s=%d, m=%d' % (n, a, s, m)
     primitive(in_path, out_path, n=n, s=s, m=m)
     if os.path.exists(out_path):
