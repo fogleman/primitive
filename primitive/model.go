@@ -8,7 +8,7 @@ import (
 	"github.com/fogleman/gg"
 )
 
-const Scale = 1
+const Scale = 4
 
 type Model struct {
 	W, H    int
@@ -45,15 +45,12 @@ func (model *Model) Run() {
 		model.Step()
 		elapsed := time.Since(start).Seconds()
 		fmt.Printf("%d, %.3f, %.6f\n", frame, elapsed, model.Score)
-		if frame%10 == 0 {
+		if frame%1 == 0 {
 			path := fmt.Sprintf("out%03d.png", frame)
 			SavePNG("out.png", model.Current)
 			model.Context.SavePNG(path)
 		}
 		frame++
-		if frame > 100 {
-			break
-		}
 	}
 }
 
@@ -61,8 +58,8 @@ func (model *Model) Step() {
 	state := model.CreateState()
 	// state := model.RandomState()
 	// fmt.Println(PreAnneal(state, 10000))
-	// state = Anneal(state, 0.1, 0.00001, 10000).(*State)
-	state = HillClimb(state, 1000).(*State)
+	state = Anneal(state, 0.1, 0.00001, 30000).(*State)
+	// state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape)
 }
 

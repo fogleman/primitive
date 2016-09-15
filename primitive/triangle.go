@@ -1,6 +1,7 @@
 package primitive
 
 import (
+	"math"
 	"math/rand"
 
 	"github.com/fogleman/gg"
@@ -20,7 +21,9 @@ func NewRandomTriangle(w, h int) *Triangle {
 	y2 := rand.Intn(h)
 	x3 := rand.Intn(w)
 	y3 := rand.Intn(h)
-	return &Triangle{w, h, x1, y1, x2, y2, x3, y3}
+	t := &Triangle{w, h, x1, y1, x2, y2, x3, y3}
+	t.Mutate()
+	return t
 }
 
 func (t *Triangle) Draw(dc *gg.Context) {
@@ -36,17 +39,55 @@ func (t *Triangle) Copy() Shape {
 }
 
 func (t *Triangle) Mutate() {
-	switch rand.Intn(3) {
-	case 0:
-		t.X1 = clampInt(t.X1+rand.Intn(21)-10, 0, t.W-1)
-		t.Y1 = clampInt(t.Y1+rand.Intn(21)-10, 0, t.H-1)
-	case 1:
-		t.X2 = clampInt(t.X2+rand.Intn(21)-10, 0, t.W-1)
-		t.Y2 = clampInt(t.Y2+rand.Intn(21)-10, 0, t.H-1)
-	case 2:
-		t.X3 = clampInt(t.X3+rand.Intn(21)-10, 0, t.W-1)
-		t.Y3 = clampInt(t.Y3+rand.Intn(21)-10, 0, t.H-1)
+	for {
+		switch rand.Intn(3) {
+		case 0:
+			t.X1 = clampInt(t.X1+rand.Intn(21)-10, 0, t.W-1)
+			t.Y1 = clampInt(t.Y1+rand.Intn(21)-10, 0, t.H-1)
+		case 1:
+			t.X2 = clampInt(t.X2+rand.Intn(21)-10, 0, t.W-1)
+			t.Y2 = clampInt(t.Y2+rand.Intn(21)-10, 0, t.H-1)
+		case 2:
+			t.X3 = clampInt(t.X3+rand.Intn(21)-10, 0, t.W-1)
+			t.Y3 = clampInt(t.Y3+rand.Intn(21)-10, 0, t.H-1)
+		}
+		if t.Valid() {
+			break
+		}
 	}
+}
+
+func (t *Triangle) Valid() bool {
+	const minDegrees = 30
+	var a1, a2, a3 float64
+	{
+		x1 := float64(t.X2 - t.X1)
+		y1 := float64(t.Y2 - t.Y1)
+		x2 := float64(t.X3 - t.X1)
+		y2 := float64(t.Y3 - t.Y1)
+		d1 := math.Sqrt(x1*x1 + y1*y1)
+		d2 := math.Sqrt(x2*x2 + y2*y2)
+		x1 /= d1
+		y1 /= d1
+		x2 /= d2
+		y2 /= d2
+		a1 = math.Acos(x1*x2+y1*y2) * 180 / math.Pi
+	}
+	{
+		x1 := float64(t.X1 - t.X2)
+		y1 := float64(t.Y1 - t.Y2)
+		x2 := float64(t.X3 - t.X2)
+		y2 := float64(t.Y3 - t.Y2)
+		d1 := math.Sqrt(x1*x1 + y1*y1)
+		d2 := math.Sqrt(x2*x2 + y2*y2)
+		x1 /= d1
+		y1 /= d1
+		x2 /= d2
+		y2 /= d2
+		a2 = math.Acos(x1*x2+y1*y2) * 180 / math.Pi
+	}
+	a3 = 180 - a1 - a2
+	return a1 > minDegrees && a2 > minDegrees && a3 > minDegrees
 }
 
 func (t *Triangle) Rasterize() []Scanline {
