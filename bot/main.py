@@ -82,7 +82,7 @@ def run():
         a /= 2
         n *= 2
     print 'running algorithm, n=%d, a=%d, s=%d, m=%d' % (n, a, s, m)
-    primitive(in_path, out_path, n=n, s=s, m=m)
+    primitive(in_path, out_path, n=n, a=a, s=s, m=m)
     if os.path.exists(out_path):
         print 'uploading to twitter'
         tweet('', out_path)
