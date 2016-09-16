@@ -125,7 +125,7 @@ func (model *Model) BestRandomState(buffer *image.RGBA, t ShapeType, n int) *Sta
 func (model *Model) RandomState(buffer *image.RGBA, t ShapeType) *State {
 	switch t {
 	default:
-		return model.RandomState(buffer, ShapeType(rand.Intn(3)+1))
+		return model.RandomState(buffer, ShapeType(rand.Intn(4)+1))
 	case ShapeTypeTriangle:
 		return NewState(model, buffer, NewRandomTriangle(model.W, model.H))
 	case ShapeTypeRectangle:
