@@ -141,7 +141,8 @@ func (model *Model) RandomState(buffer *image.RGBA, t ShapeType) *State {
 
 func (model *Model) Add(shape Shape) {
 	lines := shape.Rasterize()
-	c := model.computeColor(lines, model.Alpha)
+	// c := model.computeColor(lines, model.Alpha)
+	c := model.pickColor(lines, Palette, model.Buffer)
 	s := model.computeScore(lines, c, model.Buffer)
 	Draw(model.Current, c, lines)
 	model.Score = s
@@ -179,6 +180,25 @@ func (model *Model) computeColor(lines []Scanline, alpha int) Color {
 	return Color{r, g, b, alpha}
 }
 
+var Palette = []Color{
+	{59, 34, 16, 226},
+	{128, 97, 72, 191},
+	{143, 113, 88, 130},
+}
+
+func (model *Model) pickColor(lines []Scanline, palette []Color, buffer *image.RGBA) Color {
+	var bestScore float64
+	var bestColor Color
+	for i, c := range palette {
+		s := model.computeScore(lines, c, buffer)
+		if i == 0 || s < bestScore {
+			bestScore = s
+			bestColor = c
+		}
+	}
+	return bestColor
+}
+
 func (model *Model) computeScore(lines []Scanline, c Color, buffer *image.RGBA) float64 {
 	copy(buffer.Pix, model.Current.Pix)
 	Draw(buffer, c, lines)
@@ -187,7 +207,8 @@ func (model *Model) computeScore(lines []Scanline, c Color, buffer *image.RGBA) 
 
 func (model *Model) Energy(shape Shape, buffer *image.RGBA) float64 {
 	lines := shape.Rasterize()
-	c := model.computeColor(lines, model.Alpha)
+	// c := model.computeColor(lines, model.Alpha)
+	c := model.pickColor(lines, Palette, buffer)
 	s := model.computeScore(lines, c, buffer)
 	return s
 }
