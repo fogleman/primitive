@@ -103,5 +103,28 @@ def main():
             time.sleep(5)
         run()
 
+def download_photos():
+    date = random_date()
+    photos = interesting(date)
+    for photo in photos:
+        url = photo_url(photo, 'm')
+        path = '%s.jpg' % photo['id']
+        download_photo(url, path)
+
+def process(in_folder, out_folder, n, a=128, s=1, m=1):
+    try:
+        os.makedirs(out_folder)
+    except Exception:
+        pass
+    for name in os.listdir(in_folder):
+        if not name.endswith('.jpg'):
+            continue
+        print name
+        in_path = os.path.join(in_folder, name)
+        out_path = os.path.join(out_folder, name[:-4] + '.png')
+        if os.path.exists(out_path):
+            continue
+        primitive(in_path, out_path, n=n, a=a, s=s, m=m)
+
 if __name__ == '__main__':
     main()
