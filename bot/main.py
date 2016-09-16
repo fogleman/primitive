@@ -5,7 +5,7 @@ import requests
 import time
 import twitter
 
-RATE = 60 * 15
+RATE = 60 * 30
 
 FLICKR_API_KEY = None
 TWITTER_CONSUMER_KEY = None
@@ -77,7 +77,8 @@ def run():
     n = random.choice([50, 100, 150])
     a = 128
     s = 4
-    m = random.randint(1, 4)
+    # m = random.randint(1, 4)
+    m = random.choice([1, 1, 3, 3, 5, 5, 4])
     if random.random() < 0.5:
         a /= 2
         n *= 2

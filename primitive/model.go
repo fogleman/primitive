@@ -130,10 +130,10 @@ func (model *Model) RandomState(buffer *image.RGBA, t ShapeType) *State {
 		return NewState(model, buffer, NewRandomTriangle(model.W, model.H))
 	case ShapeTypeRectangle:
 		return NewState(model, buffer, NewRandomRectangle(model.W, model.H))
-	case ShapeTypeCircle:
-		return NewState(model, buffer, NewRandomCircle(model.W, model.H))
 	case ShapeTypeEllipse:
 		return NewState(model, buffer, NewRandomEllipse(model.W, model.H))
+	case ShapeTypeCircle:
+		return NewState(model, buffer, NewRandomCircle(model.W, model.H))
 	case ShapeTypeRotatedRectangle:
 		return NewState(model, buffer, NewRandomRotatedRectangle(model.W, model.H))
 	}
