@@ -19,6 +19,7 @@ const (
 	ShapeTypeRectangle
 	ShapeTypeEllipse
 	ShapeTypeCircle
+	ShapeTypeRotatedRectangle
 )
 
 type Model struct {
@@ -26,11 +27,12 @@ type Model struct {
 	Target  *image.RGBA
 	Current *image.RGBA
 	Buffer  *image.RGBA
-	Score   float64
 	Context *gg.Context
+	Score   float64
 	Alpha   int
 	Scale   int
 	Mode    ShapeType
+	Shapes  []Shape
 }
 
 func NewModel(target image.Image, alpha, scale int, mode ShapeType) *Model {
@@ -71,21 +73,17 @@ func (model *Model) Run(n int) image.Image {
 }
 
 func (model *Model) Step() {
-	state := model.BestRandomState(model.Buffer, model.Mode, 100)
-	// state := model.RandomState(model.Buffer, ShapeTypeAny)
-	// fmt.Println(PreAnneal(state, 10000))
-	state = Anneal(state, 0.1, 0.00001, 25000).(*State)
-	// state = HillClimb(state, 1000).(*State)
+	state := model.BestRandomState(model.Buffer, model.Mode, 3000)
+	// state = Anneal(state, 0.1, 0.00001, 25000).(*State)
+	state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape)
 }
 
 func (model *Model) worker(i int, ch chan *State) {
 	buffer := image.NewRGBA(model.Target.Bounds())
-	t := ShapeType(i + 1)
-	// t = ShapeTypeAny
-	state := model.BestRandomState(buffer, t, 1000)
-	state = Anneal(state, 0.1, 0.00001, 25000).(*State)
-	// state = HillClimb(state, 2000).(*State)
+	state := model.BestRandomState(buffer, ShapeType(i+1), 3000)
+	// state = Anneal(state, 0.1, 0.00001, 25000).(*State)
+	state = HillClimb(state, 1000).(*State)
 	ch <- state
 }
 
@@ -136,6 +134,8 @@ func (model *Model) RandomState(buffer *image.RGBA, t ShapeType) *State {
 		return NewState(model, buffer, NewRandomCircle(model.W, model.H))
 	case ShapeTypeEllipse:
 		return NewState(model, buffer, NewRandomEllipse(model.W, model.H))
+	case ShapeTypeRotatedRectangle:
+		return NewState(model, buffer, NewRandomRotatedRectangle(model.W, model.H))
 	}
 }
 
@@ -147,6 +147,7 @@ func (model *Model) Add(shape Shape) {
 	model.Score = s
 	model.Context.SetRGBA255(c.R, c.G, c.B, c.A)
 	shape.Draw(model.Context)
+	model.Shapes = append(model.Shapes, shape)
 }
 
 func (model *Model) computeColor(lines []Scanline, alpha int) Color {

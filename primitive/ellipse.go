@@ -17,15 +17,15 @@ type Ellipse struct {
 func NewRandomEllipse(w, h int) *Ellipse {
 	x := rand.Intn(w)
 	y := rand.Intn(h)
-	rx := rand.Intn(w)
-	ry := rand.Intn(h)
+	rx := rand.Intn(w / 2)
+	ry := rand.Intn(h / 2)
 	return &Ellipse{w, h, x, y, rx, ry, false}
 }
 
 func NewRandomCircle(w, h int) *Ellipse {
 	x := rand.Intn(w)
 	y := rand.Intn(h)
-	r := rand.Intn(w)
+	r := rand.Intn(w / 2)
 	return &Ellipse{w, h, x, y, r, r, true}
 }
 

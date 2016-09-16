@@ -71,7 +71,7 @@ func (t *Triangle) Valid() bool {
 		y1 /= d1
 		x2 /= d2
 		y2 /= d2
-		a1 = math.Acos(x1*x2+y1*y2) * 180 / math.Pi
+		a1 = Degrees(math.Acos(x1*x2 + y1*y2))
 	}
 	{
 		x1 := float64(t.X1 - t.X2)
@@ -84,7 +84,7 @@ func (t *Triangle) Valid() bool {
 		y1 /= d1
 		x2 /= d2
 		y2 /= d2
-		a2 = math.Acos(x1*x2+y1*y2) * 180 / math.Pi
+		a2 = Degrees(math.Acos(x1*x2 + y1*y2))
 	}
 	a3 = 180 - a1 - a2
 	return a1 > minDegrees && a2 > minDegrees && a3 > minDegrees
@@ -146,7 +146,7 @@ func rasterizeTriangleTop(x1, y1, x2, y2, x3, y3 int) []Scanline {
 	s2 := float64(x3-x2) / float64(y3-y2)
 	ax := float64(x3)
 	bx := float64(x3)
-	lines := make([]Scanline, y3-y1+1)
+	lines := make([]Scanline, y3-y1)
 	i := 0
 	for y := y3; y > y1; y-- {
 		ax -= s1
