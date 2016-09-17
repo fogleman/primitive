@@ -7,17 +7,8 @@ import (
 	_ "image/jpeg"
 	"image/png"
 	"math"
-	"math/rand"
 	"os"
 )
-
-func Radians(degrees float64) float64 {
-	return degrees * math.Pi / 180
-}
-
-func Degrees(radians float64) float64 {
-	return radians * 180 / math.Pi
-}
 
 func LoadImage(path string) (image.Image, error) {
 	file, err := os.Open(path)
@@ -36,6 +27,44 @@ func SavePNG(path string, im image.Image) error {
 	}
 	defer file.Close()
 	return png.Encode(file, im)
+}
+
+func radians(degrees float64) float64 {
+	return degrees * math.Pi / 180
+}
+
+func degrees(radians float64) float64 {
+	return radians * 180 / math.Pi
+}
+
+func clampInt(x, lo, hi int) int {
+	if x < lo {
+		return lo
+	}
+	if x > hi {
+		return hi
+	}
+	return x
+}
+
+func minInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func rotate(x, y, theta float64) (rx, ry float64) {
+	rx = x*math.Cos(theta) - y*math.Sin(theta)
+	ry = x*math.Sin(theta) + y*math.Cos(theta)
+	return
 }
 
 func imageToRGBA(src image.Image) *image.RGBA {
@@ -61,8 +90,6 @@ func averageImageColor(im image.Image) color.Color {
 	size := rgba.Bounds().Size()
 	w, h := size.X, size.Y
 	var r, g, b int
-	// w = 20
-	// h = 20
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
 			c := rgba.RGBAAt(x, y)
@@ -75,38 +102,4 @@ func averageImageColor(im image.Image) color.Color {
 	g /= w * h
 	b /= w * h
 	return color.NRGBA{uint8(r), uint8(g), uint8(b), 255}
-}
-
-func clampInt(x, lo, hi int) int {
-	if x < lo {
-		return lo
-	}
-	if x > hi {
-		return hi
-	}
-	return x
-}
-
-func pt(x int) float64 {
-	return float64(x) + rand.Float64()
-}
-
-func rotate(x, y, theta float64) (rx, ry float64) {
-	rx = x*math.Cos(theta) - y*math.Sin(theta)
-	ry = x*math.Sin(theta) + y*math.Cos(theta)
-	return
-}
-
-func minInt(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func maxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }

@@ -27,9 +27,9 @@ func NewRandomTriangle(w, h int) *Triangle {
 }
 
 func (t *Triangle) Draw(dc *gg.Context) {
-	dc.LineTo(pt(t.X1), pt(t.Y1))
-	dc.LineTo(pt(t.X2), pt(t.Y2))
-	dc.LineTo(pt(t.X3), pt(t.Y3))
+	dc.LineTo(float64(t.X1), float64(t.Y1))
+	dc.LineTo(float64(t.X2), float64(t.Y2))
+	dc.LineTo(float64(t.X3), float64(t.Y3))
 	dc.Fill()
 }
 
@@ -71,7 +71,7 @@ func (t *Triangle) Valid() bool {
 		y1 /= d1
 		x2 /= d2
 		y2 /= d2
-		a1 = Degrees(math.Acos(x1*x2 + y1*y2))
+		a1 = degrees(math.Acos(x1*x2 + y1*y2))
 	}
 	{
 		x1 := float64(t.X1 - t.X2)
@@ -84,7 +84,7 @@ func (t *Triangle) Valid() bool {
 		y1 /= d1
 		x2 /= d2
 		y2 /= d2
-		a2 = Degrees(math.Acos(x1*x2 + y1*y2))
+		a2 = degrees(math.Acos(x1*x2 + y1*y2))
 	}
 	a3 = 180 - a1 - a2
 	return a1 > minDegrees && a2 > minDegrees && a3 > minDegrees

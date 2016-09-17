@@ -61,7 +61,6 @@ func (model *Model) Run(n int) image.Image {
 	start := time.Now()
 	for i := 1; i <= n; i++ {
 		model.Step()
-		// model.GoStep()
 		elapsed := time.Since(start).Seconds()
 		fmt.Printf("%d, %.3f, %.6f\n", i, elapsed, model.Score)
 		if SaveFrames {
