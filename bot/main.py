@@ -2,6 +2,7 @@ import datetime
 import os
 import random
 import requests
+import subprocess
 import time
 import twitter
 
@@ -53,7 +54,8 @@ def download_photo(url, path):
 
 def primitive(i, o, n, a=128, s=1, m=1):
     args = (i, o, n, a, s, m)
-    os.system('primitive -i %s -o %s -n %d -a %d -s %d -m %d' % args)
+    cmd = 'primitive -i %s -o %s -n %d -a %d -s %d -m %d' % args
+    subprocess.call(cmd, shell=True)
 
 def tweet(status, media):
     api = twitter.Api(
@@ -105,28 +107,18 @@ def main():
             time.sleep(5)
         run()
 
-def download_photos():
-    date = random_date()
+def download_photos(folder, date=None):
+    try:
+        os.makedirs(folder)
+    except Exception:
+        pass
+    date = date or random_date()
     photos = interesting(date)
     for photo in photos:
         url = photo_url(photo, 'm')
         path = '%s.jpg' % photo['id']
+        path = os.path.join(folder, path)
         download_photo(url, path)
-
-def process(in_folder, out_folder, n, a=128, s=1, m=1):
-    try:
-        os.makedirs(out_folder)
-    except Exception:
-        pass
-    for name in os.listdir(in_folder):
-        if not name.endswith('.jpg'):
-            continue
-        print name
-        in_path = os.path.join(in_folder, name)
-        out_path = os.path.join(out_folder, name[:-4] + '.png')
-        if os.path.exists(out_path):
-            continue
-        primitive(in_path, out_path, n=n, a=a, s=s, m=m)
 
 if __name__ == '__main__':
     main()
