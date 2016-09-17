@@ -102,20 +102,19 @@ func (r *RotatedRectangle) Copy() Shape {
 }
 
 func (r *RotatedRectangle) Mutate() {
-	for {
-		switch rand.Intn(2) {
-		case 0:
-			r.X = clampInt(r.X+rand.Intn(21)-10, 0, r.W-1)
-			r.Y = clampInt(r.Y+rand.Intn(21)-10, 0, r.H-1)
-		case 1:
-			r.Sx = clampInt(r.Sx+rand.Intn(21)-10, 0, r.W-1)
-			r.Sy = clampInt(r.Sy+rand.Intn(21)-10, 0, r.H-1)
-		case 2:
-			r.Angle = r.Angle + rand.Intn(21) - 10
-		}
-		if r.Valid() {
-			break
-		}
+	switch rand.Intn(3) {
+	case 0:
+		r.X = clampInt(r.X+rand.Intn(21)-10, 0, r.W-1)
+		r.Y = clampInt(r.Y+rand.Intn(21)-10, 0, r.H-1)
+	case 1:
+		r.Sx = clampInt(r.Sx+rand.Intn(21)-10, 0, r.W-1)
+		r.Sy = clampInt(r.Sy+rand.Intn(21)-10, 0, r.H-1)
+	case 2:
+		r.Angle = r.Angle + rand.Intn(41) - 20
+	}
+	for !r.Valid() {
+		r.Sx = clampInt(r.Sx+rand.Intn(21)-10, 0, r.W-1)
+		r.Sy = clampInt(r.Sy+rand.Intn(21)-10, 0, r.H-1)
 	}
 }
 
