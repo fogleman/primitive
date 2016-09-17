@@ -11,17 +11,6 @@ import (
 
 const SaveFrames = false
 
-type ShapeType int
-
-const (
-	ShapeTypeAny ShapeType = iota
-	ShapeTypeTriangle
-	ShapeTypeRectangle
-	ShapeTypeEllipse
-	ShapeTypeCircle
-	ShapeTypeRotatedRectangle
-)
-
 type Model struct {
 	W, H    int
 	Target  *image.RGBA
@@ -31,11 +20,11 @@ type Model struct {
 	Score   float64
 	Alpha   int
 	Scale   int
-	Mode    ShapeType
+	Mode    Mode
 	Shapes  []Shape
 }
 
-func NewModel(target image.Image, alpha, scale int, mode ShapeType) *Model {
+func NewModel(target image.Image, alpha, scale int, mode Mode) *Model {
 	c := averageImageColor(target)
 	// c = color.White
 	// c = color.Black
@@ -80,7 +69,7 @@ func (model *Model) Step() {
 
 func (model *Model) worker(i int, ch chan *State) {
 	buffer := image.NewRGBA(model.Target.Bounds())
-	state := model.BestRandomState(buffer, ShapeType(i+1), 3000)
+	state := model.BestRandomState(buffer, Mode(i+1), 3000)
 	// state = Anneal(state, 0.1, 0.00001, 25000).(*State)
 	state = HillClimb(state, 1000).(*State)
 	ch <- state
@@ -107,7 +96,7 @@ func (model *Model) GoStep() {
 	model.Add(bestShape)
 }
 
-func (model *Model) BestRandomState(buffer *image.RGBA, t ShapeType, n int) *State {
+func (model *Model) BestRandomState(buffer *image.RGBA, t Mode, n int) *State {
 	var bestEnergy float64
 	var bestState *State
 	for i := 0; i < n; i++ {
@@ -121,19 +110,19 @@ func (model *Model) BestRandomState(buffer *image.RGBA, t ShapeType, n int) *Sta
 	return bestState
 }
 
-func (model *Model) RandomState(buffer *image.RGBA, t ShapeType) *State {
+func (model *Model) RandomState(buffer *image.RGBA, t Mode) *State {
 	switch t {
 	default:
-		return model.RandomState(buffer, ShapeType(rand.Intn(4)+1))
-	case ShapeTypeTriangle:
+		return model.RandomState(buffer, Mode(rand.Intn(4)+1))
+	case ModeTriangle:
 		return NewState(model, buffer, NewRandomTriangle(model.W, model.H))
-	case ShapeTypeRectangle:
+	case ModeRectangle:
 		return NewState(model, buffer, NewRandomRectangle(model.W, model.H))
-	case ShapeTypeEllipse:
+	case ModeEllipse:
 		return NewState(model, buffer, NewRandomEllipse(model.W, model.H))
-	case ShapeTypeCircle:
+	case ModeCircle:
 		return NewState(model, buffer, NewRandomCircle(model.W, model.H))
-	case ShapeTypeRotatedRectangle:
+	case ModeRotatedRectangle:
 		return NewState(model, buffer, NewRandomRotatedRectangle(model.W, model.H))
 	}
 }
