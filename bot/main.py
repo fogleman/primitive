@@ -14,6 +14,15 @@ TWITTER_CONSUMER_SECRET = None
 TWITTER_ACCESS_TOKEN_KEY = None
 TWITTER_ACCESS_TOKEN_SECRET = None
 
+MODE_NAMES = [
+    'primitives',
+    'triangles',
+    'rectangles',
+    'ellipses',
+    'circles',
+    'rotated rectangles',
+]
+
 try:
     from config import *
 except ImportError:
@@ -76,16 +85,17 @@ def run():
     url = photo_url(photo, 'm')
     print 'downloading', url
     download_photo(url, in_path)
-    n = random.choice([50, 100, 150, 200])
+    n = random.randint(5, 25) * 10
     a = 128
     s = 4
-    # m = random.randint(1, 5)
     m = random.choice([0, 1, 3, 5])
     if m == 0:
-        n = random.choice([50, 100])
+        n = random.randint(5, 10) * 10
     elif random.random() < 0.5:
         a /= 2
         n *= 2
+    status = '%d %s' % (n, MODE_NAMES[m])
+    print status
     print 'running algorithm, n=%d, a=%d, s=%d, m=%d' % (n, a, s, m)
     primitive(in_path, out_path, n=n, a=a, s=s, m=m)
     if os.path.exists(out_path):
