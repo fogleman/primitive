@@ -30,7 +30,7 @@ func NewRandomCircle(w, h int) *Ellipse {
 }
 
 func (c *Ellipse) Draw(dc *gg.Context) {
-	dc.DrawEllipse(pt(c.X), pt(c.Y), pt(c.Rx), pt(c.Ry))
+	dc.DrawEllipse(float64(c.X), float64(c.Y), float64(c.Rx), float64(c.Ry))
 	dc.Fill()
 }
 

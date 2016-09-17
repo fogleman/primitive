@@ -74,12 +74,14 @@ def run():
     url = photo_url(photo, 'm')
     print 'downloading', url
     download_photo(url, in_path)
-    n = random.choice([50, 100, 150])
+    n = random.choice([50, 100, 150, 200])
     a = 128
     s = 4
-    # m = random.randint(1, 4)
-    m = random.choice([1, 1, 3, 3, 5, 5, 4])
-    if random.random() < 0.5:
+    # m = random.randint(1, 5)
+    m = random.choice([0, 1, 3, 5])
+    if m == 0:
+        n = random.choice([50, 100])
+    elif random.random() < 0.5:
         a /= 2
         n *= 2
     print 'running algorithm, n=%d, a=%d, s=%d, m=%d' % (n, a, s, m)
@@ -102,6 +104,29 @@ def main():
                 break
             time.sleep(5)
         run()
+
+def download_photos():
+    date = random_date()
+    photos = interesting(date)
+    for photo in photos:
+        url = photo_url(photo, 'm')
+        path = '%s.jpg' % photo['id']
+        download_photo(url, path)
+
+def process(in_folder, out_folder, n, a=128, s=1, m=1):
+    try:
+        os.makedirs(out_folder)
+    except Exception:
+        pass
+    for name in os.listdir(in_folder):
+        if not name.endswith('.jpg'):
+            continue
+        print name
+        in_path = os.path.join(in_folder, name)
+        out_path = os.path.join(out_folder, name[:-4] + '.png')
+        if os.path.exists(out_path):
+            continue
+        primitive(in_path, out_path, n=n, a=a, s=s, m=m)
 
 if __name__ == '__main__':
     main()

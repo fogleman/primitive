@@ -30,7 +30,7 @@ func (r *Rectangle) Draw(dc *gg.Context) {
 	if y1 > y2 {
 		y1, y2 = y2, y1
 	}
-	dc.DrawRectangle(pt(x1), pt(y1), pt(x2-x1+1), pt(y2-y1+1))
+	dc.DrawRectangle(float64(x1), float64(y1), float64(x2-x1+1), float64(y2-y1+1))
 	dc.Fill()
 }
 
@@ -90,7 +90,7 @@ func (r *RotatedRectangle) Draw(dc *gg.Context) {
 	sx, sy := float64(r.Sx), float64(r.Sy)
 	dc.Push()
 	dc.Translate(float64(r.X), float64(r.Y))
-	dc.Rotate(Radians(float64(r.Angle)))
+	dc.Rotate(radians(float64(r.Angle)))
 	dc.DrawRectangle(-sx/2, -sy/2, sx, sy)
 	dc.Pop()
 	dc.Fill()
@@ -130,7 +130,7 @@ func (r *RotatedRectangle) Valid() bool {
 
 func (r *RotatedRectangle) Rasterize() []Scanline {
 	sx, sy := float64(r.Sx), float64(r.Sy)
-	angle := Radians(float64(r.Angle))
+	angle := radians(float64(r.Angle))
 	rx1, ry1 := rotate(-sx/2, -sy/2, angle)
 	rx2, ry2 := rotate(sx/2, -sy/2, angle)
 	rx3, ry3 := rotate(sx/2, sy/2, angle)
@@ -162,7 +162,7 @@ func (r *RotatedRectangle) Rasterize() []Scanline {
 			max[yi] = maxInt(max[yi], xi)
 		}
 	}
-	lines := make([]Scanline, n)
+	lines := make([]Scanline, 0, n)
 	for i := 0; i < n; i++ {
 		y := miny + i
 		if y < 0 || y >= r.H {
@@ -170,7 +170,7 @@ func (r *RotatedRectangle) Rasterize() []Scanline {
 		}
 		a := maxInt(min[i], 0)
 		b := minInt(max[i], r.W-1)
-		lines[i] = Scanline{y, a, b}
+		lines = append(lines, Scanline{y, a, b})
 	}
 	return lines
 }

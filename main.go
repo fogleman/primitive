@@ -56,7 +56,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	mode := primitive.ShapeType(Mode)
+	mode := primitive.Mode(Mode)
 	model := primitive.NewModel(input, Alpha, Scale, mode)
 	output := model.Run(Number)
 	primitive.SavePNG(Output, output)
