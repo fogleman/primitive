@@ -62,15 +62,18 @@ func (model *Model) Run(n int) image.Image {
 }
 
 func (model *Model) Step() {
-	state := model.BestRandomState(model.Buffer, model.Mode, 3000)
+	state := model.BestHillClimbState(model.Buffer, model.Mode, 100, 100, 10)
+	// state := model.BestRandomState(model.Buffer, model.Mode, 3000)
 	// state = Anneal(state, 0.1, 0.00001, 25000).(*State)
 	state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape)
 }
 
 func (model *Model) worker(i int, ch chan *State) {
+	mode := Mode(i + 1)
 	buffer := image.NewRGBA(model.Target.Bounds())
-	state := model.BestRandomState(buffer, Mode(i+1), 3000)
+	state := model.BestHillClimbState(buffer, mode, 100, 100, 10)
+	// state := model.BestRandomState(buffer, mode, 3000)
 	// state = Anneal(state, 0.1, 0.00001, 25000).(*State)
 	state = HillClimb(state, 1000).(*State)
 	ch <- state
@@ -95,6 +98,21 @@ func (model *Model) GoStep() {
 		}
 	}
 	model.Add(bestShape)
+}
+
+func (model *Model) BestHillClimbState(buffer *image.RGBA, t Mode, n, age, m int) *State {
+	var bestEnergy float64
+	var bestState *State
+	for i := 0; i < m; i++ {
+		state := model.BestRandomState(buffer, t, n)
+		state = HillClimb(state, age).(*State)
+		energy := state.Energy()
+		if i == 0 || energy < bestEnergy {
+			bestEnergy = energy
+			bestState = state
+		}
+	}
+	return bestState
 }
 
 func (model *Model) BestRandomState(buffer *image.RGBA, t Mode, n int) *State {
