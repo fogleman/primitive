@@ -74,7 +74,7 @@ def run():
     url = photo_url(photo, 'm')
     print 'downloading', url
     download_photo(url, in_path)
-    n = random.choice([50, 100, 150])
+    n = random.choice([50, 100, 150, 200])
     a = 128
     s = 4
     # m = random.randint(1, 5)
