@@ -100,7 +100,7 @@ def run():
     primitive(in_path, out_path, n=n, a=a, s=s, m=m)
     if os.path.exists(out_path):
         print 'uploading to twitter'
-        tweet('', out_path)
+        tweet(status, out_path)
         print 'done'
     else:
         print 'failed!'
