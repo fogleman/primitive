@@ -25,7 +25,7 @@ func NewRandomEllipse(w, h int) *Ellipse {
 func NewRandomCircle(w, h int) *Ellipse {
 	x := rand.Intn(w)
 	y := rand.Intn(h)
-	r := rand.Intn(w / 2)
+	r := rand.Intn(w / 4)
 	return &Ellipse{w, h, x, y, r, r, true}
 }
 

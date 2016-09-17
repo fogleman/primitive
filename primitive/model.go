@@ -9,6 +9,7 @@ import (
 	"github.com/fogleman/gg"
 )
 
+const ShowProgress = false
 const SaveFrames = false
 
 type Model struct {
@@ -52,7 +53,9 @@ func (model *Model) Run(n int) image.Image {
 	for i := 1; i <= n; i++ {
 		model.Step()
 		elapsed := time.Since(start).Seconds()
-		fmt.Printf("%d, %.3f, %.6f\n", i, elapsed, model.Score)
+		if ShowProgress {
+			fmt.Printf("%d, %.3f, %.6f\n", i, elapsed, model.Score)
+		}
 		if SaveFrames {
 			SavePNG("out.png", model.Current)
 			model.Context.SavePNG(fmt.Sprintf("out%03d.png", i))
