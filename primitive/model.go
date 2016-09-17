@@ -62,7 +62,7 @@ func (model *Model) Run(n int) image.Image {
 }
 
 func (model *Model) Step() {
-	state := model.BestHillClimbState(model.Buffer, model.Mode, 100, 100, 10)
+	state := model.BestHillClimbState(model.Buffer, model.Mode, 100, 100, 20)
 	// state := model.BestRandomState(model.Buffer, model.Mode, 3000)
 	// state = Anneal(state, 0.1, 0.00001, 25000).(*State)
 	state = HillClimb(state, 1000).(*State)
@@ -132,7 +132,7 @@ func (model *Model) BestRandomState(buffer *image.RGBA, t Mode, n int) *State {
 func (model *Model) RandomState(buffer *image.RGBA, t Mode) *State {
 	switch t {
 	default:
-		return model.RandomState(buffer, Mode(rand.Intn(4)+1))
+		return model.RandomState(buffer, Mode(rand.Intn(5)+1))
 	case ModeTriangle:
 		return NewState(model, buffer, NewRandomTriangle(model.W, model.H))
 	case ModeRectangle:

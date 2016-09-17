@@ -162,7 +162,7 @@ func (r *RotatedRectangle) Rasterize() []Scanline {
 			max[yi] = maxInt(max[yi], xi)
 		}
 	}
-	lines := make([]Scanline, n)
+	lines := make([]Scanline, 0, n)
 	for i := 0; i < n; i++ {
 		y := miny + i
 		if y < 0 || y >= r.H {
@@ -170,7 +170,7 @@ func (r *RotatedRectangle) Rasterize() []Scanline {
 		}
 		a := maxInt(min[i], 0)
 		b := minInt(max[i], r.W-1)
-		lines[i] = Scanline{y, a, b}
+		lines = append(lines, Scanline{y, a, b})
 	}
 	return lines
 }
