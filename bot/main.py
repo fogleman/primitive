@@ -78,8 +78,10 @@ def run():
     a = 128
     s = 4
     # m = random.randint(1, 5)
-    m = random.choice([1, 3, 5])
-    if random.random() < 0.5:
+    m = random.choice([0, 1, 3, 5])
+    if m == 0:
+        n = random.choice([50, 100])
+    elif random.random() < 0.5:
         a /= 2
         n *= 2
     print 'running algorithm, n=%d, a=%d, s=%d, m=%d' % (n, a, s, m)
