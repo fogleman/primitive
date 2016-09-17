@@ -38,6 +38,7 @@ func NewModel(target image.Image, alpha, scale int, mode Mode) *Model {
 	model.Score = differenceFull(model.Target, model.Current)
 	model.Context = gg.NewContext(model.W*scale, model.H*scale)
 	model.Context.Scale(float64(scale), float64(scale))
+	model.Context.Translate(0.5, 0.5)
 	model.Context.SetColor(c)
 	model.Context.Clear()
 	model.Alpha = alpha
@@ -132,10 +133,12 @@ func (model *Model) Add(shape Shape) {
 	c := model.computeColor(lines, model.Alpha)
 	s := model.computeScore(lines, c, model.Buffer)
 	Draw(model.Current, c, lines)
+
 	model.Score = s
+	model.Shapes = append(model.Shapes, shape)
+
 	model.Context.SetRGBA255(c.R, c.G, c.B, c.A)
 	shape.Draw(model.Context)
-	model.Shapes = append(model.Shapes, shape)
 }
 
 func (model *Model) computeColor(lines []Scanline, alpha int) Color {
