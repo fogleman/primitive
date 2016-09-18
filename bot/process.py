@@ -23,7 +23,9 @@ def create_jobs(in_folder, out_folder, n, a, s, m):
         out_path = os.path.join(out_folder, out_name)
         if os.path.exists(out_path):
             continue
-        result.append((in_path, out_path, n, a, s, m))
+        key = (name[:-4], n, m)
+        args = (in_path, out_path, n, a, s, m)
+        result.append((key, args))
     return result
 
 def worker(jobs, done):
@@ -43,9 +45,8 @@ def process(in_folder, out_folder, nlist, alist, slist, mlist, nworkers):
     count = 0
     items = []
     for n, a, s, m in itertools.product(nlist, alist, slist, mlist):
-        for i, job in enumerate(create_jobs(in_folder, out_folder, n, a, s, m)):
-            key = (n, i, m)
-            items.append((key, job))
+        for item in create_jobs(in_folder, out_folder, n, a, s, m):
+            items.append(item)
     items.sort()
     for _, job in items:
         jobs.put(job)
