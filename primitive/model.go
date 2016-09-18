@@ -9,9 +9,11 @@ import (
 	"github.com/fogleman/gg"
 )
 
-const ShowProgress = false
-const SaveFrames = false
-const OutlineShapes = false
+const (
+	ShowProgress  = false
+	SaveFrames    = false
+	OutlineShapes = false
+)
 
 type Model struct {
 	W, H    int
@@ -49,6 +51,20 @@ func NewModel(target image.Image, alpha, scale int, mode Mode) *Model {
 	return model
 }
 
+func (model *Model) Add(shape Shape) {
+	lines := shape.Rasterize()
+	c := model.computeColor(lines, model.Alpha)
+	s := model.computeScore(lines, c, model.Buffer)
+	Draw(model.Current, c, lines)
+
+	model.Score = s
+	model.Shapes = append(model.Shapes, shape)
+
+	model.Context.SetRGBA255(c.R, c.G, c.B, c.A)
+	shape.Draw(model.Context)
+	model.Context.Fill()
+}
+
 func (model *Model) Run(n int) image.Image {
 	start := time.Now()
 	for i := 1; i <= n; i++ {
@@ -80,37 +96,6 @@ func (model *Model) Step() {
 	// state = Anneal(state, 0.1, 0.00001, 25000).(*State)
 	state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape)
-}
-
-func (model *Model) worker(i int, ch chan *State) {
-	mode := Mode(i + 1)
-	buffer := image.NewRGBA(model.Target.Bounds())
-	state := model.BestHillClimbState(buffer, mode, 100, 100, 10)
-	// state := model.BestRandomState(buffer, mode, 3000)
-	// state = Anneal(state, 0.1, 0.00001, 25000).(*State)
-	state = HillClimb(state, 1000).(*State)
-	ch <- state
-}
-
-func (model *Model) GoStep() {
-	n := 3
-	ch := make(chan *State, n)
-	for i := 0; i < n; i++ {
-		go model.worker(i, ch)
-	}
-	var bestShape Shape
-	var bestEnergy float64
-	for i := 0; i < n; i++ {
-		state := <-ch
-		shape := state.Shape
-		energy := model.Energy(shape, model.Buffer)
-		fmt.Printf("%.6f\n", energy)
-		if i == 0 || energy < bestEnergy {
-			bestEnergy = energy
-			bestShape = shape
-		}
-	}
-	model.Add(bestShape)
 }
 
 func (model *Model) BestHillClimbState(buffer *image.RGBA, t Mode, n, age, m int) *State {
@@ -157,20 +142,6 @@ func (model *Model) RandomState(buffer *image.RGBA, t Mode) *State {
 	case ModeRotatedRectangle:
 		return NewState(model, buffer, NewRandomRotatedRectangle(model.W, model.H))
 	}
-}
-
-func (model *Model) Add(shape Shape) {
-	lines := shape.Rasterize()
-	c := model.computeColor(lines, model.Alpha)
-	s := model.computeScore(lines, c, model.Buffer)
-	Draw(model.Current, c, lines)
-
-	model.Score = s
-	model.Shapes = append(model.Shapes, shape)
-
-	model.Context.SetRGBA255(c.R, c.G, c.B, c.A)
-	shape.Draw(model.Context)
-	model.Context.Fill()
 }
 
 func (model *Model) computeColor(lines []Scanline, alpha int) Color {
