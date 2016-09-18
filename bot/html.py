@@ -24,7 +24,52 @@ def run(in_folder, out_folder):
 
 def main():
     args = sys.argv[1:]
+    print HEADER
     run(args[0], args[1])
+    print FOOTER
+
+HEADER = '''
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PrimitivePic</title>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+table {
+    border-collapse: collapse;
+    margin: 4px;
+}
+img {
+    width: 400px;
+    display: block;
+    margin: 4px;
+}
+td {
+    padding: 0;
+}
+</style>
+</head>
+<body>
+<table>
+
+<tr>
+<th>original</th>
+<th>50 shapes</th>
+<th>100 shapes</th>
+<th>200 shapes</th>
+</tr>
+'''
+
+FOOTER = '''
+</table>
+</body>
+</html>
+'''
 
 if __name__ == '__main__':
     main()
