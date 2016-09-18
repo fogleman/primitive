@@ -28,8 +28,8 @@ type Model struct {
 
 func NewModel(target image.Image, alpha, scale int, mode Mode) *Model {
 	c := averageImageColor(target)
-	// c = color.White
-	// c = color.Black
+	// c := color.White
+	// c := color.Black
 	size := target.Bounds().Size()
 	model := &Model{}
 	model.W = size.X
@@ -67,7 +67,8 @@ func (model *Model) Run(n int) image.Image {
 			model.Context.NewSubPath()
 			shape.Draw(model.Context)
 		}
-		model.Context.SetRGBA255(255, 255, 255, 64)
+		c := averageImageColor(model.Target)
+		model.Context.SetRGBA255(int(c.R), int(c.G), int(c.B), 64)
 		model.Context.Stroke()
 	}
 	return model.Context.Image()

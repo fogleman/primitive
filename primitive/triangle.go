@@ -30,6 +30,7 @@ func (t *Triangle) Draw(dc *gg.Context) {
 	dc.LineTo(float64(t.X1), float64(t.Y1))
 	dc.LineTo(float64(t.X2), float64(t.Y2))
 	dc.LineTo(float64(t.X3), float64(t.Y3))
+	dc.ClosePath()
 }
 
 func (t *Triangle) Copy() Shape {
