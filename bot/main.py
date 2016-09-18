@@ -85,15 +85,12 @@ def run():
     url = photo_url(photo, 'm')
     print 'downloading', url
     download_photo(url, in_path)
-    n = random.randint(5, 25) * 10
+    n = random.randint(4, 20) * 10
     a = 128
     s = 4
-    m = random.choice([0, 1, 3, 5])
-    if m == 0:
-        n = random.randint(5, 10) * 10
-    elif random.random() < 0.5:
-        a /= 2
-        n *= 2
+    m = random.choice([1, 3, 5])
+    # if m == 0:
+    #     n = random.randint(5, 10) * 10
     status = '%d %s' % (n, MODE_NAMES[m])
     print status
     print 'running algorithm, n=%d, a=%d, s=%d, m=%d' % (n, a, s, m)
