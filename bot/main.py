@@ -4,6 +4,7 @@ import random
 import requests
 import subprocess
 import time
+import traceback
 import twitter
 
 RATE = 60 * 30
@@ -112,7 +113,10 @@ def main():
                 previous = now
                 break
             time.sleep(5)
-        run()
+        try:
+            run()
+        except Exception:
+            traceback.print_exc()
 
 def download_photos(folder, date=None):
     try:
