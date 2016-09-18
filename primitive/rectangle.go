@@ -31,7 +31,6 @@ func (r *Rectangle) Draw(dc *gg.Context) {
 		y1, y2 = y2, y1
 	}
 	dc.DrawRectangle(float64(x1), float64(y1), float64(x2-x1+1), float64(y2-y1+1))
-	dc.Fill()
 }
 
 func (r *Rectangle) Copy() Shape {
@@ -93,7 +92,6 @@ func (r *RotatedRectangle) Draw(dc *gg.Context) {
 	dc.Rotate(radians(float64(r.Angle)))
 	dc.DrawRectangle(-sx/2, -sy/2, sx, sy)
 	dc.Pop()
-	dc.Fill()
 }
 
 func (r *RotatedRectangle) Copy() Shape {

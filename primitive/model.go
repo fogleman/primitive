@@ -11,6 +11,7 @@ import (
 
 const ShowProgress = false
 const SaveFrames = false
+const OutlineShapes = false
 
 type Model struct {
 	W, H    int
@@ -60,6 +61,14 @@ func (model *Model) Run(n int) image.Image {
 			SavePNG("out.png", model.Current)
 			model.Context.SavePNG(fmt.Sprintf("out%03d.png", i))
 		}
+	}
+	if OutlineShapes {
+		for _, shape := range model.Shapes {
+			model.Context.NewSubPath()
+			shape.Draw(model.Context)
+		}
+		model.Context.SetRGBA255(255, 255, 255, 64)
+		model.Context.Stroke()
 	}
 	return model.Context.Image()
 }
@@ -160,6 +169,7 @@ func (model *Model) Add(shape Shape) {
 
 	model.Context.SetRGBA255(c.R, c.G, c.B, c.A)
 	shape.Draw(model.Context)
+	model.Context.Fill()
 }
 
 func (model *Model) computeColor(lines []Scanline, alpha int) Color {
