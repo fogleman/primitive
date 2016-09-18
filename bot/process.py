@@ -1,4 +1,5 @@
 from Queue import Queue
+import itertools
 import os
 import subprocess
 import threading
@@ -35,16 +36,21 @@ def worker(jobs, done):
 def process(in_folder, out_folder, nlist, alist, slist, mlist, nworkers):
     jobs = Queue()
     done = Queue()
-    for i in range(nworkers):
+    for i in xrange(nworkers):
         t = threading.Thread(target=worker, args=(jobs, done))
         t.setDaemon(True)
         t.start()
     count = 0
+    items = []
     for n, a, s, m in itertools.product(nlist, alist, slist, mlist):
-        for job in create_jobs(in_folder, out_folder, n, a, s, m):
-            jobs.put(job)
-            count += 1
-    for i in range(count):
+        for i, job in enumerate(create_jobs(in_folder, out_folder, n, a, s, m)):
+            key = (n, i, m)
+            items.append((key, job))
+    items.sort()
+    for _, job in items:
+        jobs.put(job)
+        count += 1
+    for i in xrange(count):
         done.get()
 
 log_lock = threading.Lock()
@@ -54,9 +60,9 @@ def log(x):
         print x
 
 if __name__ == '__main__':
-    nlist = [50, 100, 150, 200]
+    nlist = [50, 100, 200]
     alist = [128]
     slist = [4]
-    mlist = [0, 1, 3, 5, 2, 4]
+    mlist = [1, 3, 5]
     nworkers = 4
-    process('input', 'output', nlist, alist, slist, mlist, nworkers)
+    process('input1', 'output1', nlist, alist, slist, mlist, nworkers)
