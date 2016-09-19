@@ -11,6 +11,20 @@ Follow [@PrimitivePic](https://twitter.com/PrimitivePic) on Twitter to see a new
 The Twitter bot looks for interesting photos using the Flickr API, runs the algorithm using randomized parameters, and
 posts the picture using the Twitter API.
 
+### Command-line Usage
+
+    go get -u github.com/fogleman/primitive
+    primitive -i input.png -o output.png -n 100
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| -i | n/a | input file |
+| -o | n/a | output file |
+| -n | n/a | number of shapes |
+| -m | 1 | mode: 0=combo, 1=triangle, 2=rect, 3=ellipse, 4=circle, 5=rotatedrect |
+| -s | 1 | output scaling factor |
+| -a | 128 | color alpha |
+
 ### How it Works
 
 A target image is provided as input. The algorithm tries to find a shape that can be drawn to minimize the error
