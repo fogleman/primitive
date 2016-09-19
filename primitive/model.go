@@ -3,6 +3,7 @@ package primitive
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"math/rand"
 	"time"
 
@@ -16,16 +17,18 @@ const (
 )
 
 type Model struct {
-	W, H    int
-	Target  *image.RGBA
-	Current *image.RGBA
-	Buffer  *image.RGBA
-	Context *gg.Context
-	Score   float64
-	Alpha   int
-	Scale   int
-	Mode    Mode
-	Shapes  []Shape
+	W, H       int
+	Background color.Color
+	Target     *image.RGBA
+	Current    *image.RGBA
+	Buffer     *image.RGBA
+	Context    *gg.Context
+	Score      float64
+	Alpha      int
+	Scale      int
+	Mode       Mode
+	Shapes     []Shape
+	Scores     []float64
 }
 
 func NewModel(target image.Image, alpha, scale int, mode Mode) *Model {
@@ -36,19 +39,46 @@ func NewModel(target image.Image, alpha, scale int, mode Mode) *Model {
 	model := &Model{}
 	model.W = size.X
 	model.H = size.Y
+	model.Background = c
+	model.Alpha = alpha
+	model.Scale = scale
+	model.Mode = mode
 	model.Target = imageToRGBA(target)
 	model.Current = uniformRGBA(target.Bounds(), c)
 	model.Buffer = uniformRGBA(target.Bounds(), c)
 	model.Score = differenceFull(model.Target, model.Current)
-	model.Context = gg.NewContext(model.W*scale, model.H*scale)
-	model.Context.Scale(float64(scale), float64(scale))
-	model.Context.Translate(0.5, 0.5)
-	model.Context.SetColor(c)
-	model.Context.Clear()
-	model.Alpha = alpha
-	model.Scale = scale
-	model.Mode = mode
+	model.Context = model.newContext()
 	return model
+}
+
+func (model *Model) newContext() *gg.Context {
+	s := model.Scale
+	dc := gg.NewContext(model.W*s, model.H*s)
+	dc.Scale(float64(s), float64(s))
+	dc.Translate(0.5, 0.5)
+	dc.SetColor(model.Background)
+	dc.Clear()
+	return dc
+}
+
+func (model *Model) Frames(scoreDelta float64) []image.Image {
+	var result []image.Image
+	dc := model.newContext()
+	result = append(result, imageToRGBA(dc.Image()))
+	previous := 10.0
+	for i, shape := range model.Shapes {
+		c := model.computeColor(shape.Rasterize(), model.Alpha)
+		dc.SetRGBA255(c.R, c.G, c.B, c.A)
+		shape.Draw(dc)
+		dc.Fill()
+		score := model.Scores[i]
+		delta := previous - score
+		if delta >= scoreDelta {
+			previous = score
+			result = append(result, imageToRGBA(dc.Image()))
+		}
+	}
+	return result
 }
 
 func (model *Model) Add(shape Shape) {
@@ -59,6 +89,7 @@ func (model *Model) Add(shape Shape) {
 
 	model.Score = s
 	model.Shapes = append(model.Shapes, shape)
+	model.Scores = append(model.Scores, s)
 
 	model.Context.SetRGBA255(c.R, c.G, c.B, c.A)
 	shape.Draw(model.Context)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/fogleman/primitive/primitive"
@@ -59,5 +60,10 @@ func main() {
 	mode := primitive.Mode(Mode)
 	model := primitive.NewModel(input, Alpha, Scale, mode)
 	output := model.Run(Number)
-	primitive.SavePNG(Output, output)
+	if strings.HasSuffix(strings.ToLower(Output), ".gif") {
+		frames := model.Frames(0.001)
+		primitive.SaveGIFImageMagick(Output, frames, 50, 250)
+	} else {
+		primitive.SavePNG(Output, output)
+	}
 }

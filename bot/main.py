@@ -21,7 +21,7 @@ MODE_NAMES = [
     'rectangles',
     'ellipses',
     'circles',
-    'rotated rectangles',
+    'rectangles',
 ]
 
 try:
