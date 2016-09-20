@@ -43,6 +43,12 @@ The following primitives are supported:
 More shapes can be added by implementing the following interface:
 
 ```go
+type Shape interface {
+	Rasterize() []Scanline
+	Copy() Shape
+	Mutate()
+	Draw(dc *gg.Context)
+}
 ```
 
 ### Features
