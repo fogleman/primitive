@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	ShowProgress  = false
 	SaveFrames    = false
 	OutlineShapes = false
 )
@@ -101,9 +100,7 @@ func (model *Model) Run(n int) image.Image {
 	for i := 1; i <= n; i++ {
 		model.Step()
 		elapsed := time.Since(start).Seconds()
-		if ShowProgress {
-			fmt.Printf("%d, %.3f, %.6f\n", i, elapsed, model.Score)
-		}
+		v("iteration %d, time %.3f, score %.6f\n", i, elapsed, model.Score)
 		if SaveFrames {
 			SavePNG("out.png", model.Current)
 			model.Context.SavePNG(fmt.Sprintf("out%03d.png", i))
