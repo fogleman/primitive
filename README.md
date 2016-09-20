@@ -2,7 +2,12 @@
 
 Reproducing images with geometric primitives.
 
-![Examples](http://i.imgur.com/H5NYpL4.png)
+![Example](https://www.michaelfogleman.com/static/primitive/examples/16550611738.200.128.4.5.png)
+
+### How it Works
+
+A target image is provided as input. The algorithm tries to find a shape that can be drawn to minimize the error
+between the target image and the drawn image. It repeats this process, adding one shape at a time.
 
 ### Twitter
 
@@ -24,11 +29,6 @@ posts the picture using the Twitter API.
 | -m | 1 | mode: 0=combo, 1=triangle, 2=rect, 3=ellipse, 4=circle, 5=rotatedrect |
 | -s | 1 | output scaling factor |
 | -a | 128 | color alpha |
-
-### How it Works
-
-A target image is provided as input. The algorithm tries to find a shape that can be drawn to minimize the error
-between the target image and the drawn image. It repeats this process, adding one shape at a time.
 
 ### Primitives
 
@@ -60,19 +60,25 @@ Since the algorithm has a random component to it, you can run it against the sam
 
 ![Pencils](https://www.michaelfogleman.com/static/primitive/examples/pencils.gif)
 
+### Shape and Iteration Comparison Matrix
+
+The matrix below shows triangles, ellipses and rectangles at 50, 100 and 200 iterations each.
+
+![Matrix](http://i.imgur.com/H5NYpL4.png)
+
 ### Examples
 
 Here are more examples from interesting photos found on Flickr.
 
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/27471731151.50.128.4.1.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/11720700033.200.128.4.3.png)
-![Example](https://www.michaelfogleman.com/static/primitive/examples/16550611738.200.128.4.5.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/18782606664.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/21374478713.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/15196426112.200.128.4.5.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/24696847962.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/18276676312.100.128.4.1.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/29167683201.png)
+![Example](https://www.michaelfogleman.com/static/primitive/examples/26574286221.200.128.4.1.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/15011768709.200.128.4.1.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/27540729075.200.128.4.1.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/28896874003.png)
