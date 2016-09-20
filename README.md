@@ -6,8 +6,7 @@ Reproducing images with geometric primitives.
 
 ### How it Works
 
-A target image is provided as input. The algorithm tries to find a shape that can be drawn to minimize the error
-between the target image and the drawn image. It repeats this process, adding one shape at a time.
+A target image is provided as input. The algorithm tries to find the most optimal shape that can be drawn to minimize the error between the target image and the drawn image. It repeats this process, adding one shape at a time.
 
 ### Twitter
 
@@ -54,7 +53,7 @@ This project was originally inspired by the popular and excellent work of Roger 
 
 ### Progression
 
-This GIF demonstrates the iterative nature of the algorithm, attempting to minimize the mean squared error by adding one shape at a time.
+This GIF demonstrates the iterative nature of the algorithm, attempting to minimize the mean squared error by adding one shape at a time. (Use a ".gif" output file to generate one yourself!)
 
 ![Mona Lisa](https://www.michaelfogleman.com/static/primitive/examples/monalisa.gif)
 
