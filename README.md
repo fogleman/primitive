@@ -32,6 +32,7 @@ Small input images should be used (like 256x256px). You don't need the detail an
 | `-m` | 1 | mode: 0=combo, 1=triangle, 2=rect, 3=ellipse, 4=circle, 5=rotatedrect |
 | `-s` | 1 | output scaling factor |
 | `-a` | 128 | color alpha |
+| `-v` | off | verbose output |
 
 ### Primitives
 
