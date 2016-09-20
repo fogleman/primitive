@@ -77,6 +77,12 @@ Since the algorithm has a random component to it, you can run it against the sam
 
 ![Pencils](https://www.michaelfogleman.com/static/primitive/examples/pencils.gif)
 
+### Creative Constraints
+
+If you're willing to dabble in the code, you can enforce constraints on the shapes to produce even more interesting results. Here, the rectangles are constrained to point toward the sun in this picture of a pyramid sunset.
+
+![Pyramids](https://www.michaelfogleman.com/static/primitive/examples/pyramids.png)
+
 ### Shape and Iteration Comparison Matrix
 
 The matrix below shows triangles, ellipses and rectangles at 50, 100 and 200 iterations each. For a similar comparison of 500 different images, see: [large comparison matrix](https://www.michaelfogleman.com/static/primitive/) (warning: this page has 6000 images on it!)
