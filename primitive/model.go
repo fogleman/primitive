@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/fogleman/gg"
@@ -211,23 +212,38 @@ func (model *Model) RandomState(buffer *image.RGBA, t Mode) *State {
 func (model *Model) computeColor(lines []Scanline, alpha int) Color {
 	var count int
 	var rsum, gsum, bsum float64
+	var mutex sync.Mutex
+	var wg sync.WaitGroup
 	a := float64(alpha) / 255
 	for _, line := range lines {
 		i := model.Target.PixOffset(line.X1, line.Y)
-		for x := line.X1; x <= line.X2; x++ {
-			count++
-			tr := float64(model.Target.Pix[i])
-			tg := float64(model.Target.Pix[i+1])
-			tb := float64(model.Target.Pix[i+2])
-			cr := float64(model.Current.Pix[i])
-			cg := float64(model.Current.Pix[i+1])
-			cb := float64(model.Current.Pix[i+2])
-			i += 4
-			rsum += (a*cr - cr + tr) / a
-			gsum += (a*cg - cg + tg) / a
-			bsum += (a*cb - cb + tb) / a
-		}
+		wg.Add(1)
+		iterations := (line.X2 - line.X1) + 1
+		go func() {
+			var lineRsum, lineGsum, lineBsum float64
+			for x := 0; x < iterations; x++ {
+				tr := float64(model.Target.Pix[i])
+				tg := float64(model.Target.Pix[i+1])
+				tb := float64(model.Target.Pix[i+2])
+				cr := float64(model.Current.Pix[i])
+				cg := float64(model.Current.Pix[i+1])
+				cb := float64(model.Current.Pix[i+2])
+				i += 4
+
+				lineRsum += (a*cr - cr + tr) / a
+				lineGsum += (a*cg - cg + tg) / a
+				lineBsum += (a*cb - cb + tb) / a
+			}
+			mutex.Lock()
+			rsum += lineRsum
+			gsum += lineGsum
+			bsum += lineBsum
+			mutex.Unlock()
+			wg.Done()
+		}()
+		count += iterations
 	}
+	wg.Wait()
 	if count == 0 {
 		return Color{}
 	}
