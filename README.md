@@ -22,6 +22,8 @@ Run it on your own images! First, [install Go](https://golang.org/doc/install).
     go get -u github.com/fogleman/primitive
     primitive -i input.png -o output.png -n 100
 
+Small input images should be used (like 256x256px). You don't need the detail anyway and the code will run faster.
+
 | Flag | Default | Description |
 | --- | --- | --- |
 | -i | n/a | input file |
