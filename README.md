@@ -48,7 +48,21 @@ The following primitives are supported:
 - Partial image difference for a faster scoring function
 - Anti-aliased output rendering
 
+### Progression
+
+This GIF demonstrates the iterative nature of the algorithm, attempting to minimize the mean squared error by adding one shape at a time.
+
+![Mona Lisa](https://www.michaelfogleman.com/static/primitive/examples/monalisa.gif)
+
+### Static Animation
+
+Since the algorithm has a random component to it, you can run it against the same input image multiple times to bring life to a static image.
+
+![Pencils](https://www.michaelfogleman.com/static/primitive/examples/pencils.gif)
+
 ### Examples
+
+Here are more examples from interesting photos found on Flickr.
 
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/27471731151.50.128.4.1.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/11720700033.200.128.4.3.png)
