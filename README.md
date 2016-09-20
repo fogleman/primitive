@@ -26,12 +26,12 @@ Small input images should be used (like 256x256px). You don't need the detail an
 
 | Flag | Default | Description |
 | --- | --- | --- |
-| -i | n/a | input file |
-| -o | n/a | output file |
-| -n | n/a | number of shapes |
-| -m | 1 | mode: 0=combo, 1=triangle, 2=rect, 3=ellipse, 4=circle, 5=rotatedrect |
-| -s | 1 | output scaling factor |
-| -a | 128 | color alpha |
+| `-i` | n/a | input file |
+| `-o` | n/a | output file |
+| `-n` | n/a | number of shapes |
+| `-m` | 1 | mode: 0=combo, 1=triangle, 2=rect, 3=ellipse, 4=circle, 5=rotatedrect |
+| `-s` | 1 | output scaling factor |
+| `-a` | 128 | color alpha |
 
 ### Primitives
 
