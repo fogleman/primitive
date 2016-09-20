@@ -15,9 +15,9 @@ func v(format string, a ...interface{}) {
 }
 
 func vv(format string, a ...interface{}) {
-	Log(2, format, a...)
+	Log(2, "  "+format, a...)
 }
 
 func vvv(format string, a ...interface{}) {
-	Log(3, format, a...)
+	Log(3, "    "+format, a...)
 }

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/fogleman/primitive/primitive"
+	"github.com/nfnt/resize"
 )
 
 var (
@@ -16,7 +17,8 @@ var (
 	Output     string
 	Number     int
 	Alpha      int
-	Scale      int
+	InputSize  int
+	OutputSize int
 	Mode       int
 	V, VV, VVV bool
 )
@@ -26,10 +28,11 @@ func init() {
 	flag.StringVar(&Output, "o", "", "output image path")
 	flag.IntVar(&Number, "n", 0, "number of primitives")
 	flag.IntVar(&Alpha, "a", 128, "alpha value")
-	flag.IntVar(&Scale, "s", 1, "output image scale")
+	flag.IntVar(&InputSize, "r", 256, "resize large input images to this size")
+	flag.IntVar(&OutputSize, "s", 1024, "output image size")
 	flag.IntVar(&Mode, "m", 1, "mode: 0=combo, 1=triangle, 2=rectangle, 3=ellipse, 4=circle")
 	flag.BoolVar(&V, "v", false, "verbose")
-	// flag.BoolVar(&VV, "vv", false, "very verbose")
+	flag.BoolVar(&VV, "vv", false, "very verbose")
 	// flag.BoolVar(&VVV, "vvv", false, "very very verbose")
 }
 
@@ -39,6 +42,7 @@ func errorMessage(message string) bool {
 }
 
 func main() {
+	// parse and validate arguments
 	flag.Parse()
 	ok := true
 	if Input == "" {
@@ -56,6 +60,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	// set log level
 	if V {
 		primitive.LogLevel = 1
 	}
@@ -66,15 +71,25 @@ func main() {
 		primitive.LogLevel = 3
 	}
 
+	// seed random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
+
+	// read input image
 	primitive.Log(1, "reading %s\n", Input)
 	input, err := primitive.LoadImage(Input)
 	if err != nil {
 		panic(err)
 	}
-	mode := primitive.Mode(Mode)
-	model := primitive.NewModel(input, Alpha, Scale, mode)
+
+	// scale down input image if needed
+	size := uint(InputSize)
+	input = resize.Thumbnail(size, size, input, resize.Bilinear)
+
+	// run algorithm
+	model := primitive.NewModel(input, Alpha, OutputSize, primitive.Mode(Mode))
 	output := model.Run(Number)
+
+	// write output image
 	primitive.Log(1, "writing %s\n", Output)
 	if strings.HasSuffix(strings.ToLower(Output), ".gif") {
 		frames := model.Frames(0.001)

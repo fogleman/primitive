@@ -24,23 +24,22 @@ type Model struct {
 	Context    *gg.Context
 	Score      float64
 	Alpha      int
-	Scale      int
+	Size       int
 	Mode       Mode
 	Shapes     []Shape
 	Scores     []float64
 }
 
-func NewModel(target image.Image, alpha, scale int, mode Mode) *Model {
+func NewModel(target image.Image, alpha, size int, mode Mode) *Model {
 	c := averageImageColor(target)
 	// c := color.White
 	// c := color.Black
-	size := target.Bounds().Size()
 	model := &Model{}
-	model.W = size.X
-	model.H = size.Y
+	model.W = target.Bounds().Size().X
+	model.H = target.Bounds().Size().Y
 	model.Background = c
 	model.Alpha = alpha
-	model.Scale = scale
+	model.Size = size
 	model.Mode = mode
 	model.Target = imageToRGBA(target)
 	model.Current = uniformRGBA(target.Bounds(), c)
@@ -51,9 +50,20 @@ func NewModel(target image.Image, alpha, scale int, mode Mode) *Model {
 }
 
 func (model *Model) newContext() *gg.Context {
-	s := model.Scale
-	dc := gg.NewContext(model.W*s, model.H*s)
-	dc.Scale(float64(s), float64(s))
+	aspect := float64(model.W) / float64(model.H)
+	var w, h int
+	var scale float64
+	if aspect >= 1 {
+		w = model.Size
+		h = int(float64(model.Size) / aspect)
+		scale = float64(model.Size) / float64(model.W)
+	} else {
+		w = int(float64(model.Size) * aspect)
+		h = model.Size
+		scale = float64(model.Size) / float64(model.H)
+	}
+	dc := gg.NewContext(w, h)
+	dc.Scale(scale, scale)
 	dc.Translate(0.5, 0.5)
 	dc.SetColor(model.Background)
 	dc.Clear()
@@ -119,7 +129,7 @@ func (model *Model) Run(n int) image.Image {
 }
 
 func (model *Model) Step() {
-	state := model.BestHillClimbState(model.Buffer, model.Mode, 100, 100, 20)
+	state := model.BestHillClimbState(model.Buffer, model.Mode, 100, 100, 10)
 	// state := model.BestRandomState(model.Buffer, model.Mode, 3000)
 	// state = Anneal(state, 0.1, 0.00001, 25000).(*State)
 	state = HillClimb(state, 1000).(*State)
@@ -131,8 +141,10 @@ func (model *Model) BestHillClimbState(buffer *image.RGBA, t Mode, n, age, m int
 	var bestState *State
 	for i := 0; i < m; i++ {
 		state := model.BestRandomState(buffer, t, n)
+		before := state.Energy()
 		state = HillClimb(state, age).(*State)
 		energy := state.Energy()
+		vv("%dx random: %.6f -> %dx hill climb: %.6f\n", n, before, age, energy)
 		if i == 0 || energy < bestEnergy {
 			bestEnergy = energy
 			bestState = state
