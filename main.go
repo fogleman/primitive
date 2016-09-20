@@ -30,7 +30,7 @@ func init() {
 	flag.IntVar(&Alpha, "a", 128, "alpha value")
 	flag.IntVar(&InputSize, "r", 256, "resize large input images to this size")
 	flag.IntVar(&OutputSize, "s", 1024, "output image size")
-	flag.IntVar(&Mode, "m", 1, "mode: 0=combo, 1=triangle, 2=rectangle, 3=ellipse, 4=circle")
+	flag.IntVar(&Mode, "m", 1, "0=combo 1=triangle 2=rect 3=ellipse 4=circle 5=rotatedrect")
 	flag.BoolVar(&V, "v", false, "verbose")
 	flag.BoolVar(&VV, "vv", false, "very verbose")
 	// flag.BoolVar(&VVV, "vvv", false, "very very verbose")
@@ -46,16 +46,16 @@ func main() {
 	flag.Parse()
 	ok := true
 	if Input == "" {
-		ok = errorMessage("input argument required")
+		ok = errorMessage("ERROR: input argument required")
 	}
 	if Output == "" {
-		ok = errorMessage("output argument required")
+		ok = errorMessage("ERROR: output argument required")
 	}
 	if Number == 0 {
-		ok = errorMessage("number argument required")
+		ok = errorMessage("ERROR: number argument required")
 	}
 	if !ok {
-		fmt.Println("Usage:")
+		fmt.Println("Usage: primitive [OPTIONS] -i input -o output -n shape_count")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
