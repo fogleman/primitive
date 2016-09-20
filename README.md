@@ -89,7 +89,7 @@ If you're willing to dabble in the code, you can enforce constraints on the shap
 
 ### Shape and Iteration Comparison Matrix
 
-The matrix below shows triangles, ellipses and rectangles at 50, 100 and 200 iterations each. For a similar comparison of 500 different images, see: [large comparison matrix](https://www.michaelfogleman.com/static/primitive/) (warning: this page has 6000 images on it!)
+The matrix below shows triangles, ellipses and rectangles at 50, 100 and 200 iterations each.
 
 ![Matrix](http://i.imgur.com/H5NYpL4.png)
 
