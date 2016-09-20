@@ -93,13 +93,6 @@ The matrix below shows triangles, ellipses and rectangles at 50, 100 and 200 ite
 
 Here are more examples from interesting photos found on Flickr.
 
-![Example](https://www.michaelfogleman.com/static/primitive/examples/27471731151.50.128.4.1.png)
-![Example](https://www.michaelfogleman.com/static/primitive/examples/11720700033.200.128.4.3.png)
-![Example](https://www.michaelfogleman.com/static/primitive/examples/18782606664.png)
-![Example](https://www.michaelfogleman.com/static/primitive/examples/21374478713.png)
-![Example](https://www.michaelfogleman.com/static/primitive/examples/15196426112.200.128.4.5.png)
-![Example](https://www.michaelfogleman.com/static/primitive/examples/24696847962.png)
-![Example](https://www.michaelfogleman.com/static/primitive/examples/18276676312.100.128.4.1.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/29167683201.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/26574286221.200.128.4.1.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/15011768709.200.128.4.1.png)
@@ -113,3 +106,10 @@ Here are more examples from interesting photos found on Flickr.
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/25213252889.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/15015411870.200.128.4.3.png)
 ![Example](https://www.michaelfogleman.com/static/primitive/examples/25766500104.png)
+![Example](https://www.michaelfogleman.com/static/primitive/examples/27471731151.50.128.4.1.png)
+![Example](https://www.michaelfogleman.com/static/primitive/examples/11720700033.200.128.4.3.png)
+![Example](https://www.michaelfogleman.com/static/primitive/examples/18782606664.png)
+![Example](https://www.michaelfogleman.com/static/primitive/examples/21374478713.png)
+![Example](https://www.michaelfogleman.com/static/primitive/examples/15196426112.200.128.4.5.png)
+![Example](https://www.michaelfogleman.com/static/primitive/examples/24696847962.png)
+![Example](https://www.michaelfogleman.com/static/primitive/examples/18276676312.100.128.4.1.png)
