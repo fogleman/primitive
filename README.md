@@ -17,6 +17,8 @@ posts the picture using the Twitter API.
 
 ### Command-line Usage
 
+Run it on your own images! First, [install Go](https://golang.org/doc/install).
+
     go get -u github.com/fogleman/primitive
     primitive -i input.png -o output.png -n 100
 
