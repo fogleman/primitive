@@ -42,9 +42,10 @@ The following primitives are supported:
 
 ### Features
 
-- Hill Climbing or Simulated Annealing for optimization
-- Optimal color computation based on affected pixels for each shape
-- Partial image difference for a faster scoring function
+- [Hill Climbing](https://en.wikipedia.org/wiki/Hill_climbing) or [Simulated Annealing](https://en.wikipedia.org/wiki/Simulated_annealing) for optimization (hill climbing multiple random shapes is nearly as good as annealing and faster)
+- Scanline rasterization of shapes in pure Go (preferable for implementing the features below)
+- Optimal color computation based on affected pixels for each shape (color is directly computed, not optimized for)
+- Partial image difference for faster scoring (only pixels that change need be considered)
 - Anti-aliased output rendering
 
 ### Inspiration
