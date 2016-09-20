@@ -40,6 +40,11 @@ The following primitives are supported:
 - Rotated Rectangle
 - Combo (a mix of the above in a single image)
 
+More shapes can be added by implementing the following interface:
+
+```go
+```
+
 ### Features
 
 - [Hill Climbing](https://en.wikipedia.org/wiki/Hill_climbing) or [Simulated Annealing](https://en.wikipedia.org/wiki/Simulated_annealing) for optimization (hill climbing multiple random shapes is nearly as good as annealing and faster)
