@@ -48,6 +48,10 @@ The following primitives are supported:
 - Partial image difference for a faster scoring function
 - Anti-aliased output rendering
 
+### Inspiration
+
+This project was originally inspired by the popular and excellent work of Roger Johansson - [Genetic Programming: Evolution of Mona Lisa](https://rogeralsing.com/2008/12/07/genetic-programming-evolution-of-mona-lisa/). Since seeing that article when it was quite new, I've tinkered with this problem here and there over the years. But only now am I satisfied with my results.
+
 ### Progression
 
 This GIF demonstrates the iterative nature of the algorithm, attempting to minimize the mean squared error by adding one shape at a time.
@@ -62,7 +66,7 @@ Since the algorithm has a random component to it, you can run it against the sam
 
 ### Shape and Iteration Comparison Matrix
 
-The matrix below shows triangles, ellipses and rectangles at 50, 100 and 200 iterations each.
+The matrix below shows triangles, ellipses and rectangles at 50, 100 and 200 iterations each. For a similar comparison of 500 different images, see: [large comparison matrix](https://www.michaelfogleman.com/static/primitive/) (warning: this page has 6000 images on it!)
 
 ![Matrix](http://i.imgur.com/H5NYpL4.png)
 
