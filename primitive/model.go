@@ -11,11 +11,6 @@ import (
 	"github.com/fogleman/gg"
 )
 
-const (
-	SaveFrames    = false
-	OutlineShapes = false
-)
-
 type Model struct {
 	W, H       int
 	Background color.Color
@@ -135,20 +130,16 @@ func (model *Model) Run(n int) image.Image {
 		model.Step()
 		elapsed := time.Since(start).Seconds()
 		v("iteration %d, time %.3f, score %.6f\n", i, elapsed, model.Score)
-		if SaveFrames {
-			SavePNG("out.png", model.Current)
-			model.Context.SavePNG(fmt.Sprintf("out%03d.png", i))
-		}
 	}
-	if OutlineShapes {
-		for _, shape := range model.Shapes {
-			model.Context.NewSubPath()
-			shape.Draw(model.Context)
-		}
-		c := averageImageColor(model.Target)
-		model.Context.SetRGBA255(int(c.R), int(c.G), int(c.B), 64)
-		model.Context.Stroke()
-	}
+	// if OutlineShapes {
+	// 	for _, shape := range model.Shapes {
+	// 		model.Context.NewSubPath()
+	// 		shape.Draw(model.Context)
+	// 	}
+	// 	c := averageImageColor(model.Target)
+	// 	model.Context.SetRGBA255(int(c.R), int(c.G), int(c.B), 64)
+	// 	model.Context.Stroke()
+	// }
 	return model.Context.Image()
 }
 

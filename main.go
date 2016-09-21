@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -20,7 +21,7 @@ var (
 	InputSize  int
 	OutputSize int
 	Mode       int
-	V, VV, VVV bool
+	V, VV      bool
 )
 
 func init() {
@@ -33,7 +34,6 @@ func init() {
 	flag.IntVar(&Mode, "m", 1, "0=combo 1=triangle 2=rect 3=ellipse 4=circle 5=rotatedrect")
 	flag.BoolVar(&V, "v", false, "verbose")
 	flag.BoolVar(&VV, "vv", false, "very verbose")
-	// flag.BoolVar(&VVV, "vvv", false, "very very verbose")
 }
 
 func errorMessage(message string) bool {
@@ -67,9 +67,6 @@ func main() {
 	if VV {
 		primitive.LogLevel = 2
 	}
-	if VVV {
-		primitive.LogLevel = 3
-	}
 
 	// seed random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -85,18 +82,35 @@ func main() {
 	size := uint(InputSize)
 	input = resize.Thumbnail(size, size, input, resize.Bilinear)
 
+	// determine output options
+	ext := strings.ToLower(filepath.Ext(Output))
+	saveFrames := strings.Contains(Output, "%") && ext != ".gif"
+
 	// run algorithm
 	model := primitive.NewModel(input, Alpha, OutputSize, primitive.Mode(Mode))
-	output := model.Run(Number)
+	start := time.Now()
+	for i := 1; i <= Number; i++ {
+		// find optimal shape and add it to the model
+		model.Step()
+		elapsed := time.Since(start).Seconds()
+		primitive.Log(1, "iteration %d, time %.3f, score %.6f\n", i, elapsed, model.Score)
 
-	// write output image
-	primitive.Log(1, "writing %s\n", Output)
-	if strings.HasSuffix(strings.ToLower(Output), ".gif") {
-		frames := model.Frames(0.001)
-		primitive.SaveGIFImageMagick(Output, frames, 50, 250)
-	} else if strings.HasSuffix(strings.ToLower(Output), ".svg") {
-		primitive.SaveFile(Output, model.SVG())
-	} else {
-		primitive.SavePNG(Output, output)
+		// write output image(s)
+		if saveFrames || i == Number {
+			path := Output
+			if saveFrames {
+				path = fmt.Sprintf(Output, i)
+			}
+			primitive.Log(1, "writing %s\n", Output)
+			switch ext {
+			case ".png":
+				primitive.SavePNG(path, model.Context.Image())
+			case ".svg":
+				primitive.SaveFile(path, model.SVG())
+			case ".gif":
+				frames := model.Frames(0.001)
+				primitive.SaveGIFImageMagick(path, frames, 50, 250)
+			}
+		}
 	}
 }
