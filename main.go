@@ -101,7 +101,7 @@ func main() {
 			if saveFrames {
 				path = fmt.Sprintf(Output, i)
 			}
-			primitive.Log(1, "writing %s\n", Output)
+			primitive.Log(1, "writing %s\n", path)
 			switch ext {
 			case ".png":
 				primitive.SavePNG(path, model.Context.Image())
