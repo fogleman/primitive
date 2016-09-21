@@ -39,9 +39,9 @@ Small input images should be used (like 256x256px). You don't need the detail an
 
 Depending on the output filename extension provided, you can produce different types of output.
 
-- PNG (raster output)
-- SVG (vector output)
-- GIF (animated output, shows shapes being added)
+- `PNG`: raster output
+- `SVG`: vector output
+- `GIF`: animated output showing shapes being added - requires ImageMagick (specifically the `convert` command)
 
 ### Primitives
 
