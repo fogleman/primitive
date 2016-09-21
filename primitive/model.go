@@ -102,7 +102,7 @@ func (model *Model) SVG() string {
 	var lines []string
 	lines = append(lines, fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%d\" height=\"%d\">", w, h))
 	lines = append(lines, fmt.Sprintf("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#%02x%02x%02x\" />", w, h, r, g, b))
-	lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f)\">", scale))
+	lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f) translate(0.5 0.5)\">", scale))
 	lines = append(lines, model.SVGs...)
 	lines = append(lines, "</g>")
 	lines = append(lines, "</svg>")

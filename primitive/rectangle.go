@@ -22,27 +22,25 @@ func NewRandomRectangle(w, h int) *Rectangle {
 	return &Rectangle{w, h, x1, y1, x2, y2}
 }
 
-func (r *Rectangle) Draw(dc *gg.Context) {
-	x1, y1 := r.X1, r.Y1
-	x2, y2 := r.X2, r.Y2
+func (r *Rectangle) bounds() (x1, y1, x2, y2 int) {
+	x1, y1 = r.X1, r.Y1
+	x2, y2 = r.X2, r.Y2
 	if x1 > x2 {
 		x1, x2 = x2, x1
 	}
 	if y1 > y2 {
 		y1, y2 = y2, y1
 	}
+	return
+}
+
+func (r *Rectangle) Draw(dc *gg.Context) {
+	x1, y1, x2, y2 := r.bounds()
 	dc.DrawRectangle(float64(x1), float64(y1), float64(x2-x1+1), float64(y2-y1+1))
 }
 
 func (r *Rectangle) SVG(attrs string) string {
-	x1, y1 := r.X1, r.Y1
-	x2, y2 := r.X2, r.Y2
-	if x1 > x2 {
-		x1, x2 = x2, x1
-	}
-	if y1 > y2 {
-		y1, y2 = y2, y1
-	}
+	x1, y1, x2, y2 := r.bounds()
 	w := x2 - x1 + 1
 	h := y2 - y1 + 1
 	return fmt.Sprintf(
@@ -67,14 +65,7 @@ func (r *Rectangle) Mutate() {
 }
 
 func (r *Rectangle) Rasterize() []Scanline {
-	x1, y1 := r.X1, r.Y1
-	x2, y2 := r.X2, r.Y2
-	if x1 > x2 {
-		x1, x2 = x2, x1
-	}
-	if y1 > y2 {
-		y1, y2 = y2, y1
-	}
+	x1, y1, x2, y2 := r.bounds()
 	lines := make([]Scanline, y2-y1+1)
 	i := 0
 	for y := y1; y <= y2; y++ {
@@ -112,7 +103,9 @@ func (r *RotatedRectangle) Draw(dc *gg.Context) {
 }
 
 func (r *RotatedRectangle) SVG(attrs string) string {
-	return "" // TODO
+	return fmt.Sprintf(
+		"<g transform=\"translate(%d %d) rotate(%d) scale(%d %d)\"><rect %s x=\"-0.5\" y=\"-0.5\" width=\"1\" height=\"1\" /></g>",
+		r.X, r.Y, r.Angle, r.Sx, r.Sy, attrs)
 }
 
 func (r *RotatedRectangle) Copy() Shape {
