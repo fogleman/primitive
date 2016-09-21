@@ -1,6 +1,7 @@
 package primitive
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 
@@ -31,6 +32,12 @@ func NewRandomCircle(w, h int) *Ellipse {
 
 func (c *Ellipse) Draw(dc *gg.Context) {
 	dc.DrawEllipse(float64(c.X), float64(c.Y), float64(c.Rx), float64(c.Ry))
+}
+
+func (c *Ellipse) SVG(attrs string) string {
+	return fmt.Sprintf(
+		"<ellipse %s cx=\"%d\" cy=\"%d\" rx=\"%d\" ry=\"%d\" />",
+		attrs, c.X, c.Y, c.Rx, c.Ry)
 }
 
 func (c *Ellipse) Copy() Shape {

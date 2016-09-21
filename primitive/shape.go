@@ -7,4 +7,5 @@ type Shape interface {
 	Copy() Shape
 	Mutate()
 	Draw(dc *gg.Context)
+	SVG(attrs string) string
 }

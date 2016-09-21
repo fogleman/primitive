@@ -26,6 +26,16 @@ func LoadImage(path string) (image.Image, error) {
 	return im, err
 }
 
+func SaveFile(path, contents string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	_, err = file.WriteString(contents)
+	return err
+}
+
 func SavePNG(path string, im image.Image) error {
 	file, err := os.Create(path)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/fogleman/gg"
@@ -28,6 +29,7 @@ type Model struct {
 	Mode       Mode
 	Shapes     []Shape
 	Scores     []float64
+	SVGs       []string
 }
 
 func NewModel(target image.Image, alpha, size int, mode Mode) *Model {
@@ -49,10 +51,8 @@ func NewModel(target image.Image, alpha, size int, mode Mode) *Model {
 	return model
 }
 
-func (model *Model) newContext() *gg.Context {
+func (model *Model) sizeAndScale() (w, h int, scale float64) {
 	aspect := float64(model.W) / float64(model.H)
-	var w, h int
-	var scale float64
 	if aspect >= 1 {
 		w = model.Size
 		h = int(float64(model.Size) / aspect)
@@ -62,6 +62,11 @@ func (model *Model) newContext() *gg.Context {
 		h = model.Size
 		scale = float64(model.Size) / float64(model.H)
 	}
+	return
+}
+
+func (model *Model) newContext() *gg.Context {
+	w, h, scale := model.sizeAndScale()
 	dc := gg.NewContext(w, h)
 	dc.Scale(scale, scale)
 	dc.Translate(0.5, 0.5)
@@ -90,15 +95,34 @@ func (model *Model) Frames(scoreDelta float64) []image.Image {
 	return result
 }
 
+func (model *Model) SVG() string {
+	w, h, scale := model.sizeAndScale()
+	cr, cg, cb, _ := model.Background.RGBA()
+	r, g, b := int(cr/257), int(cg/257), int(cb/257)
+	var lines []string
+	lines = append(lines, fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%d\" height=\"%d\">", w, h))
+	lines = append(lines, fmt.Sprintf("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#%02x%02x%02x\" />", w, h, r, g, b))
+	lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f)\">", scale))
+	lines = append(lines, model.SVGs...)
+	lines = append(lines, "</g>")
+	lines = append(lines, "</svg>")
+	return strings.Join(lines, "\n")
+}
+
 func (model *Model) Add(shape Shape) {
 	lines := shape.Rasterize()
 	c := model.computeColor(lines, model.Alpha)
 	s := model.computeScore(lines, c, model.Buffer)
 	Draw(model.Current, c, lines)
 
+	attrs := "fill=\"#%02x%02x%02x\" fill-opacity=\"%f\""
+	attrs = fmt.Sprintf(attrs, c.R, c.G, c.B, float64(c.A)/255)
+	svg := shape.SVG(attrs)
+
 	model.Score = s
 	model.Shapes = append(model.Shapes, shape)
 	model.Scores = append(model.Scores, s)
+	model.SVGs = append(model.SVGs, svg)
 
 	model.Context.SetRGBA255(c.R, c.G, c.B, c.A)
 	shape.Draw(model.Context)

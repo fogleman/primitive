@@ -94,6 +94,8 @@ func main() {
 	if strings.HasSuffix(strings.ToLower(Output), ".gif") {
 		frames := model.Frames(0.001)
 		primitive.SaveGIFImageMagick(Output, frames, 50, 250)
+	} else if strings.HasSuffix(strings.ToLower(Output), ".svg") {
+		primitive.SaveFile(Output, model.SVG())
 	} else {
 		primitive.SavePNG(Output, output)
 	}

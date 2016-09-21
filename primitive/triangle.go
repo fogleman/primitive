@@ -1,6 +1,7 @@
 package primitive
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 
@@ -31,6 +32,12 @@ func (t *Triangle) Draw(dc *gg.Context) {
 	dc.LineTo(float64(t.X2), float64(t.Y2))
 	dc.LineTo(float64(t.X3), float64(t.Y3))
 	dc.ClosePath()
+}
+
+func (t *Triangle) SVG(attrs string) string {
+	return fmt.Sprintf(
+		"<polygon %s points=\"%d,%d %d,%d %d,%d\" />",
+		attrs, t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3)
 }
 
 func (t *Triangle) Copy() Shape {
