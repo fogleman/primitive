@@ -91,7 +91,7 @@ func main() {
 
 	// determine output options
 	ext := strings.ToLower(filepath.Ext(Output))
-	saveFrames := strings.Contains(Output, "%") && ext != ".gif"
+	// saveFrames := strings.Contains(Output, "%") && ext != ".gif"
 
 	// determine background color
 	var bg primitive.Color
@@ -111,17 +111,18 @@ func main() {
 		primitive.Log(1, "iteration %d, time %.3f, score %.6f\n", i, elapsed, model.Score)
 
 		// write output image(s)
-		if saveFrames || i == Number {
+		if i == Number || i == 50 || i == 100 || i == 200 {
 			path := Output
-			if saveFrames {
-				path = fmt.Sprintf(Output, i)
-			}
+			// if saveFrames {
+			path = fmt.Sprintf(Output, i)
+			// }
 			primitive.Log(1, "writing %s\n", path)
 			switch ext {
 			default:
 				check(fmt.Errorf("unrecognized file extension: %s", ext))
 			case ".png":
 				check(primitive.SavePNG(path, model.Context.Image()))
+				check(primitive.SaveFile(path[:len(path)-4]+".svg", model.SVG()))
 			case ".jpg", ".jpeg":
 				check(primitive.SaveJPG(path, model.Context.Image(), 95))
 			case ".svg":

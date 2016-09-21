@@ -2,29 +2,34 @@ from Queue import Queue
 import itertools
 import os
 import subprocess
+import sys
 import threading
 
-def primitive(i, o, n, a, s, m):
-    args = (i, o, n, a, s, m)
-    cmd = 'primitive -i %s -o %s -n %d -a %d -s %d -m %d' % args
-    subprocess.call(cmd, shell=True)
-
-def create_jobs(in_folder, out_folder, n, a, s, m):
-    result = []
+def makedirs(x):
     try:
-        os.makedirs(out_folder)
+        os.makedirs(x)
     except Exception:
         pass
+
+def primitive(i, o, n, a, m):
+    makedirs(os.path.split(o)[0])
+    args = (i, o, n, a, m)
+    cmd = 'primitive -r 128 -s 512 -i %s -o %s -n %d -a %d -m %d' % args
+    subprocess.call(cmd, shell=True)
+
+def create_jobs(in_folder, out_folder, n, a, m):
+    result = []
     for name in os.listdir(in_folder):
-        if not name.endswith('.jpg'):
+        base, ext = os.path.splitext(name)
+        if ext.lower() not in ['.jpg', '.jpeg', '.png']:
             continue
-        out_name = '%s.%d.%d.%d.%d.png' % (name[:-4], n, a, s, m)
+        out_name = '%d.%%d.png' % (m)
         in_path = os.path.join(in_folder, name)
-        out_path = os.path.join(out_folder, out_name)
+        out_path = os.path.join(out_folder, base, out_name)
         if os.path.exists(out_path):
             continue
-        key = (name[:-4], n, m)
-        args = (in_path, out_path, n, a, s, m)
+        key = (base, n, m)
+        args = (in_path, out_path, n, a, m)
         result.append((key, args))
     return result
 
@@ -35,7 +40,7 @@ def worker(jobs, done):
         primitive(*job)
         done.put(True)
 
-def process(in_folder, out_folder, nlist, alist, slist, mlist, nworkers):
+def process(in_folder, out_folder, nlist, alist, mlist, nworkers):
     jobs = Queue()
     done = Queue()
     for i in xrange(nworkers):
@@ -44,8 +49,8 @@ def process(in_folder, out_folder, nlist, alist, slist, mlist, nworkers):
         t.start()
     count = 0
     items = []
-    for n, a, s, m in itertools.product(nlist, alist, slist, mlist):
-        for item in create_jobs(in_folder, out_folder, n, a, s, m):
+    for n, a, m in itertools.product(nlist, alist, mlist):
+        for item in create_jobs(in_folder, out_folder, n, a, m):
             items.append(item)
     items.sort()
     for _, job in items:
@@ -61,9 +66,9 @@ def log(x):
         print x
 
 if __name__ == '__main__':
-    nlist = [50, 100, 200]
+    args = sys.argv[1:]
+    nlist = [500]
     alist = [128]
-    slist = [4]
-    mlist = [1, 3, 5]
+    mlist = [0, 1, 3, 5]
     nworkers = 4
-    process('input1', 'output1', nlist, alist, slist, mlist, nworkers)
+    process(args[0], args[1], nlist, alist, mlist, nworkers)
