@@ -43,6 +43,8 @@ Depending on the output filename extension provided, you can produce different t
 - `SVG`: vector output
 - `GIF`: animated output showing shapes being added - requires ImageMagick (specifically the `convert` command)
 
+For PNG and SVG outputs, you can also include `%d`, `%03d`, etc. in the filename. In this case, each frame will be saved separately.
+
 ### Primitives
 
 The following primitives are supported:
