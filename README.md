@@ -35,6 +35,14 @@ Small input images should be used (like 256x256px). You don't need the detail an
 | `-a` | 128 | color alpha |
 | `-v` | off | verbose output |
 
+### Output Formats
+
+Depending on the output filename extension provided, you can produce different types of output.
+
+- PNG (raster output)
+- SVG (vector output)
+- GIF (animated output, shows shapes being added)
+
 ### Primitives
 
 The following primitives are supported:
