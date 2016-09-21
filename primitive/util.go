@@ -154,7 +154,7 @@ func uniformRGBA(r image.Rectangle, c color.Color) *image.RGBA {
 	return im
 }
 
-func averageImageColor(im image.Image) color.NRGBA {
+func AverageImageColor(im image.Image) color.NRGBA {
 	rgba := imageToRGBA(im)
 	size := rgba.Bounds().Size()
 	w, h := size.X, size.Y

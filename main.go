@@ -17,6 +17,7 @@ import (
 var (
 	Input      string
 	Output     string
+	Background string
 	Number     int
 	Alpha      int
 	InputSize  int
@@ -28,6 +29,7 @@ var (
 func init() {
 	flag.StringVar(&Input, "i", "", "input image path")
 	flag.StringVar(&Output, "o", "", "output image path")
+	flag.StringVar(&Background, "bg", "", "background color (hex)")
 	flag.IntVar(&Number, "n", 0, "number of primitives")
 	flag.IntVar(&Alpha, "a", 128, "alpha value")
 	flag.IntVar(&InputSize, "r", 256, "resize large input images to this size")
@@ -91,8 +93,16 @@ func main() {
 	ext := strings.ToLower(filepath.Ext(Output))
 	saveFrames := strings.Contains(Output, "%") && ext != ".gif"
 
+	// determine background color
+	var bg primitive.Color
+	if Background == "" {
+		bg = primitive.MakeColor(primitive.AverageImageColor(input))
+	} else {
+		bg = primitive.MakeHexColor(Background)
+	}
+
 	// run algorithm
-	model := primitive.NewModel(input, Alpha, OutputSize, primitive.Mode(Mode))
+	model := primitive.NewModel(input, bg, Alpha, OutputSize, primitive.Mode(Mode))
 	start := time.Now()
 	for i := 1; i <= Number; i++ {
 		// find optimal shape and add it to the model

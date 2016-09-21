@@ -3,17 +3,15 @@ package primitive
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"math/rand"
 	"strings"
-	"time"
 
 	"github.com/fogleman/gg"
 )
 
 type Model struct {
 	W, H       int
-	Background color.Color
+	Background Color
 	Target     *image.RGBA
 	Current    *image.RGBA
 	Buffer     *image.RGBA
@@ -27,20 +25,17 @@ type Model struct {
 	SVGs       []string
 }
 
-func NewModel(target image.Image, alpha, size int, mode Mode) *Model {
-	c := averageImageColor(target)
-	// c := color.White
-	// c := color.Black
+func NewModel(target image.Image, background Color, alpha, size int, mode Mode) *Model {
 	model := &Model{}
 	model.W = target.Bounds().Size().X
 	model.H = target.Bounds().Size().Y
-	model.Background = c
+	model.Background = background
 	model.Alpha = alpha
 	model.Size = size
 	model.Mode = mode
 	model.Target = imageToRGBA(target)
-	model.Current = uniformRGBA(target.Bounds(), c)
-	model.Buffer = uniformRGBA(target.Bounds(), c)
+	model.Current = uniformRGBA(target.Bounds(), background.NRGBA())
+	model.Buffer = uniformRGBA(target.Bounds(), background.NRGBA())
 	model.Score = differenceFull(model.Target, model.Current)
 	model.Context = model.newContext()
 	return model
@@ -65,7 +60,7 @@ func (model *Model) newContext() *gg.Context {
 	dc := gg.NewContext(w, h)
 	dc.Scale(scale, scale)
 	dc.Translate(0.5, 0.5)
-	dc.SetColor(model.Background)
+	dc.SetColor(model.Background.NRGBA())
 	dc.Clear()
 	return dc
 }
@@ -92,11 +87,10 @@ func (model *Model) Frames(scoreDelta float64) []image.Image {
 
 func (model *Model) SVG() string {
 	w, h, scale := model.sizeAndScale()
-	cr, cg, cb, _ := model.Background.RGBA()
-	r, g, b := int(cr/257), int(cg/257), int(cb/257)
+	c := model.Background
 	var lines []string
 	lines = append(lines, fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%d\" height=\"%d\">", w, h))
-	lines = append(lines, fmt.Sprintf("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#%02x%02x%02x\" />", w, h, r, g, b))
+	lines = append(lines, fmt.Sprintf("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#%02x%02x%02x\" />", w, h, c.R, c.G, c.B))
 	lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f) translate(0.5 0.5)\">", scale))
 	lines = append(lines, model.SVGs...)
 	lines = append(lines, "</g>")
@@ -124,28 +118,9 @@ func (model *Model) Add(shape Shape) {
 	model.Context.Fill()
 }
 
-func (model *Model) Run(n int) image.Image {
-	start := time.Now()
-	for i := 1; i <= n; i++ {
-		model.Step()
-		elapsed := time.Since(start).Seconds()
-		v("iteration %d, time %.3f, score %.6f\n", i, elapsed, model.Score)
-	}
-	// if OutlineShapes {
-	// 	for _, shape := range model.Shapes {
-	// 		model.Context.NewSubPath()
-	// 		shape.Draw(model.Context)
-	// 	}
-	// 	c := averageImageColor(model.Target)
-	// 	model.Context.SetRGBA255(int(c.R), int(c.G), int(c.B), 64)
-	// 	model.Context.Stroke()
-	// }
-	return model.Context.Image()
-}
-
 func (model *Model) Step() {
 	state := model.BestHillClimbState(model.Buffer, model.Mode, 100, 100, 10)
-	// state := model.BestRandomState(model.Buffer, model.Mode, 3000)
+	// state := model.BestRandomState(model.Buffer, model.Mode, 1000)
 	// state = Anneal(state, 0.1, 0.00001, 25000).(*State)
 	state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape)
