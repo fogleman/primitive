@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -41,6 +42,12 @@ func errorMessage(message string) bool {
 	return false
 }
 
+func check(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
 	// parse and validate arguments
 	flag.Parse()
@@ -74,9 +81,7 @@ func main() {
 	// read input image
 	primitive.Log(1, "reading %s\n", Input)
 	input, err := primitive.LoadImage(Input)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 
 	// scale down input image if needed
 	size := uint(InputSize)
@@ -103,13 +108,17 @@ func main() {
 			}
 			primitive.Log(1, "writing %s\n", path)
 			switch ext {
+			default:
+				check(fmt.Errorf("unrecognized file extension: %s", ext))
 			case ".png":
-				primitive.SavePNG(path, model.Context.Image())
+				check(primitive.SavePNG(path, model.Context.Image()))
+			case ".jpg", ".jpeg":
+				check(primitive.SaveJPG(path, model.Context.Image(), 95))
 			case ".svg":
-				primitive.SaveFile(path, model.SVG())
+				check(primitive.SaveFile(path, model.SVG()))
 			case ".gif":
 				frames := model.Frames(0.001)
-				primitive.SaveGIFImageMagick(path, frames, 50, 250)
+				check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
 			}
 		}
 	}

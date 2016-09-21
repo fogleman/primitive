@@ -7,7 +7,7 @@ import (
 	"image/color/palette"
 	"image/draw"
 	"image/gif"
-	_ "image/jpeg"
+	"image/jpeg"
 	"image/png"
 	"io/ioutil"
 	"math"
@@ -43,6 +43,15 @@ func SavePNG(path string, im image.Image) error {
 	}
 	defer file.Close()
 	return png.Encode(file, im)
+}
+
+func SaveJPG(path string, im image.Image, quality int) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	return jpeg.Encode(file, im, &jpeg.Options{quality})
 }
 
 func SaveGIF(path string, frames []image.Image, delay, lastDelay int) error {
