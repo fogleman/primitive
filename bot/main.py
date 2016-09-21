@@ -90,7 +90,8 @@ def run():
     a = 128
     s = 4
     m = random.choice([1, 3, 5])
-    status = '%d %s' % (n, MODE_NAMES[m])
+    ourl = 'https://flickr.com/photo.gne?id=%d' % (photo['id'])
+    status = '%d %s - %s' % (n, MODE_NAMES[m], ourl)
     print status
     print 'running algorithm, n=%d, a=%d, s=%d, m=%d' % (n, a, s, m)
     primitive(in_path, out_path, n=n, a=a, s=s, m=m)
