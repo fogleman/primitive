@@ -23,6 +23,7 @@ type Model struct {
 	Size       int
 	Mode       Mode
 	Shapes     []Shape
+	Colors     []Color
 	Scores     []float64
 	SVGs       []string
 }
@@ -73,7 +74,7 @@ func (model *Model) Frames(scoreDelta float64) []image.Image {
 	result = append(result, imageToRGBA(dc.Image()))
 	previous := 10.0
 	for i, shape := range model.Shapes {
-		c := model.computeColor(shape.Rasterize(), model.Alpha)
+		c := model.Colors[i]
 		dc.SetRGBA255(c.R, c.G, c.B, c.A)
 		shape.Draw(dc)
 		dc.Fill()
@@ -112,6 +113,7 @@ func (model *Model) Add(shape Shape) {
 
 	model.Score = s
 	model.Shapes = append(model.Shapes, shape)
+	model.Colors = append(model.Colors, c)
 	model.Scores = append(model.Scores, s)
 	model.SVGs = append(model.SVGs, svg)
 
