@@ -122,8 +122,7 @@ func (model *Model) Add(shape Shape) {
 
 func (model *Model) Step() {
 	state := model.runWorkers(model.Mode, 100, 100, 8)
-	// state := model.BestHillClimbState(model.Buffer, model.Mode, 100, 100, 20)
-	// state = HillClimb(state, 1000).(*State)
+	state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape)
 }
 
@@ -147,7 +146,7 @@ func (model *Model) runWorkers(t Mode, n, age, m int) *State {
 			bestState = state
 		}
 	}
-	return HillClimb(bestState, 1000).(*State)
+	return bestState
 }
 
 func (model *Model) runWorker(t Mode, n, age, m int, ch chan *State) {
