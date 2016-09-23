@@ -62,9 +62,9 @@ def download_photo(url, path):
     with open(path, 'wb') as fp:
         fp.write(r.content)
 
-def primitive(i, o, n, a=128, s=1, m=1):
-    args = (i, o, n, a, s, m)
-    cmd = 'primitive -i %s -o %s -n %d -a %d -s %d -m %d' % args
+def primitive(i, o, n, a=128, m=1):
+    args = (i, o, n, a, m)
+    cmd = 'primitive -i %s -o %s -n %d -a %d -m %d' % args
     subprocess.call(cmd, shell=True)
 
 def tweet(status, media):
@@ -75,25 +75,37 @@ def tweet(status, media):
         access_token_secret=TWITTER_ACCESS_TOKEN_SECRET)
     api.PostUpdate(status, media)
 
+def flickr_url(photo_id):
+    alphabet = '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ'
+    return 'https://flic.kr/p/%s' % base_encode(alphabet, int(photo_id))
+
+def base_encode(alphabet, number, suffix=''):
+    base = len(alphabet)
+    if number >= base:
+        div, mod = divmod(number, base)
+        return base_encode(alphabet, div, alphabet[mod] + suffix)
+    else:
+        return alphabet[number] + suffix
+
 def run():
     date = random_date()
     print 'finding an interesting photo from', date
     photos = interesting(date)
     photo = random.choice(photos)
+    print photo
     print 'picked photo', photo['id']
     in_path = '%s.jpg' % photo['id']
     out_path = '%s.png' % photo['id']
     url = photo_url(photo, 'm')
     print 'downloading', url
     download_photo(url, in_path)
-    n = random.randint(5, 25) * 10
+    n = random.randint(5, 30) * 10
     a = 128
-    s = 4
     m = random.choice([1, 3, 5])
-    status = '%d %s' % (n, MODE_NAMES[m])
+    status = '%d %s. %s' % (n, MODE_NAMES[m], flickr_url(photo['id']))
     print status
-    print 'running algorithm, n=%d, a=%d, s=%d, m=%d' % (n, a, s, m)
-    primitive(in_path, out_path, n=n, a=a, s=s, m=m)
+    print 'running algorithm, n=%d, a=%d, m=%d' % (n, a, m)
+    primitive(in_path, out_path, n=n, a=a, m=m)
     if os.path.exists(out_path):
         print 'uploading to twitter'
         tweet(status, out_path)
