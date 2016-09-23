@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"math/rand"
+	"runtime"
 	"strings"
 	"time"
 
@@ -120,14 +121,14 @@ func (model *Model) Add(shape Shape) {
 }
 
 func (model *Model) Step() {
-	state := model.runWorkers(model.Mode, 100, 100, 10)
+	state := model.runWorkers(model.Mode, 100, 100, 8)
 	// state := model.BestHillClimbState(model.Buffer, model.Mode, 100, 100, 20)
 	// state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape)
 }
 
 func (model *Model) runWorkers(t Mode, n, age, m int) *State {
-	wn := 1 //runtime.GOMAXPROCS(0)
+	wn := runtime.GOMAXPROCS(0)
 	ch := make(chan *State, wn)
 	wm := m / wn
 	if m%wn != 0 {
@@ -234,7 +235,7 @@ func (model *Model) computeColor(lines []Scanline, alpha int) Color {
 }
 
 func (model *Model) computeScore(lines []Scanline, c Color, buffer *image.RGBA) float64 {
-	copy(buffer.Pix, model.Current.Pix)
+	Copy(buffer, model.Current, lines)
 	Draw(buffer, c, lines)
 	return differencePartial(model.Target, model.Current, buffer, model.Score, lines)
 }

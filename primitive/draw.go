@@ -21,3 +21,11 @@ func Draw(im *image.RGBA, c Color, lines []Scanline) {
 		}
 	}
 }
+
+func Copy(dst, src *image.RGBA, lines []Scanline) {
+	for _, line := range lines {
+		a := dst.PixOffset(line.X1, line.Y)
+		b := a + (line.X2-line.X1+1)*4
+		copy(dst.Pix[a:b], src.Pix[a:b])
+	}
+}
