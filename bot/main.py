@@ -92,7 +92,6 @@ def run():
     print 'finding an interesting photo from', date
     photos = interesting(date)
     photo = random.choice(photos)
-    print photo
     print 'picked photo', photo['id']
     in_path = '%s.jpg' % photo['id']
     out_path = '%s.png' % photo['id']
