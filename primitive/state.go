@@ -6,26 +6,33 @@ type State struct {
 	Model  *Model
 	Buffer *image.RGBA
 	Shape  Shape
+	Score  float64
 }
 
 func NewState(model *Model, buffer *image.RGBA, shape Shape) *State {
-	return &State{model, buffer, shape}
+	return &State{model, buffer, shape, -1}
 }
 
 func (state *State) Energy() float64 {
-	return state.Model.Energy(state.Shape, state.Buffer)
+	if state.Score < 0 {
+		state.Score = state.Model.Energy(state.Shape, state.Buffer)
+	}
+	return state.Score
 }
 
 func (state *State) DoMove() interface{} {
-	oldShape := state.Shape.Copy()
+	oldState := state.Copy()
 	state.Shape.Mutate()
-	return oldShape
+	state.Score = -1
+	return oldState
 }
 
 func (state *State) UndoMove(undo interface{}) {
-	state.Shape = undo.(Shape)
+	oldState := undo.(*State)
+	state.Shape = oldState.Shape
+	state.Score = oldState.Score
 }
 
 func (state *State) Copy() Annealable {
-	return &State{state.Model, state.Buffer, state.Shape.Copy()}
+	return &State{state.Model, state.Buffer, state.Shape.Copy(), state.Score}
 }

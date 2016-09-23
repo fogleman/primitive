@@ -13,21 +13,22 @@ type Ellipse struct {
 	X, Y   int
 	Rx, Ry int
 	Circle bool
+	rnd    *rand.Rand
 }
 
-func NewRandomEllipse(w, h int) *Ellipse {
-	x := rand.Intn(w)
-	y := rand.Intn(h)
-	rx := rand.Intn(w / 2)
-	ry := rand.Intn(h / 2)
-	return &Ellipse{w, h, x, y, rx, ry, false}
+func NewRandomEllipse(w, h int, rnd *rand.Rand) *Ellipse {
+	x := rnd.Intn(w)
+	y := rnd.Intn(h)
+	rx := rnd.Intn(w / 2)
+	ry := rnd.Intn(h / 2)
+	return &Ellipse{w, h, x, y, rx, ry, false, rnd}
 }
 
-func NewRandomCircle(w, h int) *Ellipse {
-	x := rand.Intn(w)
-	y := rand.Intn(h)
-	r := rand.Intn(w / 4)
-	return &Ellipse{w, h, x, y, r, r, true}
+func NewRandomCircle(w, h int, rnd *rand.Rand) *Ellipse {
+	x := rnd.Intn(w)
+	y := rnd.Intn(h)
+	r := rnd.Intn(w / 4)
+	return &Ellipse{w, h, x, y, r, r, true, rnd}
 }
 
 func (c *Ellipse) Draw(dc *gg.Context) {
@@ -46,17 +47,18 @@ func (c *Ellipse) Copy() Shape {
 }
 
 func (c *Ellipse) Mutate() {
-	switch rand.Intn(3) {
+	rnd := c.rnd
+	switch rnd.Intn(3) {
 	case 0:
-		c.X = clampInt(c.X+rand.Intn(21)-10, 0, c.W-1)
-		c.Y = clampInt(c.Y+rand.Intn(21)-10, 0, c.H-1)
+		c.X = clampInt(c.X+rnd.Intn(21)-10, 0, c.W-1)
+		c.Y = clampInt(c.Y+rnd.Intn(21)-10, 0, c.H-1)
 	case 1:
-		c.Rx = clampInt(c.Rx+rand.Intn(21)-10, 0, c.W-1)
+		c.Rx = clampInt(c.Rx+rnd.Intn(21)-10, 0, c.W-1)
 		if c.Circle {
 			c.Ry = c.Rx
 		}
 	case 2:
-		c.Ry = clampInt(c.Ry+rand.Intn(21)-10, 0, c.W-1)
+		c.Ry = clampInt(c.Ry+rnd.Intn(21)-10, 0, c.W-1)
 		if c.Circle {
 			c.Rx = c.Ry
 		}

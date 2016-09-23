@@ -13,16 +13,17 @@ type Triangle struct {
 	X1, Y1 int
 	X2, Y2 int
 	X3, Y3 int
+	rnd    *rand.Rand
 }
 
-func NewRandomTriangle(w, h int) *Triangle {
-	x1 := rand.Intn(w)
-	y1 := rand.Intn(h)
-	x2 := rand.Intn(w)
-	y2 := rand.Intn(h)
-	x3 := rand.Intn(w)
-	y3 := rand.Intn(h)
-	t := &Triangle{w, h, x1, y1, x2, y2, x3, y3}
+func NewRandomTriangle(w, h int, rnd *rand.Rand) *Triangle {
+	x1 := rnd.Intn(w)
+	y1 := rnd.Intn(h)
+	x2 := rnd.Intn(w)
+	y2 := rnd.Intn(h)
+	x3 := rnd.Intn(w)
+	y3 := rnd.Intn(h)
+	t := &Triangle{w, h, x1, y1, x2, y2, x3, y3, rnd}
 	t.Mutate()
 	return t
 }
@@ -46,17 +47,18 @@ func (t *Triangle) Copy() Shape {
 }
 
 func (t *Triangle) Mutate() {
+	rnd := t.rnd
 	for {
-		switch rand.Intn(3) {
+		switch rnd.Intn(3) {
 		case 0:
-			t.X1 = clampInt(t.X1+rand.Intn(21)-10, 0, t.W-1)
-			t.Y1 = clampInt(t.Y1+rand.Intn(21)-10, 0, t.H-1)
+			t.X1 = clampInt(t.X1+rnd.Intn(21)-10, 0, t.W-1)
+			t.Y1 = clampInt(t.Y1+rnd.Intn(21)-10, 0, t.H-1)
 		case 1:
-			t.X2 = clampInt(t.X2+rand.Intn(21)-10, 0, t.W-1)
-			t.Y2 = clampInt(t.Y2+rand.Intn(21)-10, 0, t.H-1)
+			t.X2 = clampInt(t.X2+rnd.Intn(21)-10, 0, t.W-1)
+			t.Y2 = clampInt(t.Y2+rnd.Intn(21)-10, 0, t.H-1)
 		case 2:
-			t.X3 = clampInt(t.X3+rand.Intn(21)-10, 0, t.W-1)
-			t.Y3 = clampInt(t.Y3+rand.Intn(21)-10, 0, t.H-1)
+			t.X3 = clampInt(t.X3+rnd.Intn(21)-10, 0, t.W-1)
+			t.Y3 = clampInt(t.Y3+rnd.Intn(21)-10, 0, t.H-1)
 		}
 		if t.Valid() {
 			break

@@ -12,14 +12,15 @@ type Rectangle struct {
 	W, H   int
 	X1, Y1 int
 	X2, Y2 int
+	rnd    *rand.Rand
 }
 
-func NewRandomRectangle(w, h int) *Rectangle {
-	x1 := rand.Intn(w)
-	y1 := rand.Intn(h)
-	x2 := rand.Intn(w)
-	y2 := rand.Intn(h)
-	return &Rectangle{w, h, x1, y1, x2, y2}
+func NewRandomRectangle(w, h int, rnd *rand.Rand) *Rectangle {
+	x1 := rnd.Intn(w)
+	y1 := rnd.Intn(h)
+	x2 := rnd.Intn(w)
+	y2 := rnd.Intn(h)
+	return &Rectangle{w, h, x1, y1, x2, y2, rnd}
 }
 
 func (r *Rectangle) bounds() (x1, y1, x2, y2 int) {
@@ -54,13 +55,14 @@ func (r *Rectangle) Copy() Shape {
 }
 
 func (r *Rectangle) Mutate() {
-	switch rand.Intn(2) {
+	rnd := r.rnd
+	switch rnd.Intn(2) {
 	case 0:
-		r.X1 = clampInt(r.X1+rand.Intn(21)-10, 0, r.W-1)
-		r.Y1 = clampInt(r.Y1+rand.Intn(21)-10, 0, r.H-1)
+		r.X1 = clampInt(r.X1+rnd.Intn(21)-10, 0, r.W-1)
+		r.Y1 = clampInt(r.Y1+rnd.Intn(21)-10, 0, r.H-1)
 	case 1:
-		r.X2 = clampInt(r.X2+rand.Intn(21)-10, 0, r.W-1)
-		r.Y2 = clampInt(r.Y2+rand.Intn(21)-10, 0, r.H-1)
+		r.X2 = clampInt(r.X2+rnd.Intn(21)-10, 0, r.W-1)
+		r.Y2 = clampInt(r.Y2+rnd.Intn(21)-10, 0, r.H-1)
 	}
 }
 
@@ -80,15 +82,16 @@ type RotatedRectangle struct {
 	X, Y   int
 	Sx, Sy int
 	Angle  int
+	rnd    *rand.Rand
 }
 
-func NewRandomRotatedRectangle(w, h int) *RotatedRectangle {
-	x := rand.Intn(w)
-	y := rand.Intn(h)
-	sx := rand.Intn(w / 2)
-	sy := rand.Intn(h / 2)
-	a := rand.Intn(360)
-	r := &RotatedRectangle{w, h, x, y, sx, sy, a}
+func NewRandomRotatedRectangle(w, h int, rnd *rand.Rand) *RotatedRectangle {
+	x := rnd.Intn(w)
+	y := rnd.Intn(h)
+	sx := rnd.Intn(w / 2)
+	sy := rnd.Intn(h / 2)
+	a := rnd.Intn(360)
+	r := &RotatedRectangle{w, h, x, y, sx, sy, a, rnd}
 	r.Mutate()
 	return r
 }
@@ -114,19 +117,20 @@ func (r *RotatedRectangle) Copy() Shape {
 }
 
 func (r *RotatedRectangle) Mutate() {
-	switch rand.Intn(3) {
+	rnd := r.rnd
+	switch rnd.Intn(3) {
 	case 0:
-		r.X = clampInt(r.X+rand.Intn(21)-10, 0, r.W-1)
-		r.Y = clampInt(r.Y+rand.Intn(21)-10, 0, r.H-1)
+		r.X = clampInt(r.X+rnd.Intn(21)-10, 0, r.W-1)
+		r.Y = clampInt(r.Y+rnd.Intn(21)-10, 0, r.H-1)
 	case 1:
-		r.Sx = clampInt(r.Sx+rand.Intn(21)-10, 0, r.W-1)
-		r.Sy = clampInt(r.Sy+rand.Intn(21)-10, 0, r.H-1)
+		r.Sx = clampInt(r.Sx+rnd.Intn(21)-10, 0, r.W-1)
+		r.Sy = clampInt(r.Sy+rnd.Intn(21)-10, 0, r.H-1)
 	case 2:
-		r.Angle = r.Angle + rand.Intn(41) - 20
+		r.Angle = r.Angle + rnd.Intn(41) - 20
 	}
 	for !r.Valid() {
-		r.Sx = clampInt(r.Sx+rand.Intn(21)-10, 0, r.W-1)
-		r.Sy = clampInt(r.Sy+rand.Intn(21)-10, 0, r.H-1)
+		r.Sx = clampInt(r.Sx+rnd.Intn(21)-10, 0, r.W-1)
+		r.Sy = clampInt(r.Sy+rnd.Intn(21)-10, 0, r.H-1)
 	}
 }
 

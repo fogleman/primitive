@@ -5,6 +5,7 @@ import (
 	"image"
 	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/fogleman/gg"
 )
@@ -119,18 +120,47 @@ func (model *Model) Add(shape Shape) {
 }
 
 func (model *Model) Step() {
-	state := model.BestHillClimbState(model.Buffer, model.Mode, 100, 100, 10)
-	// state := model.BestRandomState(model.Buffer, model.Mode, 1000)
-	// state = Anneal(state, 0.1, 0.00001, 25000).(*State)
-	state = HillClimb(state, 1000).(*State)
+	state := model.runWorkers(model.Mode, 100, 100, 10)
+	// state := model.BestHillClimbState(model.Buffer, model.Mode, 100, 100, 20)
+	// state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape)
 }
 
-func (model *Model) BestHillClimbState(buffer *image.RGBA, t Mode, n, age, m int) *State {
+func (model *Model) runWorkers(t Mode, n, age, m int) *State {
+	wn := 1 //runtime.GOMAXPROCS(0)
+	ch := make(chan *State, wn)
+	wm := m / wn
+	if m%wn != 0 {
+		wm++
+	}
+	for i := 0; i < wn; i++ {
+		go model.runWorker(t, n, age, wm, ch)
+	}
+	var bestEnergy float64
+	var bestState *State
+	for i := 0; i < wn; i++ {
+		state := <-ch
+		energy := state.Energy()
+		if i == 0 || energy < bestEnergy {
+			bestEnergy = energy
+			bestState = state
+		}
+	}
+	return HillClimb(bestState, 1000).(*State)
+}
+
+func (model *Model) runWorker(t Mode, n, age, m int, ch chan *State) {
+	buffer := image.NewRGBA(model.Target.Bounds())
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	state := model.BestHillClimbState(buffer, t, n, age, m, rnd)
+	ch <- state
+}
+
+func (model *Model) BestHillClimbState(buffer *image.RGBA, t Mode, n, age, m int, rnd *rand.Rand) *State {
 	var bestEnergy float64
 	var bestState *State
 	for i := 0; i < m; i++ {
-		state := model.BestRandomState(buffer, t, n)
+		state := model.BestRandomState(buffer, t, n, rnd)
 		before := state.Energy()
 		state = HillClimb(state, age).(*State)
 		energy := state.Energy()
@@ -143,11 +173,11 @@ func (model *Model) BestHillClimbState(buffer *image.RGBA, t Mode, n, age, m int
 	return bestState
 }
 
-func (model *Model) BestRandomState(buffer *image.RGBA, t Mode, n int) *State {
+func (model *Model) BestRandomState(buffer *image.RGBA, t Mode, n int, rnd *rand.Rand) *State {
 	var bestEnergy float64
 	var bestState *State
 	for i := 0; i < n; i++ {
-		state := model.RandomState(buffer, t)
+		state := model.RandomState(buffer, t, rnd)
 		energy := state.Energy()
 		if i == 0 || energy < bestEnergy {
 			bestEnergy = energy
@@ -157,20 +187,20 @@ func (model *Model) BestRandomState(buffer *image.RGBA, t Mode, n int) *State {
 	return bestState
 }
 
-func (model *Model) RandomState(buffer *image.RGBA, t Mode) *State {
+func (model *Model) RandomState(buffer *image.RGBA, t Mode, rnd *rand.Rand) *State {
 	switch t {
 	default:
-		return model.RandomState(buffer, Mode(rand.Intn(5)+1))
+		return model.RandomState(buffer, Mode(rnd.Intn(5)+1), rnd)
 	case ModeTriangle:
-		return NewState(model, buffer, NewRandomTriangle(model.W, model.H))
+		return NewState(model, buffer, NewRandomTriangle(model.W, model.H, rnd))
 	case ModeRectangle:
-		return NewState(model, buffer, NewRandomRectangle(model.W, model.H))
+		return NewState(model, buffer, NewRandomRectangle(model.W, model.H, rnd))
 	case ModeEllipse:
-		return NewState(model, buffer, NewRandomEllipse(model.W, model.H))
+		return NewState(model, buffer, NewRandomEllipse(model.W, model.H, rnd))
 	case ModeCircle:
-		return NewState(model, buffer, NewRandomCircle(model.W, model.H))
+		return NewState(model, buffer, NewRandomCircle(model.W, model.H, rnd))
 	case ModeRotatedRectangle:
-		return NewState(model, buffer, NewRandomRotatedRectangle(model.W, model.H))
+		return NewState(model, buffer, NewRandomRotatedRectangle(model.W, model.H, rnd))
 	}
 }
 
