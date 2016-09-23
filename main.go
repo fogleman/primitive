@@ -23,6 +23,7 @@ var (
 	InputSize  int
 	OutputSize int
 	Mode       int
+	Workers    int
 	V, VV      bool
 )
 
@@ -35,6 +36,7 @@ func init() {
 	flag.IntVar(&InputSize, "r", 256, "resize large input images to this size")
 	flag.IntVar(&OutputSize, "s", 1024, "output image size")
 	flag.IntVar(&Mode, "m", 1, "0=combo 1=triangle 2=rect 3=ellipse 4=circle 5=rotatedrect")
+	flag.IntVar(&Workers, "j", 0, "number of parallel workers (default uses all cores)")
 	flag.BoolVar(&V, "v", false, "verbose")
 	flag.BoolVar(&VV, "vv", false, "very verbose")
 }
@@ -102,11 +104,11 @@ func main() {
 	}
 
 	// run algorithm
-	model := primitive.NewModel(input, bg, Alpha, OutputSize, primitive.Mode(Mode))
+	model := primitive.NewModel(input, bg, OutputSize)
 	start := time.Now()
 	for i := 1; i <= Number; i++ {
 		// find optimal shape and add it to the model
-		model.Step()
+		model.Step(primitive.ShapeType(Mode), Alpha, Workers)
 		elapsed := time.Since(start).Seconds()
 		primitive.Log(1, "iteration %d, time %.3f, score %.6f\n", i, elapsed, model.Score)
 

@@ -9,3 +9,14 @@ type Shape interface {
 	Draw(dc *gg.Context)
 	SVG(attrs string) string
 }
+
+type ShapeType int
+
+const (
+	ShapeTypeAny ShapeType = iota
+	ShapeTypeTriangle
+	ShapeTypeRectangle
+	ShapeTypeEllipse
+	ShapeTypeCircle
+	ShapeTypeRotatedRectangle
+)

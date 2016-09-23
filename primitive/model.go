@@ -19,23 +19,18 @@ type Model struct {
 	Buffer     *image.RGBA
 	Context    *gg.Context
 	Score      float64
-	Alpha      int
 	Size       int
-	Mode       Mode
 	Shapes     []Shape
 	Colors     []Color
 	Scores     []float64
-	SVGs       []string
 }
 
-func NewModel(target image.Image, background Color, alpha, size int, mode Mode) *Model {
+func NewModel(target image.Image, background Color, size int) *Model {
 	model := &Model{}
 	model.W = target.Bounds().Size().X
 	model.H = target.Bounds().Size().Y
 	model.Background = background
-	model.Alpha = alpha
 	model.Size = size
-	model.Mode = mode
 	model.Target = imageToRGBA(target)
 	model.Current = uniformRGBA(target.Bounds(), background.NRGBA())
 	model.Buffer = uniformRGBA(target.Bounds(), background.NRGBA())
@@ -95,48 +90,50 @@ func (model *Model) SVG() string {
 	lines = append(lines, fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%d\" height=\"%d\">", w, h))
 	lines = append(lines, fmt.Sprintf("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#%02x%02x%02x\" />", w, h, c.R, c.G, c.B))
 	lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f) translate(0.5 0.5)\">", scale))
-	lines = append(lines, model.SVGs...)
+	for i, shape := range model.Shapes {
+		c := model.Colors[i]
+		attrs := "fill=\"#%02x%02x%02x\" fill-opacity=\"%f\""
+		attrs = fmt.Sprintf(attrs, c.R, c.G, c.B, float64(c.A)/255)
+		lines = append(lines, shape.SVG(attrs))
+	}
 	lines = append(lines, "</g>")
 	lines = append(lines, "</svg>")
 	return strings.Join(lines, "\n")
 }
 
-func (model *Model) Add(shape Shape) {
+func (model *Model) Add(shape Shape, alpha int) {
 	lines := shape.Rasterize()
-	c := model.computeColor(lines, model.Alpha)
+	c := model.computeColor(lines, alpha)
 	s := model.computeScore(lines, c, model.Buffer)
 	Draw(model.Current, c, lines)
-
-	attrs := "fill=\"#%02x%02x%02x\" fill-opacity=\"%f\""
-	attrs = fmt.Sprintf(attrs, c.R, c.G, c.B, float64(c.A)/255)
-	svg := shape.SVG(attrs)
 
 	model.Score = s
 	model.Shapes = append(model.Shapes, shape)
 	model.Colors = append(model.Colors, c)
 	model.Scores = append(model.Scores, s)
-	model.SVGs = append(model.SVGs, svg)
 
 	model.Context.SetRGBA255(c.R, c.G, c.B, c.A)
 	shape.Draw(model.Context)
 	model.Context.Fill()
 }
 
-func (model *Model) Step() {
-	state := model.runWorkers(model.Mode, 100, 100, 8)
+func (model *Model) Step(shapeType ShapeType, alpha, numWorkers int) {
+	state := model.runWorkers(shapeType, alpha, numWorkers, 100, 100, 8)
 	state = HillClimb(state, 1000).(*State)
-	model.Add(state.Shape)
+	model.Add(state.Shape, state.Alpha)
 }
 
-func (model *Model) runWorkers(t Mode, n, age, m int) *State {
-	wn := runtime.GOMAXPROCS(0)
+func (model *Model) runWorkers(t ShapeType, a, wn, n, age, m int) *State {
+	if wn < 1 {
+		wn = runtime.NumCPU()
+	}
 	ch := make(chan *State, wn)
 	wm := m / wn
 	if m%wn != 0 {
 		wm++
 	}
 	for i := 0; i < wn; i++ {
-		go model.runWorker(t, n, age, wm, ch)
+		go model.runWorker(t, a, n, age, wm, ch)
 	}
 	var bestEnergy float64
 	var bestState *State
@@ -151,18 +148,18 @@ func (model *Model) runWorkers(t Mode, n, age, m int) *State {
 	return bestState
 }
 
-func (model *Model) runWorker(t Mode, n, age, m int, ch chan *State) {
+func (model *Model) runWorker(t ShapeType, a, n, age, m int, ch chan *State) {
 	buffer := image.NewRGBA(model.Target.Bounds())
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	state := model.BestHillClimbState(buffer, t, n, age, m, rnd)
+	state := model.BestHillClimbState(buffer, t, a, n, age, m, rnd)
 	ch <- state
 }
 
-func (model *Model) BestHillClimbState(buffer *image.RGBA, t Mode, n, age, m int, rnd *rand.Rand) *State {
+func (model *Model) BestHillClimbState(buffer *image.RGBA, t ShapeType, a, n, age, m int, rnd *rand.Rand) *State {
 	var bestEnergy float64
 	var bestState *State
 	for i := 0; i < m; i++ {
-		state := model.BestRandomState(buffer, t, n, rnd)
+		state := model.BestRandomState(buffer, t, a, n, rnd)
 		before := state.Energy()
 		state = HillClimb(state, age).(*State)
 		energy := state.Energy()
@@ -175,11 +172,11 @@ func (model *Model) BestHillClimbState(buffer *image.RGBA, t Mode, n, age, m int
 	return bestState
 }
 
-func (model *Model) BestRandomState(buffer *image.RGBA, t Mode, n int, rnd *rand.Rand) *State {
+func (model *Model) BestRandomState(buffer *image.RGBA, t ShapeType, a, n int, rnd *rand.Rand) *State {
 	var bestEnergy float64
 	var bestState *State
 	for i := 0; i < n; i++ {
-		state := model.RandomState(buffer, t, rnd)
+		state := model.RandomState(buffer, t, a, rnd)
 		energy := state.Energy()
 		if i == 0 || energy < bestEnergy {
 			bestEnergy = energy
@@ -189,20 +186,20 @@ func (model *Model) BestRandomState(buffer *image.RGBA, t Mode, n int, rnd *rand
 	return bestState
 }
 
-func (model *Model) RandomState(buffer *image.RGBA, t Mode, rnd *rand.Rand) *State {
+func (model *Model) RandomState(buffer *image.RGBA, t ShapeType, a int, rnd *rand.Rand) *State {
 	switch t {
 	default:
-		return model.RandomState(buffer, Mode(rnd.Intn(5)+1), rnd)
-	case ModeTriangle:
-		return NewState(model, buffer, NewRandomTriangle(model.W, model.H, rnd))
-	case ModeRectangle:
-		return NewState(model, buffer, NewRandomRectangle(model.W, model.H, rnd))
-	case ModeEllipse:
-		return NewState(model, buffer, NewRandomEllipse(model.W, model.H, rnd))
-	case ModeCircle:
-		return NewState(model, buffer, NewRandomCircle(model.W, model.H, rnd))
-	case ModeRotatedRectangle:
-		return NewState(model, buffer, NewRandomRotatedRectangle(model.W, model.H, rnd))
+		return model.RandomState(buffer, ShapeType(rnd.Intn(5)+1), a, rnd)
+	case ShapeTypeTriangle:
+		return NewState(model, buffer, a, NewRandomTriangle(model.W, model.H, rnd))
+	case ShapeTypeRectangle:
+		return NewState(model, buffer, a, NewRandomRectangle(model.W, model.H, rnd))
+	case ShapeTypeEllipse:
+		return NewState(model, buffer, a, NewRandomEllipse(model.W, model.H, rnd))
+	case ShapeTypeCircle:
+		return NewState(model, buffer, a, NewRandomCircle(model.W, model.H, rnd))
+	case ShapeTypeRotatedRectangle:
+		return NewState(model, buffer, a, NewRandomRotatedRectangle(model.W, model.H, rnd))
 	}
 }
 
@@ -240,9 +237,9 @@ func (model *Model) computeScore(lines []Scanline, c Color, buffer *image.RGBA) 
 	return differencePartial(model.Target, model.Current, buffer, model.Score, lines)
 }
 
-func (model *Model) Energy(shape Shape, buffer *image.RGBA) float64 {
+func (model *Model) Energy(alpha int, shape Shape, buffer *image.RGBA) float64 {
 	lines := shape.Rasterize()
-	c := model.computeColor(lines, model.Alpha)
+	c := model.computeColor(lines, alpha)
 	s := model.computeScore(lines, c, buffer)
 	return s
 }
