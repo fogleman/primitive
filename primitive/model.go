@@ -206,31 +206,30 @@ func (model *Model) RandomState(buffer *image.RGBA, t Mode, rnd *rand.Rand) *Sta
 }
 
 func (model *Model) computeColor(lines []Scanline, alpha int) Color {
-	var count int
-	var rsum, gsum, bsum float64
-	a := float64(alpha) / 255
+	var rsum, gsum, bsum, count int64
+	a := 0x101 * 255 / alpha
 	for _, line := range lines {
 		i := model.Target.PixOffset(line.X1, line.Y)
 		for x := line.X1; x <= line.X2; x++ {
-			count++
-			tr := float64(model.Target.Pix[i])
-			tg := float64(model.Target.Pix[i+1])
-			tb := float64(model.Target.Pix[i+2])
-			cr := float64(model.Current.Pix[i])
-			cg := float64(model.Current.Pix[i+1])
-			cb := float64(model.Current.Pix[i+2])
+			tr := int(model.Target.Pix[i])
+			tg := int(model.Target.Pix[i+1])
+			tb := int(model.Target.Pix[i+2])
+			cr := int(model.Current.Pix[i])
+			cg := int(model.Current.Pix[i+1])
+			cb := int(model.Current.Pix[i+2])
 			i += 4
-			rsum += (a*cr - cr + tr) / a
-			gsum += (a*cg - cg + tg) / a
-			bsum += (a*cb - cb + tb) / a
+			rsum += int64((tr-cr)*a + cr*0x101)
+			gsum += int64((tg-cg)*a + cg*0x101)
+			bsum += int64((tb-cb)*a + cb*0x101)
+			count++
 		}
 	}
 	if count == 0 {
 		return Color{}
 	}
-	r := clampInt(int(rsum/float64(count)), 0, 255)
-	g := clampInt(int(gsum/float64(count)), 0, 255)
-	b := clampInt(int(bsum/float64(count)), 0, 255)
+	r := clampInt(int(rsum/count)>>8, 0, 255)
+	g := clampInt(int(gsum/count)>>8, 0, 255)
+	b := clampInt(int(bsum/count)>>8, 0, 255)
 	return Color{r, g, b, alpha}
 }
 
