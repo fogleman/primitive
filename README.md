@@ -6,7 +6,16 @@ Reproducing images with geometric primitives.
 
 ### How it Works
 
-A target image is provided as input. The algorithm tries to find the most optimal shape that can be drawn to minimize the error between the target image and the drawn image. It repeats this process, adding one shape at a time. Around 50 to 200 shapes are needed to reach a result that is recognizable yet artistic and abstract.
+A target image is provided as input. The algorithm tries to find the single most optimal shape that can be drawn to minimize the error between the target image and the drawn image. It repeats this process, adding *one shape at a time*. Around 50 to 200 shapes are needed to reach a result that is recognizable yet artistic and abstract.
+
+### How it Works, Part II
+
+Say we have a `Target Image`. This is what we're working towards recreating. We start with a blank canvas, but we fill it with a single solid color. Currently, this is the average color of the `Target Image`. We call this new blank canvas the `Current Image`. Now, we start evaluating shapes. To evaluate a shape, we draw it on top of the `Current Image`, producing a `New Image`. This `New Image` is compared to the `Target Image` to compute a score. We use the [root-mean-square error](https://en.wikipedia.org/wiki/Root-mean-square_deviation) for the score.
+
+    Current Image + Shape => New Image
+    RMSE(New Image, Target Image) => Score
+
+The shapes are generated randomly. We can generate a random shape and score it. Then we can mutate the shape (by tweaking a triangle vertex, tweaking an ellipse radius or center, etc.) and score it again. If the mutation improved the score, we keep it. Otherwise we rollback to the previous state. Repeating this process is known as [hill climbing](https://en.wikipedia.org/wiki/Hill_climbing). Hill climbing is prone to getting stuck in local minima, so we actually do this many different times with several different starting shapes. We can also generate N random shapes and pick the best one before we start hill climbing. [Simulated annealing](https://en.wikipedia.org/wiki/Simulated_annealing) is another good option, but in my tests I found the hill climbing technique just as good and faster, at least for this particular problem.
 
 ### Twitter
 
@@ -14,6 +23,8 @@ Follow [@PrimitivePic](https://twitter.com/PrimitivePic) on Twitter to see a new
 
 The Twitter bot looks for interesting photos using the Flickr API, runs the algorithm using randomized parameters, and
 posts the picture using the Twitter API.
+
+You can tweet a picture to the bot and it will process it for you.
 
 ### Command-line Usage
 
@@ -40,10 +51,13 @@ Small input images should be used (like 256x256px). You don't need the detail an
 Depending on the output filename extension provided, you can produce different types of output.
 
 - `PNG`: raster output
+- `JPG`: raster output
 - `SVG`: vector output
 - `GIF`: animated output showing shapes being added - requires ImageMagick (specifically the `convert` command)
 
 For PNG and SVG outputs, you can also include `%d`, `%03d`, etc. in the filename. In this case, each frame will be saved separately.
+
+You can use the `-o` flag multiple times. This way you can save both a PNG and an SVG, for example.
 
 ### Primitives
 
@@ -78,6 +92,8 @@ type Shape interface {
 ### Inspiration
 
 This project was originally inspired by the popular and excellent work of Roger Johansson - [Genetic Programming: Evolution of Mona Lisa](https://rogeralsing.com/2008/12/07/genetic-programming-evolution-of-mona-lisa/). Since seeing that article when it was quite new, I've tinkered with this problem here and there over the years. But only now am I satisfied with my results.
+
+It should be noted that there are significant differences in my implementation compared to Roger's original work. Mine is not a genetic algorithm. Mine only operates on one shape at a time. Mine is much faster (AFAIK) and supports many types of shapes.
 
 ### Progression
 
