@@ -128,7 +128,7 @@ def handle_mention(status):
     a = 128
     m = random.choice([1, 3, 5, 1, 3, 5, 1, 3, 4])
     text = (status.text or '').lower()
-    text = ''.join(x for x in text if x.isalnum())
+    text = ''.join(x for x in text if x.isalnum() or x.isspace())
     tokens = text.split()
     for count, mode in zip(tokens, tokens[1:]):
         if count.isdigit() and mode in MODE_NAMES:
