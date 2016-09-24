@@ -8,6 +8,7 @@ import traceback
 import twitter
 
 RATE = 60 * 30
+MENTION_RATE = 65
 
 FLICKR_API_KEY = None
 TWITTER_CONSUMER_KEY = None
@@ -23,6 +24,10 @@ MODE_NAMES = [
     'circles',
     'rectangles',
 ]
+
+SINCE_ID = None
+START_DATETIME = datetime.datetime.utcnow()
+USER_DATETIME = {}
 
 try:
     from config import *
@@ -67,13 +72,83 @@ def primitive(i, o, n, a=128, m=1):
     cmd = 'primitive -i %s -o %s -n %d -a %d -m %d' % args
     subprocess.call(cmd, shell=True)
 
-def tweet(status, media):
-    api = twitter.Api(
+def twitter_api():
+    return twitter.Api(
         consumer_key=TWITTER_CONSUMER_KEY,
         consumer_secret=TWITTER_CONSUMER_SECRET,
         access_token_key=TWITTER_ACCESS_TOKEN_KEY,
         access_token_secret=TWITTER_ACCESS_TOKEN_SECRET)
-    api.PostUpdate(status, media)
+
+def tweet(status, media, in_reply_to_status_id=None):
+    api = twitter_api()
+    api.PostUpdate(status, media, in_reply_to_status_id=in_reply_to_status_id)
+
+def handle_mentions():
+    global SINCE_ID
+    print 'checking for mentions'
+    api = twitter_api()
+    statuses = api.GetMentions(200, SINCE_ID)
+    for status in reversed(statuses):
+        SINCE_ID = status.id
+        print 'handling mention', status.id
+        handle_mention(status)
+    print 'done with mentions'
+
+def handle_mention(status):
+    mentions = status.user_mentions or []
+    if len(mentions) != 1:
+        print 'mention does not have exactly one mention'
+        return
+    media = status.media or []
+    if len(media) != 1:
+        print 'mention does not have exactly one media'
+        return
+    url = media[0].media_url or None
+    if not url:
+        print 'mention does not have a media_url'
+        return
+    created_at = datetime.datetime.strptime(
+        status.created_at, '%a %b %d %H:%M:%S +0000 %Y')
+    if created_at < START_DATETIME:
+        print 'mention timestamp before bot started'
+        return
+    user_id = status.user.id
+    now = datetime.datetime.utcnow()
+    td = datetime.timedelta(minutes=15)
+    if user_id in USER_DATETIME:
+        if now - USER_DATETIME[user_id] < td:
+            print 'user mentioned me too recently'
+            return
+    USER_DATETIME[user_id] = now
+    in_path = '%s.jpg' % status.id
+    out_path = '%s.png' % status.id
+    print 'downloading', url
+    download_photo(url, in_path)
+    n = random.randint(10, 40) * 10
+    a = 128
+    m = random.choice([1, 3, 5, 1, 3, 5, 1, 3, 4])
+    text = (status.text or '').lower()
+    text = ''.join(x for x in text if x.isalnum())
+    tokens = text.split()
+    for count, mode in zip(tokens, tokens[1:]):
+        if count.isdigit() and mode in MODE_NAMES:
+            n = int(count)
+            if n < 10:
+                n = 10
+            if n > 400:
+                n = 400
+            m = MODE_NAMES.index(mode)
+            break
+    status_text = '@%s %d %s.' % (status.user.screen_name, n, MODE_NAMES[m])
+    print status_text
+    print 'running algorithm, n=%d, a=%d, m=%d' % (n, a, m)
+    primitive(in_path, out_path, n=n, a=a, m=m)
+    if os.path.exists(out_path):
+        print 'uploading to twitter'
+        tweet(status_text, out_path, status.id)
+        print 'done'
+    else:
+        print 'failed!'
 
 def flickr_url(photo_id):
     alphabet = '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ'
@@ -87,7 +162,7 @@ def base_encode(alphabet, number, suffix=''):
     else:
         return alphabet[number] + suffix
 
-def run():
+def generate():
     date = random_date()
     print 'finding an interesting photo from', date
     photos = interesting(date)
@@ -101,31 +176,35 @@ def run():
     n = random.randint(10, 40) * 10
     a = 128
     m = random.choice([1, 3, 5, 1, 3, 5, 1, 3, 4])
-    status = '%d %s. %s' % (n, MODE_NAMES[m], flickr_url(photo['id']))
-    print status
+    status_text = '%d %s. %s' % (n, MODE_NAMES[m], flickr_url(photo['id']))
+    print status_text
     print 'running algorithm, n=%d, a=%d, m=%d' % (n, a, m)
     primitive(in_path, out_path, n=n, a=a, m=m)
     if os.path.exists(out_path):
         print 'uploading to twitter'
-        tweet(status, out_path)
+        tweet(status_text, out_path)
         print 'done'
     else:
         print 'failed!'
 
 def main():
     previous = 0
+    mention_previous = 0
     while True:
-        while True:
-            now = time.time()
-            elapsed = now - previous
-            if elapsed > RATE:
-                previous = now
-                break
-            time.sleep(5)
-        try:
-            run()
-        except Exception:
-            traceback.print_exc()
+        now = time.time()
+        if now - previous > RATE:
+            previous = now
+            try:
+                generate()
+            except Exception:
+                traceback.print_exc()
+        if now - mention_previous > MENTION_RATE:
+            mention_previous = now
+            try:
+                handle_mentions()
+            except Exception:
+                traceback.print_exc()
+        time.sleep(5)
 
 def download_photos(folder, date=None):
     try:
