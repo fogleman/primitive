@@ -128,10 +128,10 @@ func (r *RotatedRectangle) Mutate() {
 	case 2:
 		r.Angle = r.Angle + rnd.Intn(41) - 20
 	}
-	for !r.Valid() {
-		r.Sx = clampInt(r.Sx+rnd.Intn(21)-10, 0, r.W-1)
-		r.Sy = clampInt(r.Sy+rnd.Intn(21)-10, 0, r.H-1)
-	}
+	// for !r.Valid() {
+	// 	r.Sx = clampInt(r.Sx+rnd.Intn(21)-10, 0, r.W-1)
+	// 	r.Sy = clampInt(r.Sy+rnd.Intn(21)-10, 0, r.H-1)
+	// }
 }
 
 func (r *RotatedRectangle) Valid() bool {

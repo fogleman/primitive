@@ -98,9 +98,9 @@ def run():
     url = photo_url(photo, 'm')
     print 'downloading', url
     download_photo(url, in_path)
-    n = random.randint(5, 30) * 10
+    n = random.randint(10, 40) * 10
     a = 128
-    m = random.choice([1, 3, 5])
+    m = random.choice([1, 3, 5, 1, 3, 5, 1, 3, 4])
     status = '%d %s. %s' % (n, MODE_NAMES[m], flickr_url(photo['id']))
     print status
     print 'running algorithm, n=%d, a=%d, m=%d' % (n, a, m)
