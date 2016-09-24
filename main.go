@@ -16,7 +16,7 @@ import (
 
 var (
 	Input      string
-	Output     string
+	Outputs    flagArray
 	Background string
 	Number     int
 	Alpha      int
@@ -27,9 +27,20 @@ var (
 	V, VV      bool
 )
 
+type flagArray []string
+
+func (i *flagArray) String() string {
+	return strings.Join(*i, ", ")
+}
+
+func (i *flagArray) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
+
 func init() {
 	flag.StringVar(&Input, "i", "", "input image path")
-	flag.StringVar(&Output, "o", "", "output image path")
+	flag.Var(&Outputs, "o", "output image path")
 	flag.StringVar(&Background, "bg", "", "background color (hex)")
 	flag.IntVar(&Number, "n", 0, "number of primitives")
 	flag.IntVar(&Alpha, "a", 128, "alpha value")
@@ -59,7 +70,7 @@ func main() {
 	if Input == "" {
 		ok = errorMessage("ERROR: input argument required")
 	}
-	if Output == "" {
+	if len(Outputs) == 0 {
 		ok = errorMessage("ERROR: output argument required")
 	}
 	if Number == 0 {
@@ -91,10 +102,6 @@ func main() {
 	size := uint(InputSize)
 	input = resize.Thumbnail(size, size, input, resize.Bilinear)
 
-	// determine output options
-	ext := strings.ToLower(filepath.Ext(Output))
-	saveFrames := strings.Contains(Output, "%") && ext != ".gif"
-
 	// determine background color
 	var bg primitive.Color
 	if Background == "" {
@@ -113,24 +120,28 @@ func main() {
 		primitive.Log(1, "iteration %d, time %.3f, score %.6f\n", i, elapsed, model.Score)
 
 		// write output image(s)
-		if saveFrames || i == Number {
-			path := Output
-			if saveFrames {
-				path = fmt.Sprintf(Output, i)
-			}
-			primitive.Log(1, "writing %s\n", path)
-			switch ext {
-			default:
-				check(fmt.Errorf("unrecognized file extension: %s", ext))
-			case ".png":
-				check(primitive.SavePNG(path, model.Context.Image()))
-			case ".jpg", ".jpeg":
-				check(primitive.SaveJPG(path, model.Context.Image(), 95))
-			case ".svg":
-				check(primitive.SaveFile(path, model.SVG()))
-			case ".gif":
-				frames := model.Frames(0.001)
-				check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
+		for _, output := range Outputs {
+			ext := strings.ToLower(filepath.Ext(output))
+			saveFrames := strings.Contains(output, "%") && ext != ".gif"
+			if saveFrames || i == Number {
+				path := output
+				if saveFrames {
+					path = fmt.Sprintf(output, i)
+				}
+				primitive.Log(1, "writing %s\n", path)
+				switch ext {
+				default:
+					check(fmt.Errorf("unrecognized file extension: %s", ext))
+				case ".png":
+					check(primitive.SavePNG(path, model.Context.Image()))
+				case ".jpg", ".jpeg":
+					check(primitive.SaveJPG(path, model.Context.Image(), 95))
+				case ".svg":
+					check(primitive.SaveFile(path, model.SVG()))
+				case ".gif":
+					frames := model.Frames(0.001)
+					check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
+				}
 			}
 		}
 	}
