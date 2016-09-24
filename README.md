@@ -46,6 +46,8 @@ Small input images should be used (like 256x256px). You don't need the detail an
 | `-r` | 256 | resize large input images to this size before processing |
 | `-s` | 1024 | output image size |
 | `-a` | 128 | color alpha |
+| `-bg` | avg | starting background color (hex) |
+| `-j` | 0 | number of parallel workers (default uses all cores) |
 | `-v` | off | verbose output |
 
 ### Output Formats
