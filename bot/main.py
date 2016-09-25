@@ -114,7 +114,7 @@ def handle_mention(status):
         return
     user_id = status.user.id
     now = datetime.datetime.utcnow()
-    td = datetime.timedelta(minutes=15)
+    td = datetime.timedelta(minutes=5)
     if user_id in USER_DATETIME:
         if now - USER_DATETIME[user_id] < td:
             print 'user mentioned me too recently'
@@ -130,6 +130,9 @@ def handle_mention(status):
     text = (status.text or '').lower()
     text = ''.join(x for x in text if x.isalnum() or x.isspace())
     tokens = text.split()
+    for mode in tokens:
+        if mode in MODE_NAMES:
+            m = MODE_NAMES.index(mode)
     for count, mode in zip(tokens, tokens[1:]):
         if count.isdigit() and mode in MODE_NAMES:
             n = int(count)
