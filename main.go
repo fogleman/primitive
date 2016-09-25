@@ -112,6 +112,7 @@ func main() {
 
 	// run algorithm
 	model := primitive.NewModel(input, bg, OutputSize)
+	primitive.Log(1, "iteration %d, time %.3f, score %.6f\n", 0, 0.0, model.Score)
 	start := time.Now()
 	for i := 1; i <= Number; i++ {
 		// find optimal shape and add it to the model

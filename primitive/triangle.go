@@ -47,18 +47,19 @@ func (t *Triangle) Copy() Shape {
 }
 
 func (t *Triangle) Mutate() {
+	const m = 16
 	rnd := t.rnd
 	for {
 		switch rnd.Intn(3) {
 		case 0:
-			t.X1 = clampInt(t.X1+rnd.Intn(21)-10, 0, t.W-1)
-			t.Y1 = clampInt(t.Y1+rnd.Intn(21)-10, 0, t.H-1)
+			t.X1 = clampInt(t.X1+rnd.Intn(21)-10, -m, t.W-1+m)
+			t.Y1 = clampInt(t.Y1+rnd.Intn(21)-10, -m, t.H-1+m)
 		case 1:
-			t.X2 = clampInt(t.X2+rnd.Intn(21)-10, 0, t.W-1)
-			t.Y2 = clampInt(t.Y2+rnd.Intn(21)-10, 0, t.H-1)
+			t.X2 = clampInt(t.X2+rnd.Intn(21)-10, -m, t.W-1+m)
+			t.Y2 = clampInt(t.Y2+rnd.Intn(21)-10, -m, t.H-1+m)
 		case 2:
-			t.X3 = clampInt(t.X3+rnd.Intn(21)-10, 0, t.W-1)
-			t.Y3 = clampInt(t.Y3+rnd.Intn(21)-10, 0, t.H-1)
+			t.X3 = clampInt(t.X3+rnd.Intn(21)-10, -m, t.W-1+m)
+			t.Y3 = clampInt(t.Y3+rnd.Intn(21)-10, -m, t.H-1+m)
 		}
 		if t.Valid() {
 			break
@@ -100,7 +101,8 @@ func (t *Triangle) Valid() bool {
 }
 
 func (t *Triangle) Rasterize() []Scanline {
-	return rasterizeTriangle(t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3)
+	lines := rasterizeTriangle(t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3)
+	return cropScanlines(lines, t.W, t.H)
 }
 
 func rasterizeTriangle(x1, y1, x2, y2, x3, y3 int) []Scanline {
