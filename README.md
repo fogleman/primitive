@@ -56,7 +56,7 @@ You can use the `-o` flag multiple times. This way you can save both a PNG and a
 
 This GIF demonstrates the iterative nature of the algorithm, attempting to minimize the mean squared error by adding one shape at a time. (Use a ".gif" output file to generate one yourself!)
 
-![Mona Lisa](https://www.michaelfogleman.com/static/primitive/examples/monalisa.gif)
+<img src="https://www.michaelfogleman.com/static/primitive/examples/monalisa.3.2000.gif" width="440"/> <img src="https://www.michaelfogleman.com/static/primitive/examples/monalisa-original.png" width="440"/>
 
 ### Static Animation
 
