@@ -19,4 +19,5 @@ const (
 	ShapeTypeEllipse
 	ShapeTypeCircle
 	ShapeTypeRotatedRectangle
+	ShapeTypePath
 )

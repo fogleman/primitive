@@ -200,6 +200,8 @@ func (model *Model) RandomState(buffer *image.RGBA, t ShapeType, a int, rnd *ran
 		return NewState(model, buffer, a, NewRandomCircle(model.W, model.H, rnd))
 	case ShapeTypeRotatedRectangle:
 		return NewState(model, buffer, a, NewRandomRotatedRectangle(model.W, model.H, rnd))
+	case ShapeTypePath:
+		return NewState(model, buffer, a, NewRandomPath(model.W, model.H, rnd))
 	}
 }
 
