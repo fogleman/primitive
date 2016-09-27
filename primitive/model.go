@@ -33,7 +33,7 @@ func NewModel(target image.Image, background Color, size int) *Model {
 	model.Size = size
 	model.Target = imageToRGBA(target)
 	model.Current = uniformRGBA(target.Bounds(), background.NRGBA())
-	model.Buffer = uniformRGBA(target.Bounds(), background.NRGBA())
+	model.Buffer = image.NewRGBA(target.Bounds())
 	model.Score = differenceFull(model.Target, model.Current)
 	model.Context = model.newContext()
 	return model
@@ -118,7 +118,7 @@ func (model *Model) Add(shape Shape, alpha int) {
 }
 
 func (model *Model) Step(shapeType ShapeType, alpha, numWorkers int) {
-	state := model.runWorkers(shapeType, alpha, numWorkers, 100, 100, 8)
+	state := model.runWorkers(shapeType, alpha, numWorkers, 1000, 100, 16)
 	state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape, state.Alpha)
 }
@@ -191,17 +191,17 @@ func (model *Model) RandomState(buffer *image.RGBA, t ShapeType, a int, rnd *ran
 	default:
 		return model.RandomState(buffer, ShapeType(rnd.Intn(5)+1), a, rnd)
 	case ShapeTypeTriangle:
-		return NewState(model, buffer, a, NewRandomTriangle(model.W, model.H, rnd))
+		return NewState(model, buffer, a, NewRandomTriangle(model.W, model.H, rnd), rnd)
 	case ShapeTypeRectangle:
-		return NewState(model, buffer, a, NewRandomRectangle(model.W, model.H, rnd))
+		return NewState(model, buffer, a, NewRandomRectangle(model.W, model.H, rnd), rnd)
 	case ShapeTypeEllipse:
-		return NewState(model, buffer, a, NewRandomEllipse(model.W, model.H, rnd))
+		return NewState(model, buffer, a, NewRandomEllipse(model.W, model.H, rnd), rnd)
 	case ShapeTypeCircle:
-		return NewState(model, buffer, a, NewRandomCircle(model.W, model.H, rnd))
+		return NewState(model, buffer, a, NewRandomCircle(model.W, model.H, rnd), rnd)
 	case ShapeTypeRotatedRectangle:
-		return NewState(model, buffer, a, NewRandomRotatedRectangle(model.W, model.H, rnd))
+		return NewState(model, buffer, a, NewRandomRotatedRectangle(model.W, model.H, rnd), rnd)
 	case ShapeTypePath:
-		return NewState(model, buffer, a, NewRandomPath(model.W, model.H, rnd))
+		return NewState(model, buffer, a, NewRandomPath(model.W, model.H, rnd), rnd)
 	}
 }
 

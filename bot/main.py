@@ -124,7 +124,7 @@ def handle_mention(status):
     out_path = '%s.png' % status.id
     print 'downloading', url
     download_photo(url, in_path)
-    n = random.randint(10, 40) * 10
+    n = random.randint(10, 50) * 10
     a = 128
     m = random.choice([1, 3, 5, 1, 3, 5, 1, 3, 4])
     text = (status.text or '').lower()
@@ -138,8 +138,8 @@ def handle_mention(status):
             n = int(count)
             if n < 10:
                 n = 10
-            if n > 400:
-                n = 400
+            if n > 500:
+                n = 500
             m = MODE_NAMES.index(mode)
             break
     status_text = '@%s %d %s.' % (status.user.screen_name, n, MODE_NAMES[m])
@@ -176,7 +176,7 @@ def generate():
     url = photo_url(photo, 'm')
     print 'downloading', url
     download_photo(url, in_path)
-    n = random.randint(10, 40) * 10
+    n = random.randint(10, 50) * 10
     a = 128
     m = random.choice([1, 3, 5, 1, 3, 5, 1, 3, 4])
     status_text = '%d %s. %s' % (n, MODE_NAMES[m], flickr_url(photo['id']))

@@ -8,6 +8,14 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+func fix(x float64) fixed.Int26_6 {
+	return fixed.Int26_6(x * 64)
+}
+
+func fixp(x, y float64) fixed.Point26_6 {
+	return fixed.Point26_6{fix(x), fix(y)}
+}
+
 type painter struct {
 	Lines []Scanline
 }
@@ -43,24 +51,23 @@ type Path struct {
 	X2, Y2 int
 	X3, Y3 int
 	Width  int
-	rnd    *rand.Rand
 }
 
 func NewRandomPath(w, h int, rnd *rand.Rand) *Path {
 	x1 := rnd.Intn(w)
 	y1 := rnd.Intn(h)
-	x2 := x1 + rnd.Intn(21) - 10
-	y2 := y1 + rnd.Intn(21) - 10
-	x3 := x2 + rnd.Intn(21) - 10
-	y3 := y2 + rnd.Intn(21) - 10
-	width := 4 //rnd.Intn(16) + 1
-	return &Path{w, h, x1, y1, x2, y2, x3, y3, width, rnd}
+	x2 := x1 + rnd.Intn(41) - 20
+	y2 := y1 + rnd.Intn(41) - 20
+	x3 := x2 + rnd.Intn(41) - 20
+	y3 := y2 + rnd.Intn(41) - 20
+	width := 3 //rnd.Intn(16) + 1
+	return &Path{w, h, x1, y1, x2, y2, x3, y3, width}
 }
 
 func (p *Path) Draw(dc *gg.Context) {
 	dc.MoveTo(float64(p.X1), float64(p.Y1))
 	dc.QuadraticTo(float64(p.X2), float64(p.Y2), float64(p.X3), float64(p.Y3))
-	dc.SetLineWidth(float64(p.Width * 6))
+	dc.SetLineWidth(float64(p.Width * 5))
 	dc.Stroke()
 }
 
@@ -73,9 +80,8 @@ func (p *Path) Copy() Shape {
 	return &a
 }
 
-func (p *Path) Mutate() {
+func (p *Path) Mutate(rnd *rand.Rand) {
 	const m = 16
-	rnd := p.rnd
 	switch rnd.Intn(3) {
 	case 0:
 		p.X1 = clampInt(p.X1+rnd.Intn(21)-10, -m, p.W-1+m)
