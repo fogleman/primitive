@@ -90,3 +90,7 @@ func (c *Ellipse) Rasterize() []Scanline {
 	}
 	return lines
 }
+
+func (c *Ellipse) Name() string {
+	return "ellipse"
+}

@@ -187,3 +187,11 @@ func (r *RotatedRectangle) Rasterize() []Scanline {
 	}
 	return lines
 }
+
+func (r *Rectangle) Name() string {
+	return "rectangle"
+}
+
+func (r *RotatedRectangle) Name() string {
+	return "rotated rectangle"
+}
