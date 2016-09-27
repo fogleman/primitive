@@ -4,10 +4,11 @@ import (
 	"math/rand"
 
 	"github.com/fogleman/gg"
+	"github.com/golang/freetype/raster"
 )
 
 type Shape interface {
-	Rasterize() []Scanline
+	Rasterize(r *raster.Rasterizer) []Scanline
 	Copy() Shape
 	Mutate(rnd *rand.Rand)
 	Draw(dc *gg.Context, scale float64)

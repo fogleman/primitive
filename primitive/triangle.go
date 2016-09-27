@@ -100,7 +100,7 @@ func (t *Triangle) Valid() bool {
 	return a1 > minDegrees && a2 > minDegrees && a3 > minDegrees
 }
 
-func (t *Triangle) Rasterize() []Scanline {
+func (t *Triangle) Rasterize(r *raster.Rasterizer) []Scanline {
 	var path raster.Path
 	p1 := fixp(float64(t.X1), float64(t.Y1))
 	p2 := fixp(float64(t.X2), float64(t.Y2))
@@ -109,6 +109,6 @@ func (t *Triangle) Rasterize() []Scanline {
 	path.Add1(p2)
 	path.Add1(p3)
 	path.Add1(p1)
-	lines := fillPath(t.W, t.H, path)
+	lines := fillPath(r, path)
 	return lines
 }

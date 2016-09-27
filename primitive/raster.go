@@ -24,8 +24,8 @@ func (p *painter) Paint(spans []raster.Span, done bool) {
 	}
 }
 
-func fillPath(w, h int, path raster.Path) []Scanline {
-	r := raster.NewRasterizer(w, h)
+func fillPath(r *raster.Rasterizer, path raster.Path) []Scanline {
+	r.Clear()
 	r.UseNonZeroWinding = true
 	r.AddPath(path)
 	var p painter
@@ -33,8 +33,8 @@ func fillPath(w, h int, path raster.Path) []Scanline {
 	return p.Lines
 }
 
-func strokePath(w, h int, path raster.Path, width fixed.Int26_6, cr raster.Capper, jr raster.Joiner) []Scanline {
-	r := raster.NewRasterizer(w, h)
+func strokePath(r *raster.Rasterizer, path raster.Path, width fixed.Int26_6, cr raster.Capper, jr raster.Joiner) []Scanline {
+	r.Clear()
 	r.UseNonZeroWinding = true
 	r.AddStroke(path, width, cr, jr)
 	var p painter

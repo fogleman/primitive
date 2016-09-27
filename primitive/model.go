@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/fogleman/gg"
+	"github.com/golang/freetype/raster"
 )
 
 type Model struct {
@@ -19,6 +20,7 @@ type Model struct {
 	Target     *image.RGBA
 	Current    *image.RGBA
 	Buffer     *image.RGBA
+	Rasterizer *raster.Rasterizer
 	Context    *gg.Context
 	Score      float64
 	Shapes     []Shape
@@ -52,6 +54,7 @@ func NewModel(target image.Image, background Color, size int) *Model {
 	model.Target = imageToRGBA(target)
 	model.Current = uniformRGBA(target.Bounds(), background.NRGBA())
 	model.Buffer = image.NewRGBA(target.Bounds())
+	model.Rasterizer = raster.NewRasterizer(w, h)
 	model.Score = differenceFull(model.Target, model.Current)
 	model.Context = model.newContext()
 	return model
@@ -104,7 +107,7 @@ func (model *Model) SVG() string {
 }
 
 func (model *Model) Add(shape Shape, alpha int) {
-	lines := shape.Rasterize()
+	lines := shape.Rasterize(model.Rasterizer)
 	c := model.computeColor(lines, alpha)
 	s := model.computeScore(lines, c, model.Buffer)
 	Draw(model.Current, c, lines)
@@ -150,17 +153,18 @@ func (model *Model) runWorkers(t ShapeType, a, wn, n, age, m int) *State {
 }
 
 func (model *Model) runWorker(t ShapeType, a, n, age, m int, ch chan *State) {
-	buffer := image.NewRGBA(model.Target.Bounds())
+	b := image.NewRGBA(model.Target.Bounds())
+	r := raster.NewRasterizer(model.W, model.H)
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	state := model.BestHillClimbState(buffer, t, a, n, age, m, rnd)
+	state := model.BestHillClimbState(b, r, t, a, n, age, m, rnd)
 	ch <- state
 }
 
-func (model *Model) BestHillClimbState(buffer *image.RGBA, t ShapeType, a, n, age, m int, rnd *rand.Rand) *State {
+func (model *Model) BestHillClimbState(b *image.RGBA, r *raster.Rasterizer, t ShapeType, a, n, age, m int, rnd *rand.Rand) *State {
 	var bestEnergy float64
 	var bestState *State
 	for i := 0; i < m; i++ {
-		state := model.BestRandomState(buffer, t, a, n, rnd)
+		state := model.BestRandomState(b, r, t, a, n, rnd)
 		before := state.Energy()
 		state = HillClimb(state, age).(*State)
 		energy := state.Energy()
@@ -173,11 +177,11 @@ func (model *Model) BestHillClimbState(buffer *image.RGBA, t ShapeType, a, n, ag
 	return bestState
 }
 
-func (model *Model) BestRandomState(buffer *image.RGBA, t ShapeType, a, n int, rnd *rand.Rand) *State {
+func (model *Model) BestRandomState(b *image.RGBA, r *raster.Rasterizer, t ShapeType, a, n int, rnd *rand.Rand) *State {
 	var bestEnergy float64
 	var bestState *State
 	for i := 0; i < n; i++ {
-		state := model.RandomState(buffer, t, a, rnd)
+		state := model.RandomState(b, r, t, a, rnd)
 		energy := state.Energy()
 		if i == 0 || energy < bestEnergy {
 			bestEnergy = energy
@@ -187,22 +191,22 @@ func (model *Model) BestRandomState(buffer *image.RGBA, t ShapeType, a, n int, r
 	return bestState
 }
 
-func (model *Model) RandomState(buffer *image.RGBA, t ShapeType, a int, rnd *rand.Rand) *State {
+func (model *Model) RandomState(b *image.RGBA, r *raster.Rasterizer, t ShapeType, a int, rnd *rand.Rand) *State {
 	switch t {
 	default:
-		return model.RandomState(buffer, ShapeType(rnd.Intn(5)+1), a, rnd)
+		return model.RandomState(b, r, ShapeType(rnd.Intn(5)+1), a, rnd)
 	case ShapeTypeTriangle:
-		return NewState(model, buffer, a, NewRandomTriangle(model.W, model.H, rnd), rnd)
+		return NewState(model, b, r, a, NewRandomTriangle(model.W, model.H, rnd), rnd)
 	case ShapeTypeRectangle:
-		return NewState(model, buffer, a, NewRandomRectangle(model.W, model.H, rnd), rnd)
+		return NewState(model, b, r, a, NewRandomRectangle(model.W, model.H, rnd), rnd)
 	case ShapeTypeEllipse:
-		return NewState(model, buffer, a, NewRandomEllipse(model.W, model.H, rnd), rnd)
+		return NewState(model, b, r, a, NewRandomEllipse(model.W, model.H, rnd), rnd)
 	case ShapeTypeCircle:
-		return NewState(model, buffer, a, NewRandomCircle(model.W, model.H, rnd), rnd)
+		return NewState(model, b, r, a, NewRandomCircle(model.W, model.H, rnd), rnd)
 	case ShapeTypeRotatedRectangle:
-		return NewState(model, buffer, a, NewRandomRotatedRectangle(model.W, model.H, rnd), rnd)
+		return NewState(model, b, r, a, NewRandomRotatedRectangle(model.W, model.H, rnd), rnd)
 	case ShapeTypePath:
-		return NewState(model, buffer, a, NewRandomPath(model.W, model.H, rnd), rnd)
+		return NewState(model, b, r, a, NewRandomPath(model.W, model.H, rnd), rnd)
 	}
 }
 
@@ -240,8 +244,8 @@ func (model *Model) computeScore(lines []Scanline, c Color, buffer *image.RGBA) 
 	return differencePartial(model.Target, model.Current, buffer, model.Score, lines)
 }
 
-func (model *Model) Energy(alpha int, shape Shape, buffer *image.RGBA) float64 {
-	lines := shape.Rasterize()
+func (model *Model) Energy(alpha int, shape Shape, buffer *image.RGBA, rasterizer *raster.Rasterizer) float64 {
+	lines := shape.Rasterize(rasterizer)
 	c := model.computeColor(lines, alpha)
 	s := model.computeScore(lines, c, buffer)
 	return s
