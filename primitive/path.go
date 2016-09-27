@@ -21,9 +21,21 @@ type painter struct {
 }
 
 func (p *painter) Paint(spans []raster.Span, done bool) {
+	empty := Scanline{-1, -1, -1}
+	previous := empty
 	for _, span := range spans {
-		line := Scanline{span.Y, span.X0, span.X1 - 1}
-		p.Lines = append(p.Lines, line)
+		if span.Y == previous.Y && span.X0 == previous.X2+1 {
+			previous.X2 = span.X1 - 1
+		} else {
+			if previous != empty {
+				p.Lines = append(p.Lines, previous)
+			}
+			line := Scanline{span.Y, span.X0, span.X1 - 1}
+			previous = line
+		}
+	}
+	if previous != empty {
+		p.Lines = append(p.Lines, previous)
 	}
 }
 
@@ -60,14 +72,14 @@ func NewRandomPath(w, h int, rnd *rand.Rand) *Path {
 	y2 := y1 + rnd.Intn(41) - 20
 	x3 := x2 + rnd.Intn(41) - 20
 	y3 := y2 + rnd.Intn(41) - 20
-	width := 3 //rnd.Intn(16) + 1
+	width := 1
 	return &Path{w, h, x1, y1, x2, y2, x3, y3, width}
 }
 
 func (p *Path) Draw(dc *gg.Context) {
 	dc.MoveTo(float64(p.X1), float64(p.Y1))
 	dc.QuadraticTo(float64(p.X2), float64(p.Y2), float64(p.X3), float64(p.Y3))
-	dc.SetLineWidth(float64(p.Width * 5))
+	dc.SetLineWidth(float64(p.Width*4) * 2.5)
 	dc.Stroke()
 }
 
@@ -93,7 +105,7 @@ func (p *Path) Mutate(rnd *rand.Rand) {
 		p.X3 = clampInt(p.X3+rnd.Intn(21)-10, -m, p.W-1+m)
 		p.Y3 = clampInt(p.Y3+rnd.Intn(21)-10, -m, p.H-1+m)
 	case 3:
-		p.Width = clampInt(p.Width+rnd.Intn(5)-2, 1, 64)
+		p.Width = clampInt(p.Width+rnd.Intn(3)-1, 1, 16)
 	}
 }
 
