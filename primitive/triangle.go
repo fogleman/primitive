@@ -13,7 +13,6 @@ type Triangle struct {
 	X1, Y1 int
 	X2, Y2 int
 	X3, Y3 int
-	rnd    *rand.Rand
 }
 
 func NewRandomTriangle(w, h int, rnd *rand.Rand) *Triangle {
@@ -23,8 +22,8 @@ func NewRandomTriangle(w, h int, rnd *rand.Rand) *Triangle {
 	y2 := rnd.Intn(h)
 	x3 := rnd.Intn(w)
 	y3 := rnd.Intn(h)
-	t := &Triangle{w, h, x1, y1, x2, y2, x3, y3, rnd}
-	t.Mutate()
+	t := &Triangle{w, h, x1, y1, x2, y2, x3, y3}
+	t.Mutate(rnd)
 	return t
 }
 
@@ -46,9 +45,8 @@ func (t *Triangle) Copy() Shape {
 	return &a
 }
 
-func (t *Triangle) Mutate() {
+func (t *Triangle) Mutate(rnd *rand.Rand) {
 	const m = 16
-	rnd := t.rnd
 	for {
 		switch rnd.Intn(3) {
 		case 0:

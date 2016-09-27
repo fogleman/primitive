@@ -191,15 +191,15 @@ func (model *Model) RandomState(buffer *image.RGBA, t ShapeType, a int, rnd *ran
 	default:
 		return model.RandomState(buffer, ShapeType(rnd.Intn(5)+1), a, rnd)
 	case ShapeTypeTriangle:
-		return NewState(model, buffer, a, NewRandomTriangle(model.W, model.H, rnd))
+		return NewState(model, buffer, a, NewRandomTriangle(model.W, model.H, rnd), rnd)
 	case ShapeTypeRectangle:
-		return NewState(model, buffer, a, NewRandomRectangle(model.W, model.H, rnd))
+		return NewState(model, buffer, a, NewRandomRectangle(model.W, model.H, rnd), rnd)
 	case ShapeTypeEllipse:
-		return NewState(model, buffer, a, NewRandomEllipse(model.W, model.H, rnd))
+		return NewState(model, buffer, a, NewRandomEllipse(model.W, model.H, rnd), rnd)
 	case ShapeTypeCircle:
-		return NewState(model, buffer, a, NewRandomCircle(model.W, model.H, rnd))
+		return NewState(model, buffer, a, NewRandomCircle(model.W, model.H, rnd), rnd)
 	case ShapeTypeRotatedRectangle:
-		return NewState(model, buffer, a, NewRandomRotatedRectangle(model.W, model.H, rnd))
+		return NewState(model, buffer, a, NewRandomRotatedRectangle(model.W, model.H, rnd), rnd)
 	}
 }
 

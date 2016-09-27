@@ -12,7 +12,6 @@ type Rectangle struct {
 	W, H   int
 	X1, Y1 int
 	X2, Y2 int
-	rnd    *rand.Rand
 }
 
 func NewRandomRectangle(w, h int, rnd *rand.Rand) *Rectangle {
@@ -20,7 +19,7 @@ func NewRandomRectangle(w, h int, rnd *rand.Rand) *Rectangle {
 	y1 := rnd.Intn(h)
 	x2 := rnd.Intn(w)
 	y2 := rnd.Intn(h)
-	return &Rectangle{w, h, x1, y1, x2, y2, rnd}
+	return &Rectangle{w, h, x1, y1, x2, y2}
 }
 
 func (r *Rectangle) bounds() (x1, y1, x2, y2 int) {
@@ -54,8 +53,7 @@ func (r *Rectangle) Copy() Shape {
 	return &a
 }
 
-func (r *Rectangle) Mutate() {
-	rnd := r.rnd
+func (r *Rectangle) Mutate(rnd *rand.Rand) {
 	switch rnd.Intn(2) {
 	case 0:
 		r.X1 = clampInt(r.X1+rnd.Intn(21)-10, 0, r.W-1)
@@ -82,7 +80,6 @@ type RotatedRectangle struct {
 	X, Y   int
 	Sx, Sy int
 	Angle  int
-	rnd    *rand.Rand
 }
 
 func NewRandomRotatedRectangle(w, h int, rnd *rand.Rand) *RotatedRectangle {
@@ -91,8 +88,8 @@ func NewRandomRotatedRectangle(w, h int, rnd *rand.Rand) *RotatedRectangle {
 	sx := rnd.Intn(w / 2)
 	sy := rnd.Intn(h / 2)
 	a := rnd.Intn(360)
-	r := &RotatedRectangle{w, h, x, y, sx, sy, a, rnd}
-	r.Mutate()
+	r := &RotatedRectangle{w, h, x, y, sx, sy, a}
+	r.Mutate(rnd)
 	return r
 }
 
@@ -116,8 +113,7 @@ func (r *RotatedRectangle) Copy() Shape {
 	return &a
 }
 
-func (r *RotatedRectangle) Mutate() {
-	rnd := r.rnd
+func (r *RotatedRectangle) Mutate(rnd *rand.Rand) {
 	switch rnd.Intn(3) {
 	case 0:
 		r.X = clampInt(r.X+rnd.Intn(21)-10, 0, r.W-1)
