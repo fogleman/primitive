@@ -237,6 +237,14 @@ func (model *Model) computeScore(lines []Scanline, c Color, buffer *image.RGBA) 
 	return differencePartial(model.Target, model.Current, buffer, model.Score, lines)
 }
 
+func (model *Model) ToJSON() ModelJSON {
+	steps := make([]Step, 0)
+	for index, shape := range model.Shapes {
+		steps = append(steps, Step{Shape:shape, Color:model.Colors[index].ToHex(), Name:shape.Name()})
+	}
+	return ModelJSON{Bg:model.Background.ToHex(), Steps:steps, H:model.H, W:model.W}
+}
+
 func (model *Model) Energy(alpha int, shape Shape, buffer *image.RGBA) float64 {
 	lines := shape.Rasterize()
 	c := model.computeColor(lines, alpha)

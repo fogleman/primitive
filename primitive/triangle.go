@@ -170,3 +170,7 @@ func rasterizeTriangleTop(x1, y1, x2, y2, x3, y3 int) []Scanline {
 	}
 	return lines
 }
+
+func (t *Triangle) Name() string {
+	return "triangle"
+}

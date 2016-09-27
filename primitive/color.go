@@ -39,6 +39,10 @@ func MakeHexColor(x string) Color {
 	return Color{r, g, b, a}
 }
 
+func (c *Color) ToHex() string {
+	return fmt.Sprintf("#%02x%02x%02x%02x", c.A, c.R, c.G, c.B)
+}
+
 func (c *Color) NRGBA() color.NRGBA {
 	return color.NRGBA{uint8(c.R), uint8(c.G), uint8(c.B), uint8(c.A)}
 }

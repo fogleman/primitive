@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"encoding/json"
 )
 
 func LoadImage(path string) (image.Image, error) {
@@ -98,6 +99,15 @@ func SaveGIFImageMagick(path string, frames []image.Image, delay, lastDelay int)
 	return os.RemoveAll(dir)
 }
 
+func SaveSteps(path string, model ModelJSON) error {
+	serializedModel, err := json.Marshal(model)
+	if err != nil {
+		return err
+	}
+	ioutil.WriteFile(path, serializedModel, 0644)
+	return nil
+}
+
 func radians(degrees float64) float64 {
 	return degrees * math.Pi / 180
 }
@@ -171,4 +181,17 @@ func AverageImageColor(im image.Image) color.NRGBA {
 	g /= w * h
 	b /= w * h
 	return color.NRGBA{uint8(r), uint8(g), uint8(b), 255}
+}
+
+type Step struct {
+	Name string `json:"type"`
+	Color string `json:"color"`
+	Shape Shape `json:"shape"`
+}
+
+type ModelJSON struct {
+	W int `json:"width"`
+	H int `json:"height"`
+	Bg string `json:"background"`
+	Steps []Step `json:"steps"`
 }

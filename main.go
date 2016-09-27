@@ -142,6 +142,8 @@ func main() {
 				case ".gif":
 					frames := model.Frames(0.001)
 					check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
+				case ".json":
+					check(primitive.SaveSteps(path, model.ToJSON()))
 				}
 			}
 		}
