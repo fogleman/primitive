@@ -18,15 +18,15 @@ type Ellipse struct {
 func NewRandomEllipse(w, h int, rnd *rand.Rand) *Ellipse {
 	x := rnd.Intn(w)
 	y := rnd.Intn(h)
-	rx := rnd.Intn(w / 2)
-	ry := rnd.Intn(h / 2)
+	rx := rnd.Intn(32) + 1
+	ry := rnd.Intn(32) + 1
 	return &Ellipse{w, h, x, y, rx, ry, false}
 }
 
 func NewRandomCircle(w, h int, rnd *rand.Rand) *Ellipse {
 	x := rnd.Intn(w)
 	y := rnd.Intn(h)
-	r := rnd.Intn(w / 4)
+	r := rnd.Intn(32) + 1
 	return &Ellipse{w, h, x, y, r, r, true}
 }
 
@@ -51,12 +51,12 @@ func (c *Ellipse) Mutate(rnd *rand.Rand) {
 		c.X = clampInt(c.X+rnd.Intn(21)-10, 0, c.W-1)
 		c.Y = clampInt(c.Y+rnd.Intn(21)-10, 0, c.H-1)
 	case 1:
-		c.Rx = clampInt(c.Rx+rnd.Intn(21)-10, 0, c.W-1)
+		c.Rx = clampInt(c.Rx+rnd.Intn(21)-10, 1, c.W-1)
 		if c.Circle {
 			c.Ry = c.Rx
 		}
 	case 2:
-		c.Ry = clampInt(c.Ry+rnd.Intn(21)-10, 0, c.W-1)
+		c.Ry = clampInt(c.Ry+rnd.Intn(21)-10, 1, c.W-1)
 		if c.Circle {
 			c.Rx = c.Ry
 		}

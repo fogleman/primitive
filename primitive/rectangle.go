@@ -85,8 +85,8 @@ type RotatedRectangle struct {
 func NewRandomRotatedRectangle(w, h int, rnd *rand.Rand) *RotatedRectangle {
 	x := rnd.Intn(w)
 	y := rnd.Intn(h)
-	sx := rnd.Intn(w / 2)
-	sy := rnd.Intn(h / 2)
+	sx := rnd.Intn(32) + 1
+	sy := rnd.Intn(32) + 1
 	a := rnd.Intn(360)
 	r := &RotatedRectangle{w, h, x, y, sx, sy, a}
 	r.Mutate(rnd)
@@ -119,8 +119,8 @@ func (r *RotatedRectangle) Mutate(rnd *rand.Rand) {
 		r.X = clampInt(r.X+rnd.Intn(21)-10, 0, r.W-1)
 		r.Y = clampInt(r.Y+rnd.Intn(21)-10, 0, r.H-1)
 	case 1:
-		r.Sx = clampInt(r.Sx+rnd.Intn(21)-10, 0, r.W-1)
-		r.Sy = clampInt(r.Sy+rnd.Intn(21)-10, 0, r.H-1)
+		r.Sx = clampInt(r.Sx+rnd.Intn(21)-10, 1, r.W-1)
+		r.Sy = clampInt(r.Sy+rnd.Intn(21)-10, 1, r.H-1)
 	case 2:
 		r.Angle = r.Angle + rnd.Intn(41) - 20
 	}

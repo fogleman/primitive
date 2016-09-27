@@ -18,10 +18,10 @@ type Triangle struct {
 func NewRandomTriangle(w, h int, rnd *rand.Rand) *Triangle {
 	x1 := rnd.Intn(w)
 	y1 := rnd.Intn(h)
-	x2 := rnd.Intn(w)
-	y2 := rnd.Intn(h)
-	x3 := rnd.Intn(w)
-	y3 := rnd.Intn(h)
+	x2 := x1 + rnd.Intn(31) - 15
+	y2 := y1 + rnd.Intn(31) - 15
+	x3 := x1 + rnd.Intn(31) - 15
+	y3 := y1 + rnd.Intn(31) - 15
 	t := &Triangle{w, h, x1, y1, x2, y2, x3, y3}
 	t.Mutate(rnd)
 	return t
