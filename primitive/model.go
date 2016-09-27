@@ -33,7 +33,7 @@ func NewModel(target image.Image, background Color, size int) *Model {
 	model.Size = size
 	model.Target = imageToRGBA(target)
 	model.Current = uniformRGBA(target.Bounds(), background.NRGBA())
-	model.Buffer = uniformRGBA(target.Bounds(), background.NRGBA())
+	model.Buffer = image.NewRGBA(target.Bounds())
 	model.Score = differenceFull(model.Target, model.Current)
 	model.Context = model.newContext()
 	return model
@@ -118,7 +118,7 @@ func (model *Model) Add(shape Shape, alpha int) {
 }
 
 func (model *Model) Step(shapeType ShapeType, alpha, numWorkers int) {
-	state := model.runWorkers(shapeType, alpha, numWorkers, 100, 100, 8)
+	state := model.runWorkers(shapeType, alpha, numWorkers, 100, 100, 16)
 	state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape, state.Alpha)
 }
