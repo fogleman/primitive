@@ -6,6 +6,7 @@ import (
 	"math/rand"
 
 	"github.com/fogleman/gg"
+	"github.com/golang/freetype/raster"
 )
 
 type Triangle struct {
@@ -27,11 +28,12 @@ func NewRandomTriangle(w, h int, rnd *rand.Rand) *Triangle {
 	return t
 }
 
-func (t *Triangle) Draw(dc *gg.Context) {
+func (t *Triangle) Draw(dc *gg.Context, scale float64) {
 	dc.LineTo(float64(t.X1), float64(t.Y1))
 	dc.LineTo(float64(t.X2), float64(t.Y2))
 	dc.LineTo(float64(t.X3), float64(t.Y3))
 	dc.ClosePath()
+	dc.Fill()
 }
 
 func (t *Triangle) SVG(attrs string) string {
@@ -99,74 +101,14 @@ func (t *Triangle) Valid() bool {
 }
 
 func (t *Triangle) Rasterize() []Scanline {
-	lines := rasterizeTriangle(t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3)
-	return cropScanlines(lines, t.W, t.H)
-}
-
-func rasterizeTriangle(x1, y1, x2, y2, x3, y3 int) []Scanline {
-	if y1 > y3 {
-		x1, x3 = x3, x1
-		y1, y3 = y3, y1
-	}
-	if y1 > y2 {
-		x1, x2 = x2, x1
-		y1, y2 = y2, y1
-	}
-	if y2 > y3 {
-		x2, x3 = x3, x2
-		y2, y3 = y3, y2
-	}
-	if y2 == y3 {
-		return rasterizeTriangleBottom(x1, y1, x2, y2, x3, y3)
-	} else if y1 == y2 {
-		return rasterizeTriangleTop(x1, y1, x2, y2, x3, y3)
-	} else {
-		x4 := x1 + int((float64(y2-y1)/float64(y3-y1))*float64(x3-x1))
-		y4 := y2
-		bottom := rasterizeTriangleBottom(x1, y1, x2, y2, x4, y4)
-		top := rasterizeTriangleTop(x2, y2, x4, y4, x3, y3)
-		return append(bottom, top...)
-	}
-}
-
-func rasterizeTriangleBottom(x1, y1, x2, y2, x3, y3 int) []Scanline {
-	s1 := float64(x2-x1) / float64(y2-y1)
-	s2 := float64(x3-x1) / float64(y3-y1)
-	ax := float64(x1)
-	bx := float64(x1)
-	lines := make([]Scanline, y2-y1+1)
-	i := 0
-	for y := y1; y <= y2; y++ {
-		a := int(ax)
-		b := int(bx)
-		ax += s1
-		bx += s2
-		if a > b {
-			a, b = b, a
-		}
-		lines[i] = Scanline{y, a, b}
-		i++
-	}
-	return lines
-}
-
-func rasterizeTriangleTop(x1, y1, x2, y2, x3, y3 int) []Scanline {
-	s1 := float64(x3-x1) / float64(y3-y1)
-	s2 := float64(x3-x2) / float64(y3-y2)
-	ax := float64(x3)
-	bx := float64(x3)
-	lines := make([]Scanline, y3-y1)
-	i := 0
-	for y := y3; y > y1; y-- {
-		ax -= s1
-		bx -= s2
-		a := int(ax)
-		b := int(bx)
-		if a > b {
-			a, b = b, a
-		}
-		lines[i] = Scanline{y, a, b}
-		i++
-	}
+	var path raster.Path
+	p1 := fixp(float64(t.X1), float64(t.Y1))
+	p2 := fixp(float64(t.X2), float64(t.Y2))
+	p3 := fixp(float64(t.X3), float64(t.Y3))
+	path.Start(p1)
+	path.Add1(p2)
+	path.Add1(p3)
+	path.Add1(p1)
+	lines := fillPath(t.W, t.H, path)
 	return lines
 }

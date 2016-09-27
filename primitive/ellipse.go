@@ -30,8 +30,9 @@ func NewRandomCircle(w, h int, rnd *rand.Rand) *Ellipse {
 	return &Ellipse{w, h, x, y, r, r, true}
 }
 
-func (c *Ellipse) Draw(dc *gg.Context) {
+func (c *Ellipse) Draw(dc *gg.Context, scale float64) {
 	dc.DrawEllipse(float64(c.X), float64(c.Y), float64(c.Rx), float64(c.Ry))
+	dc.Fill()
 }
 
 func (c *Ellipse) SVG(attrs string) string {
@@ -82,10 +83,10 @@ func (c *Ellipse) Rasterize() []Scanline {
 			x2 = c.W - 1
 		}
 		if y1 >= 0 && y1 < c.H {
-			lines = append(lines, Scanline{y1, x1, x2})
+			lines = append(lines, Scanline{y1, x1, x2, 0xffff})
 		}
 		if y2 >= 0 && y2 < c.H && dy > 0 {
-			lines = append(lines, Scanline{y2, x1, x2})
+			lines = append(lines, Scanline{y2, x1, x2, 0xffff})
 		}
 	}
 	return lines

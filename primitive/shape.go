@@ -10,7 +10,7 @@ type Shape interface {
 	Rasterize() []Scanline
 	Copy() Shape
 	Mutate(rnd *rand.Rand)
-	Draw(dc *gg.Context)
+	Draw(dc *gg.Context, scale float64)
 	SVG(attrs string) string
 }
 

@@ -5,57 +5,7 @@ import (
 
 	"github.com/fogleman/gg"
 	"github.com/golang/freetype/raster"
-	"golang.org/x/image/math/fixed"
 )
-
-func fix(x float64) fixed.Int26_6 {
-	return fixed.Int26_6(x * 64)
-}
-
-func fixp(x, y float64) fixed.Point26_6 {
-	return fixed.Point26_6{fix(x), fix(y)}
-}
-
-type painter struct {
-	Lines []Scanline
-}
-
-func (p *painter) Paint(spans []raster.Span, done bool) {
-	empty := Scanline{-1, -1, -1}
-	previous := empty
-	for _, span := range spans {
-		if span.Y == previous.Y && span.X0 == previous.X2+1 {
-			previous.X2 = span.X1 - 1
-		} else {
-			if previous != empty {
-				p.Lines = append(p.Lines, previous)
-			}
-			line := Scanline{span.Y, span.X0, span.X1 - 1}
-			previous = line
-		}
-	}
-	if previous != empty {
-		p.Lines = append(p.Lines, previous)
-	}
-}
-
-func fillPath(w, h int, path raster.Path) []Scanline {
-	r := raster.NewRasterizer(w, h)
-	r.UseNonZeroWinding = true
-	r.AddPath(path)
-	var p painter
-	r.Rasterize(&p)
-	return p.Lines
-}
-
-func strokePath(w, h int, path raster.Path, width fixed.Int26_6, cr raster.Capper, jr raster.Joiner) []Scanline {
-	r := raster.NewRasterizer(w, h)
-	r.UseNonZeroWinding = true
-	r.AddStroke(path, width, cr, jr)
-	var p painter
-	r.Rasterize(&p)
-	return p.Lines
-}
 
 type Path struct {
 	W, H   int
@@ -76,10 +26,10 @@ func NewRandomPath(w, h int, rnd *rand.Rand) *Path {
 	return &Path{w, h, x1, y1, x2, y2, x3, y3, width}
 }
 
-func (p *Path) Draw(dc *gg.Context) {
+func (p *Path) Draw(dc *gg.Context, scale float64) {
 	dc.MoveTo(float64(p.X1), float64(p.Y1))
 	dc.QuadraticTo(float64(p.X2), float64(p.Y2), float64(p.X3), float64(p.Y3))
-	dc.SetLineWidth(float64(p.Width*4) * 2.5)
+	dc.SetLineWidth(float64(p.Width) * scale)
 	dc.Stroke()
 }
 

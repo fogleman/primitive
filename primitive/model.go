@@ -13,24 +13,42 @@ import (
 
 type Model struct {
 	W, H       int
+	Sw, Sh     int
+	Scale      float64
 	Background Color
 	Target     *image.RGBA
 	Current    *image.RGBA
 	Buffer     *image.RGBA
 	Context    *gg.Context
 	Score      float64
-	Size       int
 	Shapes     []Shape
 	Colors     []Color
 	Scores     []float64
 }
 
 func NewModel(target image.Image, background Color, size int) *Model {
+	w := target.Bounds().Size().X
+	h := target.Bounds().Size().Y
+	aspect := float64(w) / float64(h)
+	var sw, sh int
+	var scale float64
+	if aspect >= 1 {
+		sw = size
+		sh = int(float64(size) / aspect)
+		scale = float64(size) / float64(w)
+	} else {
+		sw = int(float64(size) * aspect)
+		sh = size
+		scale = float64(size) / float64(h)
+	}
+
 	model := &Model{}
-	model.W = target.Bounds().Size().X
-	model.H = target.Bounds().Size().Y
+	model.W = w
+	model.H = h
+	model.Sw = sw
+	model.Sh = sh
+	model.Scale = scale
 	model.Background = background
-	model.Size = size
 	model.Target = imageToRGBA(target)
 	model.Current = uniformRGBA(target.Bounds(), background.NRGBA())
 	model.Buffer = image.NewRGBA(target.Bounds())
@@ -39,24 +57,9 @@ func NewModel(target image.Image, background Color, size int) *Model {
 	return model
 }
 
-func (model *Model) sizeAndScale() (w, h int, scale float64) {
-	aspect := float64(model.W) / float64(model.H)
-	if aspect >= 1 {
-		w = model.Size
-		h = int(float64(model.Size) / aspect)
-		scale = float64(model.Size) / float64(model.W)
-	} else {
-		w = int(float64(model.Size) * aspect)
-		h = model.Size
-		scale = float64(model.Size) / float64(model.H)
-	}
-	return
-}
-
 func (model *Model) newContext() *gg.Context {
-	w, h, scale := model.sizeAndScale()
-	dc := gg.NewContext(w, h)
-	dc.Scale(scale, scale)
+	dc := gg.NewContext(model.Sw, model.Sh)
+	dc.Scale(model.Scale, model.Scale)
 	dc.Translate(0.5, 0.5)
 	dc.SetColor(model.Background.NRGBA())
 	dc.Clear()
@@ -71,7 +74,7 @@ func (model *Model) Frames(scoreDelta float64) []image.Image {
 	for i, shape := range model.Shapes {
 		c := model.Colors[i]
 		dc.SetRGBA255(c.R, c.G, c.B, c.A)
-		shape.Draw(dc)
+		shape.Draw(dc, model.Scale)
 		dc.Fill()
 		score := model.Scores[i]
 		delta := previous - score
@@ -84,12 +87,11 @@ func (model *Model) Frames(scoreDelta float64) []image.Image {
 }
 
 func (model *Model) SVG() string {
-	w, h, scale := model.sizeAndScale()
 	c := model.Background
 	var lines []string
-	lines = append(lines, fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%d\" height=\"%d\">", w, h))
-	lines = append(lines, fmt.Sprintf("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#%02x%02x%02x\" />", w, h, c.R, c.G, c.B))
-	lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f) translate(0.5 0.5)\">", scale))
+	lines = append(lines, fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%d\" height=\"%d\">", model.Sw, model.Sh))
+	lines = append(lines, fmt.Sprintf("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#%02x%02x%02x\" />", model.Sw, model.Sh, c.R, c.G, c.B))
+	lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f) translate(0.5 0.5)\">", model.Scale))
 	for i, shape := range model.Shapes {
 		c := model.Colors[i]
 		attrs := "fill=\"#%02x%02x%02x\" fill-opacity=\"%f\""
@@ -113,8 +115,7 @@ func (model *Model) Add(shape Shape, alpha int) {
 	model.Scores = append(model.Scores, s)
 
 	model.Context.SetRGBA255(c.R, c.G, c.B, c.A)
-	shape.Draw(model.Context)
-	model.Context.Fill()
+	shape.Draw(model.Context, model.Scale)
 }
 
 func (model *Model) Step(shapeType ShapeType, alpha, numWorkers int) {

@@ -34,9 +34,10 @@ func (r *Rectangle) bounds() (x1, y1, x2, y2 int) {
 	return
 }
 
-func (r *Rectangle) Draw(dc *gg.Context) {
+func (r *Rectangle) Draw(dc *gg.Context, scale float64) {
 	x1, y1, x2, y2 := r.bounds()
 	dc.DrawRectangle(float64(x1), float64(y1), float64(x2-x1+1), float64(y2-y1+1))
+	dc.Fill()
 }
 
 func (r *Rectangle) SVG(attrs string) string {
@@ -69,7 +70,7 @@ func (r *Rectangle) Rasterize() []Scanline {
 	lines := make([]Scanline, y2-y1+1)
 	i := 0
 	for y := y1; y <= y2; y++ {
-		lines[i] = Scanline{y, x1, x2}
+		lines[i] = Scanline{y, x1, x2, 0xffff}
 		i++
 	}
 	return lines
@@ -93,13 +94,14 @@ func NewRandomRotatedRectangle(w, h int, rnd *rand.Rand) *RotatedRectangle {
 	return r
 }
 
-func (r *RotatedRectangle) Draw(dc *gg.Context) {
+func (r *RotatedRectangle) Draw(dc *gg.Context, scale float64) {
 	sx, sy := float64(r.Sx), float64(r.Sy)
 	dc.Push()
 	dc.Translate(float64(r.X), float64(r.Y))
 	dc.Rotate(radians(float64(r.Angle)))
 	dc.DrawRectangle(-sx/2, -sy/2, sx, sy)
 	dc.Pop()
+	dc.Fill()
 }
 
 func (r *RotatedRectangle) SVG(attrs string) string {
@@ -182,7 +184,7 @@ func (r *RotatedRectangle) Rasterize() []Scanline {
 		a := maxInt(min[i], 0)
 		b := minInt(max[i], r.W-1)
 		if b >= a {
-			lines = append(lines, Scanline{y, a, b})
+			lines = append(lines, Scanline{y, a, b, 0xffff})
 		}
 	}
 	return lines
