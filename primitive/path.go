@@ -1,7 +1,9 @@
 package primitive
 
 import (
+	"fmt"
 	"math/rand"
+	"strings"
 
 	"github.com/fogleman/gg"
 	"github.com/golang/freetype/raster"
@@ -34,7 +36,11 @@ func (p *Path) Draw(dc *gg.Context, scale float64) {
 }
 
 func (p *Path) SVG(attrs string) string {
-	return ""
+	// TODO: this is a little silly
+	attrs = strings.Replace(attrs, "fill", "stroke", -1)
+	return fmt.Sprintf(
+		"<path %s fill=\"none\" d=\"M %f %f Q %f %f, %f %f\" stroke-width=\"%f\" />",
+		attrs, p.X1, p.Y1, p.X2, p.Y2, p.X3, p.Y3, p.Width)
 }
 
 func (p *Path) Copy() Shape {
