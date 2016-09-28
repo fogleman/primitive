@@ -59,7 +59,7 @@ func (p *Path) Mutate(rnd *rand.Rand) {
 	}
 }
 
-func (p *Path) Rasterize(r *raster.Rasterizer) []Scanline {
+func (p *Path) Rasterize() []Scanline {
 	var path raster.Path
 	p1 := fixp(float64(p.X1), float64(p.Y1))
 	p2 := fixp(float64(p.X2), float64(p.Y2))
@@ -67,6 +67,5 @@ func (p *Path) Rasterize(r *raster.Rasterizer) []Scanline {
 	path.Start(p1)
 	path.Add2(p2, p3)
 	width := fix(float64(p.Width))
-	lines := strokePath(r, path, width, raster.RoundCapper, raster.RoundJoiner)
-	return cropScanlines(lines, p.W, p.H)
+	return strokePath(p.W, p.H, path, width, raster.RoundCapper, raster.RoundJoiner)
 }

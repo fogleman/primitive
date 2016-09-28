@@ -18,14 +18,15 @@ type painter struct {
 }
 
 func (p *painter) Paint(spans []raster.Span, done bool) {
-	for _, span := range spans {
-		line := Scanline{span.Y, span.X0, span.X1 - 1, span.Alpha}
-		p.Lines = append(p.Lines, line)
+	lines := make([]Scanline, len(spans))
+	for i, span := range spans {
+		lines[i] = Scanline{span.Y, span.X0, span.X1 - 1, span.Alpha}
 	}
+	p.Lines = append(p.Lines, lines...)
 }
 
-func fillPath(r *raster.Rasterizer, path raster.Path) []Scanline {
-	r.Clear()
+func fillPath(w, h int, path raster.Path) []Scanline {
+	r := raster.NewRasterizer(w, h)
 	r.UseNonZeroWinding = true
 	r.AddPath(path)
 	var p painter
@@ -33,8 +34,8 @@ func fillPath(r *raster.Rasterizer, path raster.Path) []Scanline {
 	return p.Lines
 }
 
-func strokePath(r *raster.Rasterizer, path raster.Path, width fixed.Int26_6, cr raster.Capper, jr raster.Joiner) []Scanline {
-	r.Clear()
+func strokePath(w, h int, path raster.Path, width fixed.Int26_6, cr raster.Capper, jr raster.Joiner) []Scanline {
+	r := raster.NewRasterizer(w, h)
 	r.UseNonZeroWinding = true
 	r.AddStroke(path, width, cr, jr)
 	var p painter

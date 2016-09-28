@@ -6,7 +6,6 @@ import (
 	"math/rand"
 
 	"github.com/fogleman/gg"
-	"github.com/golang/freetype/raster"
 )
 
 type Ellipse struct {
@@ -65,7 +64,7 @@ func (c *Ellipse) Mutate(rnd *rand.Rand) {
 	}
 }
 
-func (c *Ellipse) Rasterize(r *raster.Rasterizer) []Scanline {
+func (c *Ellipse) Rasterize() []Scanline {
 	lines := make([]Scanline, 0, c.Ry*2)
 	aspect := float64(c.Rx) / float64(c.Ry)
 	for dy := 0; dy < c.Ry; dy++ {

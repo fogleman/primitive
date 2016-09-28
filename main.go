@@ -121,7 +121,9 @@ func main() {
 		primitive.Log(1, "iteration %d, time %.3f, score %.6f\n", i, elapsed, model.Score)
 
 		// write output image(s)
-		primitive.SavePNG("out.png", model.Current)
+		if i%10 == 0 {
+			primitive.SavePNG("out.png", model.Current)
+		}
 		for _, output := range Outputs {
 			ext := strings.ToLower(filepath.Ext(output))
 			saveFrames := strings.Contains(output, "%") && ext != ".gif"

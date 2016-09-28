@@ -6,7 +6,6 @@ import (
 	"math/rand"
 
 	"github.com/fogleman/gg"
-	"github.com/golang/freetype/raster"
 )
 
 type Rectangle struct {
@@ -66,7 +65,7 @@ func (r *Rectangle) Mutate(rnd *rand.Rand) {
 	}
 }
 
-func (r *Rectangle) Rasterize(rasterizer *raster.Rasterizer) []Scanline {
+func (r *Rectangle) Rasterize() []Scanline {
 	x1, y1, x2, y2 := r.bounds()
 	lines := make([]Scanline, y2-y1+1)
 	i := 0
@@ -142,7 +141,7 @@ func (r *RotatedRectangle) Valid() bool {
 	return aspect <= 5
 }
 
-func (r *RotatedRectangle) Rasterize(rasterizer *raster.Rasterizer) []Scanline {
+func (r *RotatedRectangle) Rasterize() []Scanline {
 	sx, sy := float64(r.Sx), float64(r.Sy)
 	angle := radians(float64(r.Angle))
 	rx1, ry1 := rotate(-sx/2, -sy/2, angle)
