@@ -98,12 +98,33 @@ func SaveGIFImageMagick(path string, frames []image.Image, delay, lastDelay int)
 	return os.RemoveAll(dir)
 }
 
+func NumberString(x float64) string {
+	suffixes := []string{"", "k", "M", "G"}
+	for _, suffix := range suffixes {
+		if x < 1000 {
+			return fmt.Sprintf("%.1f%s", x, suffix)
+		}
+		x /= 1000
+	}
+	return fmt.Sprintf("%.1f%s", x, "T")
+}
+
 func radians(degrees float64) float64 {
 	return degrees * math.Pi / 180
 }
 
 func degrees(radians float64) float64 {
 	return radians * 180 / math.Pi
+}
+
+func clamp(x, lo, hi float64) float64 {
+	if x < lo {
+		return lo
+	}
+	if x > hi {
+		return hi
+	}
+	return x
 }
 
 func clampInt(x, lo, hi int) int {

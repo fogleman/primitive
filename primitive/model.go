@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"runtime"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/fogleman/gg"
@@ -24,6 +25,7 @@ type Model struct {
 	Shapes     []Shape
 	Colors     []Color
 	Scores     []float64
+	counter    int64
 }
 
 func NewModel(target image.Image, background Color, size int) *Model {
@@ -118,10 +120,12 @@ func (model *Model) Add(shape Shape, alpha int) {
 	shape.Draw(model.Context, model.Scale)
 }
 
-func (model *Model) Step(shapeType ShapeType, alpha, numWorkers int) {
+func (model *Model) Step(shapeType ShapeType, alpha, numWorkers int) int {
+	model.counter = 0
 	state := model.runWorkers(shapeType, alpha, numWorkers, 1000, 100, 16)
 	state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape, state.Alpha)
+	return int(model.counter)
 }
 
 func (model *Model) runWorkers(t ShapeType, a, wn, n, age, m int) *State {
@@ -241,6 +245,7 @@ func (model *Model) computeScore(lines []Scanline, c Color, buffer *image.RGBA) 
 }
 
 func (model *Model) Energy(alpha int, shape Shape, buffer *image.RGBA) float64 {
+	atomic.AddInt64(&model.counter, 1)
 	lines := shape.Rasterize()
 	c := model.computeColor(lines, alpha)
 	s := model.computeScore(lines, c, buffer)

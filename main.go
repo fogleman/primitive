@@ -112,13 +112,15 @@ func main() {
 
 	// run algorithm
 	model := primitive.NewModel(input, bg, OutputSize)
-	primitive.Log(1, "iteration %d, time %.3f, score %.6f\n", 0, 0.0, model.Score)
+	primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
 	start := time.Now()
 	for i := 1; i <= Number; i++ {
 		// find optimal shape and add it to the model
-		model.Step(primitive.ShapeType(Mode), Alpha, Workers)
+		t := time.Now()
+		n := model.Step(primitive.ShapeType(Mode), Alpha, Workers)
+		nps := primitive.NumberString(float64(n) / time.Since(t).Seconds())
 		elapsed := time.Since(start).Seconds()
-		primitive.Log(1, "iteration %d, time %.3f, score %.6f\n", i, elapsed, model.Score)
+		primitive.Log(1, "%d: t=%.3f, score=%.6f, n=%d, n/s=%s\n", i, elapsed, model.Score, n, nps)
 
 		// write output image(s)
 		if i%10 == 0 {
