@@ -99,7 +99,7 @@ func (t *Triangle) Valid() bool {
 	return a1 > minDegrees && a2 > minDegrees && a3 > minDegrees
 }
 
-func (t *Triangle) Rasterize() []Scanline {
+func (t *Triangle) Rasterize(buf []Scanline) []Scanline {
 	lines := rasterizeTriangle(t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3)
 	return cropScanlines(lines, t.W, t.H)
 }

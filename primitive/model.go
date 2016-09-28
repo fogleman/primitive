@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"math/rand"
-	"runtime"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -106,7 +105,7 @@ func (model *Model) SVG() string {
 }
 
 func (model *Model) Add(shape Shape, alpha int) {
-	lines := shape.Rasterize()
+	lines := shape.Rasterize(nil)
 	c := model.computeColor(lines, alpha)
 	s := model.computeScore(lines, c, model.Buffer)
 	Draw(model.Current, c, lines)
@@ -129,9 +128,6 @@ func (model *Model) Step(shapeType ShapeType, alpha, numWorkers int) int {
 }
 
 func (model *Model) runWorkers(t ShapeType, a, wn, n, age, m int) *State {
-	if wn < 1 {
-		wn = runtime.NumCPU()
-	}
 	ch := make(chan *State, wn)
 	wm := m / wn
 	if m%wn != 0 {
@@ -245,8 +241,10 @@ func (model *Model) computeScore(lines []Scanline, c Color, buffer *image.RGBA) 
 }
 
 func (model *Model) Energy(alpha int, shape Shape, buffer *image.RGBA) float64 {
+	buf := theScanlinePool.get()
+	defer theScanlinePool.put(buf)
 	atomic.AddInt64(&model.counter, 1)
-	lines := shape.Rasterize()
+	lines := shape.Rasterize(buf)
 	c := model.computeColor(lines, alpha)
 	s := model.computeScore(lines, c, buffer)
 	return s

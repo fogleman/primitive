@@ -7,7 +7,7 @@ import (
 )
 
 type Shape interface {
-	Rasterize() []Scanline
+	Rasterize(buf []Scanline) []Scanline
 	Copy() Shape
 	Mutate(rnd *rand.Rand)
 	Draw(dc *gg.Context, scale float64)

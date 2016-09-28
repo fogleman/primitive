@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -93,6 +94,12 @@ func main() {
 	// seed random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 
+	// determine worker count
+	if Workers < 1 {
+		Workers = runtime.NumCPU()
+	}
+	primitive.InitPools(Workers * 2)
+
 	// read input image
 	primitive.Log(1, "reading %s\n", Input)
 	input, err := primitive.LoadImage(Input)
@@ -123,12 +130,10 @@ func main() {
 		primitive.Log(1, "%d: t=%.3f, score=%.6f, n=%d, n/s=%s\n", i, elapsed, model.Score, n, nps)
 
 		// write output image(s)
-		if i%10 == 0 {
-			primitive.SavePNG("out.png", model.Current)
-		}
 		for _, output := range Outputs {
 			ext := strings.ToLower(filepath.Ext(output))
 			saveFrames := strings.Contains(output, "%") && ext != ".gif"
+			saveFrames = saveFrames && i%10 == 0
 			if saveFrames || i == Number {
 				path := output
 				if saveFrames {

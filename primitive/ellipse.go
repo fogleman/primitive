@@ -64,7 +64,7 @@ func (c *Ellipse) Mutate(rnd *rand.Rand) {
 	}
 }
 
-func (c *Ellipse) Rasterize() []Scanline {
+func (c *Ellipse) Rasterize(buf []Scanline) []Scanline {
 	lines := make([]Scanline, 0, c.Ry*2)
 	aspect := float64(c.Rx) / float64(c.Ry)
 	for dy := 0; dy < c.Ry; dy++ {
