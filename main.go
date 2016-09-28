@@ -24,6 +24,7 @@ var (
 	OutputSize int
 	Mode       int
 	Workers    int
+    Max float64
 	V, VV      bool
 )
 
@@ -48,6 +49,7 @@ func init() {
 	flag.IntVar(&OutputSize, "s", 1024, "output image size")
 	flag.IntVar(&Mode, "m", 1, "0=combo 1=triangle 2=rect 3=ellipse 4=circle 5=rotatedrect")
 	flag.IntVar(&Workers, "j", 0, "number of parallel workers (default uses all cores)")
+    flag.Float64Var(&Max, "ma", 0, "target score to stop adding primitives (default 0)")
 	flag.BoolVar(&V, "v", false, "verbose")
 	flag.BoolVar(&VV, "vv", false, "very verbose")
 }
@@ -124,7 +126,7 @@ func main() {
 		for _, output := range Outputs {
 			ext := strings.ToLower(filepath.Ext(output))
 			saveFrames := strings.Contains(output, "%") && ext != ".gif"
-			if saveFrames || i == Number {
+			if saveFrames || i == Number || model.Score <= Max {
 				path := output
 				if saveFrames {
 					path = fmt.Sprintf(output, i)
@@ -143,6 +145,7 @@ func main() {
 					frames := model.Frames(0.001)
 					check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
 				}
+                if model.Score <= Max { return }
 			}
 		}
 	}
