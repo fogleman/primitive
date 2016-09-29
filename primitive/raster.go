@@ -23,26 +23,24 @@ func (p *painter) Paint(spans []raster.Span, done bool) {
 	}
 }
 
-func fillPath(w, h int, path raster.Path, buf []Scanline) []Scanline {
-	r := theRasterizerPool.get()
-	defer theRasterizerPool.put(r)
-	r.SetBounds(w, h)
+func fillPath(worker *Worker, path raster.Path) []Scanline {
+	r := worker.Rasterizer
+	r.Clear()
 	r.UseNonZeroWinding = true
 	r.AddPath(path)
 	var p painter
-	p.Lines = buf[:0]
+	p.Lines = worker.Lines
 	r.Rasterize(&p)
 	return p.Lines
 }
 
-func strokePath(w, h int, path raster.Path, width fixed.Int26_6, cr raster.Capper, jr raster.Joiner, buf []Scanline) []Scanline {
-	r := theRasterizerPool.get()
-	defer theRasterizerPool.put(r)
-	r.SetBounds(w, h)
+func strokePath(worker *Worker, path raster.Path, width fixed.Int26_6, cr raster.Capper, jr raster.Joiner) []Scanline {
+	r := worker.Rasterizer
+	r.Clear()
 	r.UseNonZeroWinding = true
 	r.AddStroke(path, width, cr, jr)
 	var p painter
-	p.Lines = buf[:0]
+	p.Lines = worker.Lines
 	r.Rasterize(&p)
 	return p.Lines
 }

@@ -3,23 +3,23 @@ package primitive
 import (
 	"fmt"
 	"math"
-	"math/rand"
 
 	"github.com/fogleman/gg"
 )
 
 type Rectangle struct {
-	W, H   int
+	Worker *Worker
 	X1, Y1 int
 	X2, Y2 int
 }
 
-func NewRandomRectangle(w, h int, rnd *rand.Rand) *Rectangle {
-	x1 := rnd.Intn(w)
-	y1 := rnd.Intn(h)
-	x2 := rnd.Intn(w)
-	y2 := rnd.Intn(h)
-	return &Rectangle{w, h, x1, y1, x2, y2}
+func NewRandomRectangle(worker *Worker) *Rectangle {
+	rnd := worker.Rnd
+	x1 := rnd.Intn(worker.W)
+	y1 := rnd.Intn(worker.H)
+	x2 := clampInt(x1+rnd.Intn(32)+1, 0, worker.W-1)
+	y2 := clampInt(y1+rnd.Intn(32)+1, 0, worker.H-1)
+	return &Rectangle{worker, x1, y1, x2, y2}
 }
 
 func (r *Rectangle) bounds() (x1, y1, x2, y2 int) {
@@ -54,43 +54,45 @@ func (r *Rectangle) Copy() Shape {
 	return &a
 }
 
-func (r *Rectangle) Mutate(rnd *rand.Rand) {
+func (r *Rectangle) Mutate() {
+	w := r.Worker.W
+	h := r.Worker.H
+	rnd := r.Worker.Rnd
 	switch rnd.Intn(2) {
 	case 0:
-		r.X1 = clampInt(r.X1+rnd.Intn(21)-10, 0, r.W-1)
-		r.Y1 = clampInt(r.Y1+rnd.Intn(21)-10, 0, r.H-1)
+		r.X1 = clampInt(r.X1+rnd.Intn(21)-10, 0, w-1)
+		r.Y1 = clampInt(r.Y1+rnd.Intn(21)-10, 0, h-1)
 	case 1:
-		r.X2 = clampInt(r.X2+rnd.Intn(21)-10, 0, r.W-1)
-		r.Y2 = clampInt(r.Y2+rnd.Intn(21)-10, 0, r.H-1)
+		r.X2 = clampInt(r.X2+rnd.Intn(21)-10, 0, w-1)
+		r.Y2 = clampInt(r.Y2+rnd.Intn(21)-10, 0, h-1)
 	}
 }
 
-func (r *Rectangle) Rasterize(buf []Scanline) []Scanline {
+func (r *Rectangle) Rasterize() []Scanline {
 	x1, y1, x2, y2 := r.bounds()
-	lines := make([]Scanline, y2-y1+1)
-	i := 0
+	lines := r.Worker.Lines[:0]
 	for y := y1; y <= y2; y++ {
-		lines[i] = Scanline{y, x1, x2, 0xffff}
-		i++
+		lines = append(lines, Scanline{y, x1, x2, 0xffff})
 	}
 	return lines
 }
 
 type RotatedRectangle struct {
-	W, H   int
+	Worker *Worker
 	X, Y   int
 	Sx, Sy int
 	Angle  int
 }
 
-func NewRandomRotatedRectangle(w, h int, rnd *rand.Rand) *RotatedRectangle {
-	x := rnd.Intn(w)
-	y := rnd.Intn(h)
+func NewRandomRotatedRectangle(worker *Worker) *RotatedRectangle {
+	rnd := worker.Rnd
+	x := rnd.Intn(worker.W)
+	y := rnd.Intn(worker.H)
 	sx := rnd.Intn(32) + 1
 	sy := rnd.Intn(32) + 1
 	a := rnd.Intn(360)
-	r := &RotatedRectangle{w, h, x, y, sx, sy, a}
-	r.Mutate(rnd)
+	r := &RotatedRectangle{worker, x, y, sx, sy, a}
+	r.Mutate()
 	return r
 }
 
@@ -115,20 +117,23 @@ func (r *RotatedRectangle) Copy() Shape {
 	return &a
 }
 
-func (r *RotatedRectangle) Mutate(rnd *rand.Rand) {
+func (r *RotatedRectangle) Mutate() {
+	w := r.Worker.W
+	h := r.Worker.H
+	rnd := r.Worker.Rnd
 	switch rnd.Intn(3) {
 	case 0:
-		r.X = clampInt(r.X+rnd.Intn(21)-10, 0, r.W-1)
-		r.Y = clampInt(r.Y+rnd.Intn(21)-10, 0, r.H-1)
+		r.X = clampInt(r.X+rnd.Intn(21)-10, 0, w-1)
+		r.Y = clampInt(r.Y+rnd.Intn(21)-10, 0, h-1)
 	case 1:
-		r.Sx = clampInt(r.Sx+rnd.Intn(21)-10, 1, r.W-1)
-		r.Sy = clampInt(r.Sy+rnd.Intn(21)-10, 1, r.H-1)
+		r.Sx = clampInt(r.Sx+rnd.Intn(21)-10, 1, w-1)
+		r.Sy = clampInt(r.Sy+rnd.Intn(21)-10, 1, h-1)
 	case 2:
 		r.Angle = r.Angle + rnd.Intn(41) - 20
 	}
 	// for !r.Valid() {
-	// 	r.Sx = clampInt(r.Sx+rnd.Intn(21)-10, 0, r.W-1)
-	// 	r.Sy = clampInt(r.Sy+rnd.Intn(21)-10, 0, r.H-1)
+	// 	r.Sx = clampInt(r.Sx+rnd.Intn(21)-10, 0, w-1)
+	// 	r.Sy = clampInt(r.Sy+rnd.Intn(21)-10, 0, h-1)
 	// }
 }
 
@@ -141,7 +146,9 @@ func (r *RotatedRectangle) Valid() bool {
 	return aspect <= 5
 }
 
-func (r *RotatedRectangle) Rasterize(buf []Scanline) []Scanline {
+func (r *RotatedRectangle) Rasterize() []Scanline {
+	w := r.Worker.W
+	h := r.Worker.H
 	sx, sy := float64(r.Sx), float64(r.Sy)
 	angle := radians(float64(r.Angle))
 	rx1, ry1 := rotate(-sx/2, -sy/2, angle)
@@ -158,7 +165,7 @@ func (r *RotatedRectangle) Rasterize(buf []Scanline) []Scanline {
 	min := make([]int, n)
 	max := make([]int, n)
 	for i := range min {
-		min[i] = r.W
+		min[i] = w
 	}
 	xs := []int{x1, x2, x3, x4, x1}
 	ys := []int{y1, y2, y3, y4, y1}
@@ -175,14 +182,14 @@ func (r *RotatedRectangle) Rasterize(buf []Scanline) []Scanline {
 			max[yi] = maxInt(max[yi], xi)
 		}
 	}
-	lines := make([]Scanline, 0, n)
+	lines := r.Worker.Lines[:0]
 	for i := 0; i < n; i++ {
 		y := miny + i
-		if y < 0 || y >= r.H {
+		if y < 0 || y >= h {
 			continue
 		}
 		a := maxInt(min[i], 0)
-		b := minInt(max[i], r.W-1)
+		b := minInt(max[i], w-1)
 		if b >= a {
 			lines = append(lines, Scanline{y, a, b, 0xffff})
 		}

@@ -6,7 +6,7 @@ type Scanline struct {
 }
 
 func cropScanlines(lines []Scanline, w, h int) []Scanline {
-	result := make([]Scanline, 0, len(lines))
+	i := 0
 	for _, line := range lines {
 		if line.Y < 0 || line.Y >= h {
 			continue
@@ -22,7 +22,8 @@ func cropScanlines(lines []Scanline, w, h int) []Scanline {
 		if line.X1 > line.X2 {
 			continue
 		}
-		result = append(result, line)
+		lines[i] = line
+		i++
 	}
-	return result
+	return lines[:i]
 }

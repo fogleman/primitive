@@ -98,7 +98,6 @@ func main() {
 	if Workers < 1 {
 		Workers = runtime.NumCPU()
 	}
-	primitive.InitPools(Workers * 2)
 
 	// read input image
 	primitive.Log(1, "reading %s\n", Input)
@@ -118,13 +117,13 @@ func main() {
 	}
 
 	// run algorithm
-	model := primitive.NewModel(input, bg, OutputSize)
+	model := primitive.NewModel(input, bg, OutputSize, Workers)
 	primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
 	start := time.Now()
 	for i := 1; i <= Number; i++ {
 		// find optimal shape and add it to the model
 		t := time.Now()
-		n := model.Step(primitive.ShapeType(Mode), Alpha, Workers)
+		n := model.Step(primitive.ShapeType(Mode), Alpha)
 		nps := primitive.NumberString(float64(n) / time.Since(t).Seconds())
 		elapsed := time.Since(start).Seconds()
 		primitive.Log(1, "%d: t=%.3f, score=%.6f, n=%d, n/s=%s\n", i, elapsed, model.Score, n, nps)
@@ -133,7 +132,7 @@ func main() {
 		for _, output := range Outputs {
 			ext := strings.ToLower(filepath.Ext(output))
 			saveFrames := strings.Contains(output, "%") && ext != ".gif"
-			saveFrames = saveFrames && i%10 == 0
+			// saveFrames = saveFrames && i%10 == 0
 			if saveFrames || i == Number {
 				path := output
 				if saveFrames {
