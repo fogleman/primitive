@@ -20,7 +20,6 @@ type Model struct {
 	Colors     []Color
 	Scores     []float64
 	Workers    []*Worker
-	counter    int64
 }
 
 func NewModel(target image.Image, background Color, size, numWorkers int) *Model {
@@ -117,11 +116,14 @@ func (model *Model) Add(shape Shape, alpha int) {
 }
 
 func (model *Model) Step(shapeType ShapeType, alpha int) int {
-	model.counter = 0
 	state := model.runWorkers(shapeType, alpha, 1000, 100, 16)
-	state = HillClimb(state, 1000).(*State)
+	// state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape, state.Alpha)
-	return int(model.counter)
+	counter := 0
+	for _, worker := range model.Workers {
+		counter += worker.Counter
+	}
+	return counter
 }
 
 func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {

@@ -17,6 +17,7 @@ type Worker struct {
 	Lines      []Scanline
 	Rnd        *rand.Rand
 	Score      float64
+	Counter    int
 }
 
 func NewWorker(target *image.RGBA) *Worker {
@@ -36,9 +37,11 @@ func NewWorker(target *image.RGBA) *Worker {
 func (worker *Worker) Init(current *image.RGBA, score float64) {
 	worker.Current = current
 	worker.Score = score
+	worker.Counter = 0
 }
 
 func (worker *Worker) Energy(shape Shape, alpha int) float64 {
+	worker.Counter++
 	lines := shape.Rasterize()
 	color := computeColor(worker.Target, worker.Current, lines, alpha)
 	copyLines(worker.Buffer, worker.Current, lines)
