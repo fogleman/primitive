@@ -1,21 +1,21 @@
 package primitive
 
-import (
-	"image"
-	"math/rand"
-)
+import "math/rand"
+
+type Scorer interface {
+	Score(shape Shape) float64
+}
 
 type State struct {
-	Model       *Model
-	Buffer      *image.RGBA
-	Alpha       int
+	Worker      *Worker
 	Shape       Shape
+	Alpha       int
 	MutateAlpha bool
 	score       float64
 	rnd         *rand.Rand
 }
 
-func NewState(model *Model, buffer *image.RGBA, alpha int, shape Shape, rnd *rand.Rand) *State {
+func NewState(worker *Worker, shape Shape, alpha int) *State {
 	var mutateAlpha bool
 	if alpha == 0 {
 		alpha = 128
