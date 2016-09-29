@@ -58,16 +58,16 @@ func (p *Path) Mutate() {
 	for {
 		switch rnd.Intn(3) {
 		case 0:
-			p.X1 = clamp(p.X1+rnd.Float64()*21-10, -m, float64(w-1+m))
-			p.Y1 = clamp(p.Y1+rnd.Float64()*21-10, -m, float64(h-1+m))
+			p.X1 = clamp(p.X1+rnd.NormFloat64()*16, -m, float64(w-1+m))
+			p.Y1 = clamp(p.Y1+rnd.NormFloat64()*16, -m, float64(h-1+m))
 		case 1:
-			p.X2 = clamp(p.X2+rnd.Float64()*21-10, -m, float64(w-1+m))
-			p.Y2 = clamp(p.Y2+rnd.Float64()*21-10, -m, float64(h-1+m))
+			p.X2 = clamp(p.X2+rnd.NormFloat64()*16, -m, float64(w-1+m))
+			p.Y2 = clamp(p.Y2+rnd.NormFloat64()*16, -m, float64(h-1+m))
 		case 2:
-			p.X3 = clamp(p.X3+rnd.Float64()*21-10, -m, float64(w-1+m))
-			p.Y3 = clamp(p.Y3+rnd.Float64()*21-10, -m, float64(h-1+m))
+			p.X3 = clamp(p.X3+rnd.NormFloat64()*16, -m, float64(w-1+m))
+			p.Y3 = clamp(p.Y3+rnd.NormFloat64()*16, -m, float64(h-1+m))
 		case 3:
-			p.Width = clamp(p.Width+rnd.Float64()*2-1, 1, 16)
+			p.Width = clamp(p.Width+rnd.NormFloat64(), 1, 16)
 		}
 		if p.Valid() {
 			break

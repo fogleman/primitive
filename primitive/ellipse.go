@@ -53,15 +53,15 @@ func (c *Ellipse) Mutate() {
 	rnd := c.Worker.Rnd
 	switch rnd.Intn(3) {
 	case 0:
-		c.X = clampInt(c.X+rnd.Intn(21)-10, 0, w-1)
-		c.Y = clampInt(c.Y+rnd.Intn(21)-10, 0, h-1)
+		c.X = clampInt(c.X+int(rnd.NormFloat64()*16), 0, w-1)
+		c.Y = clampInt(c.Y+int(rnd.NormFloat64()*16), 0, h-1)
 	case 1:
-		c.Rx = clampInt(c.Rx+rnd.Intn(21)-10, 1, w-1)
+		c.Rx = clampInt(c.Rx+int(rnd.NormFloat64()*16), 1, w-1)
 		if c.Circle {
 			c.Ry = c.Rx
 		}
 	case 2:
-		c.Ry = clampInt(c.Ry+rnd.Intn(21)-10, 1, w-1)
+		c.Ry = clampInt(c.Ry+int(rnd.NormFloat64()*16), 1, w-1)
 		if c.Circle {
 			c.Rx = c.Ry
 		}

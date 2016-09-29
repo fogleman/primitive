@@ -60,11 +60,11 @@ func (r *Rectangle) Mutate() {
 	rnd := r.Worker.Rnd
 	switch rnd.Intn(2) {
 	case 0:
-		r.X1 = clampInt(r.X1+rnd.Intn(21)-10, 0, w-1)
-		r.Y1 = clampInt(r.Y1+rnd.Intn(21)-10, 0, h-1)
+		r.X1 = clampInt(r.X1+int(rnd.NormFloat64()*16), 0, w-1)
+		r.Y1 = clampInt(r.Y1+int(rnd.NormFloat64()*16), 0, h-1)
 	case 1:
-		r.X2 = clampInt(r.X2+rnd.Intn(21)-10, 0, w-1)
-		r.Y2 = clampInt(r.Y2+rnd.Intn(21)-10, 0, h-1)
+		r.X2 = clampInt(r.X2+int(rnd.NormFloat64()*16), 0, w-1)
+		r.Y2 = clampInt(r.Y2+int(rnd.NormFloat64()*16), 0, h-1)
 	}
 }
 
@@ -123,17 +123,17 @@ func (r *RotatedRectangle) Mutate() {
 	rnd := r.Worker.Rnd
 	switch rnd.Intn(3) {
 	case 0:
-		r.X = clampInt(r.X+rnd.Intn(21)-10, 0, w-1)
-		r.Y = clampInt(r.Y+rnd.Intn(21)-10, 0, h-1)
+		r.X = clampInt(r.X+int(rnd.NormFloat64()*16), 0, w-1)
+		r.Y = clampInt(r.Y+int(rnd.NormFloat64()*16), 0, h-1)
 	case 1:
-		r.Sx = clampInt(r.Sx+rnd.Intn(21)-10, 1, w-1)
-		r.Sy = clampInt(r.Sy+rnd.Intn(21)-10, 1, h-1)
+		r.Sx = clampInt(r.Sx+int(rnd.NormFloat64()*16), 1, w-1)
+		r.Sy = clampInt(r.Sy+int(rnd.NormFloat64()*16), 1, h-1)
 	case 2:
-		r.Angle = r.Angle + rnd.Intn(41) - 20
+		r.Angle = r.Angle + int(rnd.NormFloat64()*32)
 	}
 	// for !r.Valid() {
-	// 	r.Sx = clampInt(r.Sx+rnd.Intn(21)-10, 0, w-1)
-	// 	r.Sy = clampInt(r.Sy+rnd.Intn(21)-10, 0, h-1)
+	// 	r.Sx = clampInt(r.Sx+int(rnd.NormFloat64()*16), 0, w-1)
+	// 	r.Sy = clampInt(r.Sy+int(rnd.NormFloat64()*16), 0, h-1)
 	// }
 }
 

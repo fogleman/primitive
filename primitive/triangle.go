@@ -54,14 +54,14 @@ func (t *Triangle) Mutate() {
 	for {
 		switch rnd.Intn(3) {
 		case 0:
-			t.X1 = clampInt(t.X1+rnd.Intn(21)-10, -m, w-1+m)
-			t.Y1 = clampInt(t.Y1+rnd.Intn(21)-10, -m, h-1+m)
+			t.X1 = clampInt(t.X1+int(rnd.NormFloat64()*16), -m, w-1+m)
+			t.Y1 = clampInt(t.Y1+int(rnd.NormFloat64()*16), -m, h-1+m)
 		case 1:
-			t.X2 = clampInt(t.X2+rnd.Intn(21)-10, -m, w-1+m)
-			t.Y2 = clampInt(t.Y2+rnd.Intn(21)-10, -m, h-1+m)
+			t.X2 = clampInt(t.X2+int(rnd.NormFloat64()*16), -m, w-1+m)
+			t.Y2 = clampInt(t.Y2+int(rnd.NormFloat64()*16), -m, h-1+m)
 		case 2:
-			t.X3 = clampInt(t.X3+rnd.Intn(21)-10, -m, w-1+m)
-			t.Y3 = clampInt(t.Y3+rnd.Intn(21)-10, -m, h-1+m)
+			t.X3 = clampInt(t.X3+int(rnd.NormFloat64()*16), -m, w-1+m)
+			t.Y3 = clampInt(t.Y3+int(rnd.NormFloat64()*16), -m, h-1+m)
 		}
 		if t.Valid() {
 			break
