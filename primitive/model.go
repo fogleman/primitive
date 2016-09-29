@@ -133,8 +133,7 @@ func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
 	}
 	for i := 0; i < wn; i++ {
 		worker := model.Workers[i]
-		worker.Current = model.Current
-		worker.Score = model.Score
+		worker.Init(model.Current, model.Score)
 		go model.runWorker(worker, t, a, n, age, wm, ch)
 	}
 	var bestEnergy float64

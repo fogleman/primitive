@@ -26,13 +26,16 @@ func NewWorker(target *image.RGBA) *Worker {
 	worker.W = w
 	worker.H = h
 	worker.Target = target
-	// worker.Current = current
 	worker.Buffer = image.NewRGBA(target.Bounds())
 	worker.Rasterizer = raster.NewRasterizer(w, h)
 	worker.Lines = make([]Scanline, 0, 4096) // TODO: based on height
 	worker.Rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
-	// worker.Score = differenceFull(target, current)
 	return &worker
+}
+
+func (worker *Worker) Init(current *image.RGBA, score float64) {
+	worker.Current = current
+	worker.Score = score
 }
 
 func (worker *Worker) Energy(shape Shape, alpha int) float64 {

@@ -29,7 +29,7 @@ func fillPath(worker *Worker, path raster.Path) []Scanline {
 	r.UseNonZeroWinding = true
 	r.AddPath(path)
 	var p painter
-	p.Lines = worker.Lines
+	p.Lines = worker.Lines[:0]
 	r.Rasterize(&p)
 	return p.Lines
 }
@@ -40,7 +40,7 @@ func strokePath(worker *Worker, path raster.Path, width fixed.Int26_6, cr raster
 	r.UseNonZeroWinding = true
 	r.AddStroke(path, width, cr, jr)
 	var p painter
-	p.Lines = worker.Lines
+	p.Lines = worker.Lines[:0]
 	r.Rasterize(&p)
 	return p.Lines
 }
