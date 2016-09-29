@@ -106,7 +106,9 @@ func main() {
 
 	// scale down input image if needed
 	size := uint(InputSize)
-	input = resize.Thumbnail(size, size, input, resize.Bilinear)
+	if size > 0 {
+		input = resize.Thumbnail(size, size, input, resize.Bilinear)
+	}
 
 	// determine background color
 	var bg primitive.Color
