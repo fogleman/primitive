@@ -21,6 +21,7 @@ var (
 	Background string
 	Number     int
 	Alpha      int
+	DelayEnd   int
 	InputSize  int
 	OutputSize int
 	Mode       int
@@ -49,6 +50,7 @@ func init() {
 	flag.IntVar(&OutputSize, "s", 1024, "output image size")
 	flag.IntVar(&Mode, "m", 1, "0=combo 1=triangle 2=rect 3=ellipse 4=circle 5=rotatedrect")
 	flag.IntVar(&Workers, "j", 0, "number of parallel workers (default uses all cores)")
+	flag.IntVar(&DelayEnd, "e", 250, "end delay for a gif in milliseconds")
 	flag.BoolVar(&V, "v", false, "verbose")
 	flag.BoolVar(&VV, "vv", false, "very verbose")
 }
@@ -152,7 +154,7 @@ func main() {
 					check(primitive.SaveFile(path, model.SVG()))
 				case ".gif":
 					frames := model.Frames(0.001)
-					check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
+					check(primitive.SaveGIFImageMagick(path, frames, 50, DelayEnd))
 				}
 			}
 		}
