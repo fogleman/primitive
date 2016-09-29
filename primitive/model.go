@@ -101,10 +101,11 @@ func (model *Model) SVG() string {
 }
 
 func (model *Model) Add(shape Shape, alpha int) {
+	before := copyRGBA(model.Current)
 	lines := shape.Rasterize()
 	color := computeColor(model.Target, model.Current, lines, alpha)
 	drawLines(model.Current, color, lines)
-	score := differenceFull(model.Target, model.Current)
+	score := differencePartial(model.Target, before, model.Current, model.Score, lines)
 
 	model.Score = score
 	model.Shapes = append(model.Shapes, shape)
