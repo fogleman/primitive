@@ -169,12 +169,13 @@ func main() {
 			// write output image(s)
 			for _, output := range Outputs {
 				ext := strings.ToLower(filepath.Ext(output))
-				saveFrames := strings.Contains(output, "%") && ext != ".gif"
+				percent := strings.Contains(output, "%")
+				saveFrames := percent && ext != ".gif"
 				saveFrames = saveFrames && frame%Nth == 0
 				last := j == len(Configs)-1 && i == config.Count-1
 				if saveFrames || last {
 					path := output
-					if saveFrames {
+					if percent {
 						path = fmt.Sprintf(output, frame)
 					}
 					primitive.Log(1, "writing %s\n", path)
