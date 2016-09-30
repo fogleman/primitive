@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,12 +20,13 @@ var (
 	Input      string
 	Outputs    flagArray
 	Background string
-	Number     int
+	Configs    shapeConfigArray
 	Alpha      int
 	InputSize  int
 	OutputSize int
 	Mode       int
 	Workers    int
+	Nth        int
 	V, VV      bool
 )
 
@@ -39,16 +41,35 @@ func (i *flagArray) Set(value string) error {
 	return nil
 }
 
+type shapeConfig struct {
+	Count int
+	Mode  int
+	Alpha int
+}
+
+type shapeConfigArray []shapeConfig
+
+func (i *shapeConfigArray) String() string {
+	return ""
+}
+
+func (i *shapeConfigArray) Set(value string) error {
+	n, _ := strconv.ParseInt(value, 0, 0)
+	*i = append(*i, shapeConfig{int(n), Mode, Alpha})
+	return nil
+}
+
 func init() {
 	flag.StringVar(&Input, "i", "", "input image path")
 	flag.Var(&Outputs, "o", "output image path")
+	flag.Var(&Configs, "n", "number of primitives")
 	flag.StringVar(&Background, "bg", "", "background color (hex)")
-	flag.IntVar(&Number, "n", 0, "number of primitives")
 	flag.IntVar(&Alpha, "a", 128, "alpha value")
 	flag.IntVar(&InputSize, "r", 256, "resize large input images to this size")
 	flag.IntVar(&OutputSize, "s", 1024, "output image size")
 	flag.IntVar(&Mode, "m", 1, "0=combo 1=triangle 2=rect 3=ellipse 4=circle 5=rotatedrect")
 	flag.IntVar(&Workers, "j", 0, "number of parallel workers (default uses all cores)")
+	flag.IntVar(&Nth, "nth", 1, "save every Nth frame (put \"%d\" in path)")
 	flag.BoolVar(&V, "v", false, "verbose")
 	flag.BoolVar(&VV, "vv", false, "very verbose")
 }
@@ -74,11 +95,20 @@ func main() {
 	if len(Outputs) == 0 {
 		ok = errorMessage("ERROR: output argument required")
 	}
-	if Number == 0 {
+	if len(Configs) == 0 {
 		ok = errorMessage("ERROR: number argument required")
 	}
+	if len(Configs) == 1 {
+		Configs[0].Mode = Mode
+		Configs[0].Alpha = Alpha
+	}
+	for _, config := range Configs {
+		if config.Count < 1 {
+			ok = errorMessage("ERROR: number argument must be > 0")
+		}
+	}
 	if !ok {
-		fmt.Println("Usage: primitive [OPTIONS] -i input -o output -n shape_count")
+		fmt.Println("Usage: primitive [OPTIONS] -i input -o output -n count")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -122,37 +152,45 @@ func main() {
 	model := primitive.NewModel(input, bg, OutputSize, Workers)
 	primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
 	start := time.Now()
-	for i := 1; i <= Number; i++ {
-		// find optimal shape and add it to the model
-		t := time.Now()
-		n := model.Step(primitive.ShapeType(Mode), Alpha)
-		nps := primitive.NumberString(float64(n) / time.Since(t).Seconds())
-		elapsed := time.Since(start).Seconds()
-		primitive.Log(1, "%d: t=%.3f, score=%.6f, n=%d, n/s=%s\n", i, elapsed, model.Score, n, nps)
+	frame := 0
+	for j, config := range Configs {
+		primitive.Log(1, "count=%d, mode=%d, alpha=%d\n", config.Count, config.Mode, config.Alpha)
 
-		// write output image(s)
-		for _, output := range Outputs {
-			ext := strings.ToLower(filepath.Ext(output))
-			saveFrames := strings.Contains(output, "%") && ext != ".gif"
-			// saveFrames = saveFrames && i%10 == 0
-			if saveFrames || i == Number {
-				path := output
-				if saveFrames {
-					path = fmt.Sprintf(output, i)
-				}
-				primitive.Log(1, "writing %s\n", path)
-				switch ext {
-				default:
-					check(fmt.Errorf("unrecognized file extension: %s", ext))
-				case ".png":
-					check(primitive.SavePNG(path, model.Context.Image()))
-				case ".jpg", ".jpeg":
-					check(primitive.SaveJPG(path, model.Context.Image(), 95))
-				case ".svg":
-					check(primitive.SaveFile(path, model.SVG()))
-				case ".gif":
-					frames := model.Frames(0.001)
-					check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
+		for i := 0; i < config.Count; i++ {
+			frame++
+
+			// find optimal shape and add it to the model
+			t := time.Now()
+			n := model.Step(primitive.ShapeType(config.Mode), config.Alpha)
+			nps := primitive.NumberString(float64(n) / time.Since(t).Seconds())
+			elapsed := time.Since(start).Seconds()
+			primitive.Log(1, "%d: t=%.3f, score=%.6f, n=%d, n/s=%s\n", frame, elapsed, model.Score, n, nps)
+
+			// write output image(s)
+			for _, output := range Outputs {
+				ext := strings.ToLower(filepath.Ext(output))
+				saveFrames := strings.Contains(output, "%") && ext != ".gif"
+				saveFrames = saveFrames && frame%Nth == 0
+				last := j == len(Configs)-1 && i == config.Count-1
+				if saveFrames || last {
+					path := output
+					if saveFrames {
+						path = fmt.Sprintf(output, frame)
+					}
+					primitive.Log(1, "writing %s\n", path)
+					switch ext {
+					default:
+						check(fmt.Errorf("unrecognized file extension: %s", ext))
+					case ".png":
+						check(primitive.SavePNG(path, model.Context.Image()))
+					case ".jpg", ".jpeg":
+						check(primitive.SaveJPG(path, model.Context.Image(), 95))
+					case ".svg":
+						check(primitive.SaveFile(path, model.SVG()))
+					case ".gif":
+						frames := model.Frames(0.001)
+						check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
+					}
 				}
 			}
 		}
