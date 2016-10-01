@@ -12,6 +12,7 @@ type Worker struct {
 	W, H       int
 	Target     *image.RGBA
 	Current    *image.RGBA
+	Mask       *image.Gray
 	Buffer     *image.RGBA
 	Rasterizer *raster.Rasterizer
 	Lines      []Scanline
@@ -21,13 +22,14 @@ type Worker struct {
 	Counter    int
 }
 
-func NewWorker(target *image.RGBA) *Worker {
+func NewWorker(target *image.RGBA, mask *image.Gray) *Worker {
 	w := target.Bounds().Size().X
 	h := target.Bounds().Size().Y
 	worker := Worker{}
 	worker.W = w
 	worker.H = h
 	worker.Target = target
+	worker.Mask = mask
 	worker.Buffer = image.NewRGBA(target.Bounds())
 	worker.Rasterizer = raster.NewRasterizer(w, h)
 	worker.Lines = make([]Scanline, 0, 4096) // TODO: based on height
@@ -50,7 +52,7 @@ func (worker *Worker) Energy(shape Shape, alpha int) float64 {
 	color := computeColor(worker.Target, worker.Current, lines, alpha)
 	copyLines(worker.Buffer, worker.Current, lines)
 	drawLines(worker.Buffer, color, lines)
-	return differencePartial(worker.Target, worker.Current, worker.Buffer, worker.Score, lines)
+	return differencePartial(worker.Target, worker.Current, worker.Buffer, worker.Mask, worker.Score, lines)
 }
 
 func (worker *Worker) BestHillClimbState(t ShapeType, a, n, age, m int) *State {

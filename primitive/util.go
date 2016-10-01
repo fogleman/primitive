@@ -175,6 +175,20 @@ func uniformRGBA(r image.Rectangle, c color.Color) *image.RGBA {
 	return im
 }
 
+func weightMask(w, h, px, py int) *image.Gray {
+	im := image.NewGray(image.Rect(0, 0, w, h))
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			d := math.Hypot(float64(x-px), float64(y-py)) / 256
+			d = clamp(d, 0, 1)
+			d = math.Pow(d, 0.5)
+			p := uint8(255 - clampInt(int(d*255), 0, 255))
+			im.SetGray(x, y, color.Gray{p})
+		}
+	}
+	return im
+}
+
 func AverageImageColor(im image.Image) color.NRGBA {
 	rgba := imageToRGBA(im)
 	size := rgba.Bounds().Size()

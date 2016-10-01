@@ -14,6 +14,7 @@ type Model struct {
 	Background Color
 	Target     *image.RGBA
 	Current    *image.RGBA
+	Mask       *image.Gray
 	Context    *gg.Context
 	Score      float64
 	Shapes     []Shape
@@ -45,10 +46,11 @@ func NewModel(target image.Image, background Color, size, numWorkers int) *Model
 	model.Background = background
 	model.Target = imageToRGBA(target)
 	model.Current = uniformRGBA(target.Bounds(), background.NRGBA())
-	model.Score = differenceFull(model.Target, model.Current)
+	model.Mask = weightMask(w, h, w/2, h/2)
+	model.Score = differenceFull(model.Target, model.Current, model.Mask)
 	model.Context = model.newContext()
 	for i := 0; i < numWorkers; i++ {
-		worker := NewWorker(model.Target)
+		worker := NewWorker(model.Target, model.Mask)
 		model.Workers = append(model.Workers, worker)
 	}
 	return model
@@ -105,7 +107,7 @@ func (model *Model) Add(shape Shape, alpha int) {
 	lines := shape.Rasterize()
 	color := computeColor(model.Target, model.Current, lines, alpha)
 	drawLines(model.Current, color, lines)
-	score := differencePartial(model.Target, before, model.Current, model.Score, lines)
+	score := differencePartial(model.Target, before, model.Current, model.Mask, model.Score, lines)
 
 	model.Score = score
 	model.Shapes = append(model.Shapes, shape)
