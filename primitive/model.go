@@ -116,10 +116,21 @@ func (model *Model) Add(shape Shape, alpha int) {
 	shape.Draw(model.Context, model.Scale)
 }
 
-func (model *Model) Step(shapeType ShapeType, alpha int) int {
+func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 	state := model.runWorkers(shapeType, alpha, 1000, 100, 16)
 	// state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape, state.Alpha)
+
+	for i := 0; i < repeat; i++ {
+		state.Worker.Init(model.Current, model.Score)
+		a := state.Energy()
+		state = HillClimb(state, 100).(*State)
+		b := state.Energy()
+		if a == b {
+			break
+		}
+		model.Add(state.Shape, state.Alpha)
+	}
 
 	// for _, w := range model.Workers[1:] {
 	// 	model.Workers[0].Heatmap.AddHeatmap(w.Heatmap)
