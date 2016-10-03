@@ -55,9 +55,15 @@ func (p *Polygon) Mutate() {
 	h := p.Worker.H
 	rnd := p.Worker.Rnd
 	for {
-		i := rnd.Intn(p.Order)
-		p.X[i] = clamp(p.X[i]+rnd.NormFloat64()*16, -m, float64(w-1+m))
-		p.Y[i] = clamp(p.Y[i]+rnd.NormFloat64()*16, -m, float64(h-1+m))
+		if rnd.Float64() < 0.25 {
+			i := rnd.Intn(p.Order)
+			j := rnd.Intn(p.Order)
+			p.X[i], p.Y[i], p.X[j], p.Y[j] = p.X[j], p.Y[j], p.X[i], p.Y[i]
+		} else {
+			i := rnd.Intn(p.Order)
+			p.X[i] = clamp(p.X[i]+rnd.NormFloat64()*16, -m, float64(w-1+m))
+			p.Y[i] = clamp(p.Y[i]+rnd.NormFloat64()*16, -m, float64(h-1+m))
+		}
 		if p.Valid() {
 			break
 		}
@@ -68,20 +74,17 @@ func (p *Polygon) Valid() bool {
 	if !p.Convex {
 		return true
 	}
-	var previous float64
-	for i := 0; i < p.Order; i++ {
-		j := (i + 1) % p.Order
-		k := (i + 2) % p.Order
+	var sign bool
+	for a := 0; a < p.Order; a++ {
+		i := (a + 0) % p.Order
+		j := (a + 1) % p.Order
+		k := (a + 2) % p.Order
 		c := cross3(p.X[i], p.Y[i], p.X[j], p.Y[j], p.X[k], p.Y[k])
-		if i != 0 {
-			if c < 0 && previous > 0 {
-				return false
-			}
-			if c > 0 && previous < 0 {
-				return false
-			}
+		if a == 0 {
+			sign = c > 0
+		} else if c > 0 != sign {
+			return false
 		}
-		previous = c
 	}
 	return true
 }

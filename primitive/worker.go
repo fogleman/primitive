@@ -103,6 +103,6 @@ func (worker *Worker) RandomState(t ShapeType, a int) *State {
 	case ShapeTypeRotatedEllipse:
 		return NewState(worker, NewRandomRotatedEllipse(worker), a)
 	case ShapeTypePolygon:
-		return NewState(worker, NewRandomPolygon(worker, 4, true), a)
+		return NewState(worker, NewRandomPolygon(worker, 4, false), a)
 	}
 }
