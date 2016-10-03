@@ -31,9 +31,9 @@ func NewRandomQuadratic(worker *Worker) *Quadratic {
 }
 
 func (q *Quadratic) Draw(dc *gg.Context, scale float64) {
-	dc.MoveTo(float64(q.X1), float64(q.Y1))
-	dc.QuadraticTo(float64(q.X2), float64(q.Y2), float64(q.X3), float64(q.Y3))
-	dc.SetLineWidth(float64(q.Width) * scale)
+	dc.MoveTo(q.X1, q.Y1)
+	dc.QuadraticTo(q.X2, q.Y2, q.X3, q.Y3)
+	dc.SetLineWidth(q.Width * scale)
 	dc.Stroke()
 }
 

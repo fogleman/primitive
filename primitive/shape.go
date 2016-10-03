@@ -21,4 +21,5 @@ const (
 	ShapeTypeRotatedRectangle
 	ShapeTypeQuadratic
 	ShapeTypeRotatedEllipse
+	ShapeTypePolygon
 )
