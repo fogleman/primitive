@@ -20,4 +20,5 @@ const (
 	ShapeTypeCircle
 	ShapeTypeRotatedRectangle
 	ShapeTypeQuadratic
+	ShapeTypeRotatedEllipse
 )

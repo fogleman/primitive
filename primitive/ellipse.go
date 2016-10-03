@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/fogleman/gg"
+	"github.com/golang/freetype/raster"
 )
 
 type Ellipse struct {
@@ -96,4 +97,83 @@ func (c *Ellipse) Rasterize() []Scanline {
 		}
 	}
 	return lines
+}
+
+type RotatedEllipse struct {
+	Worker *Worker
+	X, Y   float64
+	Rx, Ry float64
+	Angle  float64
+}
+
+func NewRandomRotatedEllipse(worker *Worker) *RotatedEllipse {
+	rnd := worker.Rnd
+	x := rnd.Float64() * float64(worker.W)
+	y := rnd.Float64() * float64(worker.H)
+	rx := rnd.Float64()*32 + 1
+	ry := rnd.Float64()*32 + 1
+	a := rnd.Float64() * 360
+	return &RotatedEllipse{worker, x, y, rx, ry, a}
+}
+
+func (c *RotatedEllipse) Draw(dc *gg.Context, scale float64) {
+	dc.Push()
+	dc.RotateAbout(radians(c.Angle), c.X, c.Y)
+	dc.DrawEllipse(c.X, c.Y, c.Rx, c.Ry)
+	dc.Fill()
+	dc.Pop()
+}
+
+func (c *RotatedEllipse) SVG(attrs string) string {
+	return fmt.Sprintf(
+		"<g transform=\"translate(%f %f) rotate(%f) scale(%f %f)\"><ellipse %s cx=\"0\" cy=\"0\" rx=\"1\" ry=\"1\" /></g>",
+		c.X, c.Y, c.Angle, c.Rx, c.Ry, attrs)
+}
+
+func (c *RotatedEllipse) Copy() Shape {
+	a := *c
+	return &a
+}
+
+func (c *RotatedEllipse) Mutate() {
+	w := c.Worker.W
+	h := c.Worker.H
+	rnd := c.Worker.Rnd
+	switch rnd.Intn(3) {
+	case 0:
+		c.X = clamp(c.X+rnd.NormFloat64()*16, 0, float64(w-1))
+		c.Y = clamp(c.Y+rnd.NormFloat64()*16, 0, float64(h-1))
+	case 1:
+		c.Rx = clamp(c.Rx+rnd.NormFloat64()*16, 1, float64(w-1))
+		c.Ry = clamp(c.Ry+rnd.NormFloat64()*16, 1, float64(w-1))
+	case 2:
+		c.Angle = c.Angle + rnd.NormFloat64()*32
+	}
+}
+
+func (c *RotatedEllipse) Rasterize() []Scanline {
+	var path raster.Path
+	const n = 16
+	for i := 0; i < n; i++ {
+		p1 := float64(i+0) / n
+		p2 := float64(i+1) / n
+		a1 := p1 * 2 * math.Pi
+		a2 := p2 * 2 * math.Pi
+		x0 := c.Rx * math.Cos(a1)
+		y0 := c.Ry * math.Sin(a1)
+		x1 := c.Rx * math.Cos(a1+(a2-a1)/2)
+		y1 := c.Ry * math.Sin(a1+(a2-a1)/2)
+		x2 := c.Rx * math.Cos(a2)
+		y2 := c.Ry * math.Sin(a2)
+		cx := 2*x1 - x0/2 - x2/2
+		cy := 2*y1 - y0/2 - y2/2
+		x0, y0 = rotate(x0, y0, radians(c.Angle))
+		cx, cy = rotate(cx, cy, radians(c.Angle))
+		x2, y2 = rotate(x2, y2, radians(c.Angle))
+		if i == 0 {
+			path.Start(fixp(x0+c.X, y0+c.Y))
+		}
+		path.Add2(fixp(cx+c.X, cy+c.Y), fixp(x2+c.X, y2+c.Y))
+	}
+	return fillPath(c.Worker, path)
 }

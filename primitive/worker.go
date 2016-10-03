@@ -100,5 +100,7 @@ func (worker *Worker) RandomState(t ShapeType, a int) *State {
 		return NewState(worker, NewRandomRotatedRectangle(worker), a)
 	case ShapeTypeQuadratic:
 		return NewState(worker, NewRandomQuadratic(worker), a)
+	case ShapeTypeRotatedEllipse:
+		return NewState(worker, NewRandomRotatedEllipse(worker), a)
 	}
 }
