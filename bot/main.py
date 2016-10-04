@@ -10,6 +10,9 @@ import twitter
 RATE = 60 * 30
 MENTION_RATE = 65
 
+INPUT_FOLDER = ''
+OUTPUT_FOLDER = ''
+
 FLICKR_API_KEY = None
 TWITTER_CONSUMER_KEY = None
 TWITTER_CONSUMER_SECRET = None
@@ -173,8 +176,8 @@ def handle_mention(status):
             print 'user mentioned me too recently'
             return
     USER_DATETIME[user_id] = now
-    in_path = '%s.jpg' % status.id
-    out_path = '%s.png' % status.id
+    in_path = os.path.join(INPUT_FOLDER, '%s.jpg' % status.id)
+    out_path = os.path.join(OUTPUT_FOLDER, '%s.png' % status.id)
     print 'downloading', url
     download_photo(url, in_path)
     config = Config()
@@ -210,8 +213,8 @@ def generate():
     photos = interesting(date)
     photo = random.choice(photos)
     print 'picked photo', photo['id']
-    in_path = '%s.jpg' % photo['id']
-    out_path = '%s.png' % photo['id']
+    in_path = os.path.join(INPUT_FOLDER, '%s.jpg' % photo['id'])
+    out_path = os.path.join(OUTPUT_FOLDER, '%s.png' % photo['id'])
     url = photo_url(photo, 'z')
     print 'downloading', url
     download_photo(url, in_path)
