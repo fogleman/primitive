@@ -33,6 +33,7 @@ Small input images should be used (like 256x256px). You don't need the detail an
 | `n` | n/a | number of shapes |
 | `m` | 1 | mode: 0=combo, 1=triangle, 2=rect, 3=ellipse, 4=circle, 5=rotatedrect, 6=beziers, 7=rotatedellipse, 8=polygon |
 | `rep` | 0 | add N extra shapes each iteration with reduced search (mostly good for beziers) |
+| `nth` | 1 | save every Nth frame (put %d in output path) |
 | `r` | 256 | resize large input images to this size before processing |
 | `s` | 1024 | output image size |
 | `a` | 128 | color alpha |
