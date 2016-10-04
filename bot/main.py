@@ -48,8 +48,8 @@ class Config(AttrDict):
         self.n = random.randint(10, 50) * 10
         self.rep = 0
         self.a = 128
-        self.r = 384
-        self.s = 1600
+        self.r = 300
+        self.s = 1200
     def parse(self, text):
         text = (text or '').lower()
         tokens = text.split()
