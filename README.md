@@ -36,7 +36,7 @@ Small input images should be used (like 256x256px). You don't need the detail an
 | `nth` | 1 | save every Nth frame (only when `%d` is in output path) |
 | `r` | 256 | resize large input images to this size before processing |
 | `s` | 1024 | output image size |
-| `a` | 128 | color alpha |
+| `a` | 128 | color alpha (use `0` to let the algorithm choose alpha for each shape) |
 | `bg` | avg | starting background color (hex) |
 | `j` | 0 | number of parallel workers (default uses all cores) |
 | `v` | off | verbose output |
