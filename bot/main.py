@@ -181,7 +181,7 @@ def handle_mention(status):
     config.randomize()
     config.parse(status.text)
     config.validate()
-    status_text = '@%s %s.' % (status.user.screen_name, status.description)
+    status_text = '@%s %s.' % (status.user.screen_name, config.description)
     print status_text
     print 'running algorithm: %s' % config
     primitive(i=in_path, o=out_path, **config)
