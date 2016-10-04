@@ -17,12 +17,15 @@ TWITTER_ACCESS_TOKEN_KEY = None
 TWITTER_ACCESS_TOKEN_SECRET = None
 
 MODE_NAMES = [
-    'primitives',
-    'triangles',
-    'rectangles',
-    'ellipses',
-    'circles',
-    'rectangles',
+    'primitives', # 0
+    'triangles',  # 1
+    'rectangles', # 2
+    'ellipses',   # 3
+    'circles',    # 4
+    'rectangles', # 5
+    'beziers',    # 6
+    'ellipses',   # 7
+    'polygons',   # 8
 ]
 
 SINCE_ID = None
@@ -33,6 +36,50 @@ try:
     from config import *
 except ImportError:
     print 'no config found!'
+
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
+
+class Config(AttrDict):
+    def randomize(self):
+        self.m = random.choice([1, 5, 6, 7])
+        self.n = random.randint(10, 50) * 10
+        self.rep = 0
+        self.a = 128
+        self.r = 384
+        self.s = 1600
+    def parse(self, text):
+        text = (text or '').lower()
+        tokens = text.split()
+        for i, name in enumerate(MODE_NAMES):
+            if name in text:
+                self.m = i
+        for token in tokens:
+            try:
+                self.n = int(token)
+            except Exception:
+                pass
+    def validate(self):
+        self.m = clamp(self.m, 0, 8)
+        if self.m == 6:
+            self.a = 0
+            self.rep = 19
+            self.n = 100
+        else:
+            self.n = clamp(self.n, 1, 500)
+    @property
+    def description(self):
+        total = self.n + self.n * self.rep
+        return '%d %s' % (total, MODE_NAMES[self.m])
+
+def clamp(x, lo, hi):
+    if x < lo:
+        x = lo
+    if x > hi:
+        x = hi
+    return x
 
 def random_date(max_days_ago=1000):
     today = datetime.date.today()
@@ -67,9 +114,15 @@ def download_photo(url, path):
     with open(path, 'wb') as fp:
         fp.write(r.content)
 
-def primitive(i, o, n, a=128, m=1):
-    args = (i, o, n, a, m)
-    cmd = 'primitive -i %s -o %s -n %d -a %d -m %d' % args
+def primitive(**kwargs):
+    args = []
+    for k, v in kwargs.items():
+        if v is None:
+            continue
+        args.append('-%s' % k)
+        args.append(str(v))
+    args = ' '.join(args)
+    cmd = 'primitive %s' % args
     subprocess.call(cmd, shell=True)
 
 def twitter_api():
@@ -124,28 +177,14 @@ def handle_mention(status):
     out_path = '%s.png' % status.id
     print 'downloading', url
     download_photo(url, in_path)
-    n = random.randint(10, 50) * 10
-    a = 128
-    m = random.choice([1, 3, 5, 1, 3, 5, 1, 3, 4])
-    text = (status.text or '').lower()
-    text = ''.join(x for x in text if x.isalnum() or x.isspace())
-    tokens = text.split()
-    for mode in tokens:
-        if mode in MODE_NAMES:
-            m = MODE_NAMES.index(mode)
-    for count, mode in zip(tokens, tokens[1:]):
-        if count.isdigit() and mode in MODE_NAMES:
-            n = int(count)
-            if n < 10:
-                n = 10
-            if n > 500:
-                n = 500
-            m = MODE_NAMES.index(mode)
-            break
-    status_text = '@%s %d %s.' % (status.user.screen_name, n, MODE_NAMES[m])
+    config = Config()
+    config.randomize()
+    config.parse(status.text)
+    config.validate()
+    status_text = '@%s %s.' % (status.user.screen_name, status.description)
     print status_text
-    print 'running algorithm, n=%d, a=%d, m=%d' % (n, a, m)
-    primitive(in_path, out_path, n=n, a=a, m=m)
+    print 'running algorithm: %s' % config
+    primitive(i=in_path, o=out_path, **config)
     if os.path.exists(out_path):
         print 'uploading to twitter'
         tweet(status_text, out_path, status.id)
@@ -173,16 +212,16 @@ def generate():
     print 'picked photo', photo['id']
     in_path = '%s.jpg' % photo['id']
     out_path = '%s.png' % photo['id']
-    url = photo_url(photo, 'm')
+    url = photo_url(photo, 'z')
     print 'downloading', url
     download_photo(url, in_path)
-    n = random.randint(10, 50) * 10
-    a = 128
-    m = random.choice([1, 3, 5, 1, 3, 5, 1, 3, 4])
-    status_text = '%d %s. %s' % (n, MODE_NAMES[m], flickr_url(photo['id']))
+    config = Config()
+    config.randomize()
+    config.validate()
+    status_text = '%s. %s' % (config.description, flickr_url(photo['id']))
     print status_text
-    print 'running algorithm, n=%d, a=%d, m=%d' % (n, a, m)
-    primitive(in_path, out_path, n=n, a=a, m=m)
+    print 'running algorithm: %s' % config
+    primitive(i=in_path, o=out_path, **config)
     if os.path.exists(out_path):
         print 'uploading to twitter'
         tweet(status_text, out_path)
@@ -217,7 +256,7 @@ def download_photos(folder, date=None):
     date = date or random_date()
     photos = interesting(date)
     for photo in photos:
-        url = photo_url(photo, 'm')
+        url = photo_url(photo, 'z')
         path = '%s.jpg' % photo['id']
         path = os.path.join(folder, path)
         download_photo(url, path)
