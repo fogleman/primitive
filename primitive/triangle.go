@@ -14,6 +14,9 @@ type Triangle struct {
 	X3, Y3 int
 }
 
+// NewRandomTriangle uses the passed Worker's random seed to create a new
+// Triangle shape.
+// Returns a reference to the new Triangle.
 func NewRandomTriangle(worker *Worker) *Triangle {
 	rnd := worker.Rnd
 	x1 := rnd.Intn(worker.W)
@@ -41,11 +44,14 @@ func (t *Triangle) SVG(attrs string) string {
 		attrs, t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3)
 }
 
+// Copy returns a reference to a copy of the triangle.
 func (t *Triangle) Copy() Shape {
 	a := *t
 	return &a
 }
 
+// Mutate randomly changes the shape of the Triangle by randomly
+// adjusting its X,Y vertex values.
 func (t *Triangle) Mutate() {
 	w := t.Worker.W
 	h := t.Worker.H
@@ -69,6 +75,8 @@ func (t *Triangle) Mutate() {
 	}
 }
 
+// Valid tests whether the geometry of the Trianlge type adheres
+// to the rules which define a euclidean triangle.
 func (t *Triangle) Valid() bool {
 	const minDegrees = 15
 	var a1, a2, a3 float64

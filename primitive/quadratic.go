@@ -16,6 +16,10 @@ type Quadratic struct {
 	Width  float64
 }
 
+
+// NewRandomQuadratic uses the passed Worker's random seed to create a new
+// Quadratic.
+// Returns a reference to the new Quadratic.
 func NewRandomQuadratic(worker *Worker) *Quadratic {
 	rnd := worker.Rnd
 	x1 := rnd.Float64() * float64(worker.W)
@@ -30,6 +34,7 @@ func NewRandomQuadratic(worker *Worker) *Quadratic {
 	return q
 }
 
+// Draw adds the Quadratic object into the Go Graphics Context.
 func (q *Quadratic) Draw(dc *gg.Context, scale float64) {
 	dc.MoveTo(q.X1, q.Y1)
 	dc.QuadraticTo(q.X2, q.Y2, q.X3, q.Y3)
@@ -37,6 +42,7 @@ func (q *Quadratic) Draw(dc *gg.Context, scale float64) {
 	dc.Stroke()
 }
 
+// SVG returns the string markup that represents the Quadratic in SVG format.
 func (q *Quadratic) SVG(attrs string) string {
 	// TODO: this is a little silly
 	attrs = strings.Replace(attrs, "fill", "stroke", -1)
@@ -45,11 +51,14 @@ func (q *Quadratic) SVG(attrs string) string {
 		attrs, q.X1, q.Y1, q.X2, q.Y2, q.X3, q.Y3, q.Width)
 }
 
+// Copy returns a reference to a copy of the quadratic.
 func (q *Quadratic) Copy() Shape {
 	a := *q
 	return &a
 }
 
+// Mutate randomly changes the shape of the Quadratic by randomly
+// adjusting its X,Y vertex values.
 func (q *Quadratic) Mutate() {
 	const m = 16
 	w := q.Worker.W
@@ -75,6 +84,9 @@ func (q *Quadratic) Mutate() {
 	}
 }
 
+// Valid checks that the shape boundary defined by the Quadratic's vertex
+// values is a geometrically correct quadratic.
+// Returns true if correct, false otherwise
 func (q *Quadratic) Valid() bool {
 	dx12 := int(q.X1 - q.X2)
 	dy12 := int(q.Y1 - q.Y2)
@@ -87,6 +99,7 @@ func (q *Quadratic) Valid() bool {
 	d13 := dx13*dx13 + dy13*dy13
 	return d13 > d12 && d13 > d23
 }
+
 
 func (q *Quadratic) Rasterize() []Scanline {
 	var path raster.Path

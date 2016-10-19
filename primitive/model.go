@@ -22,6 +22,8 @@ type Model struct {
 	Workers    []*Worker
 }
 
+// NewNode creates a new Model object, initialises the fields and then
+// Returns a reference to the new Model.
 func NewModel(target image.Image, background Color, size, numWorkers int) *Model {
 	w := target.Bounds().Size().X
 	h := target.Bounds().Size().Y
@@ -54,6 +56,7 @@ func NewModel(target image.Image, background Color, size, numWorkers int) *Model
 	return model
 }
 
+// newContext creates and returns a new Go Graphics Context object
 func (model *Model) newContext() *gg.Context {
 	dc := gg.NewContext(model.Sw, model.Sh)
 	dc.Scale(model.Scale, model.Scale)
@@ -63,6 +66,10 @@ func (model *Model) newContext() *gg.Context {
 	return dc
 }
 
+// Frames creates a series of images showing the creation of the output step
+// by step. The difference between each step image can be controlled by the
+// scoreDelta parameter.
+// Returns a slice of images to make a GIF.
 func (model *Model) Frames(scoreDelta float64) []image.Image {
 	var result []image.Image
 	dc := model.newContext()
@@ -83,6 +90,8 @@ func (model *Model) Frames(scoreDelta float64) []image.Image {
 	return result
 }
 
+// SVG takes the final model and transforms its content into svg format for rendering.
+// Returns an svg format string.
 func (model *Model) SVG() string {
 	bg := model.Background
 	var lines []string
@@ -100,6 +109,7 @@ func (model *Model) SVG() string {
 	return strings.Join(lines, "\n")
 }
 
+// Add introduces a new shape to the model.
 func (model *Model) Add(shape Shape, alpha int) {
 	before := copyRGBA(model.Current)
 	lines := shape.Rasterize()
@@ -116,6 +126,9 @@ func (model *Model) Add(shape Shape, alpha int) {
 	shape.Draw(model.Context, model.Scale)
 }
 
+// Step adds one shape to the model which best improves the model's
+// approximation of the target image.
+// Returns the number of steps used in the process of adding the shape.
 func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 	state := model.runWorkers(shapeType, alpha, 1000, 100, 16)
 	// state = HillClimb(state, 1000).(*State)
@@ -144,6 +157,8 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 	return counter
 }
 
+// runWorkers uses each of the model's Worker objects to calculate the
+// best available State given current the current Model.
 func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
 	wn := len(model.Workers)
 	ch := make(chan *State, wn)
@@ -169,6 +184,7 @@ func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
 	return bestState
 }
 
+// runWorker runs the worker's Hill Climb algorithm and passes the result into a channel.
 func (model *Model) runWorker(worker *Worker, t ShapeType, a, n, age, m int, ch chan *State) {
 	ch <- worker.BestHillClimbState(t, a, n, age, m)
 }

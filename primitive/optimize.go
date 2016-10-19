@@ -12,6 +12,9 @@ type Annealable interface {
 	Copy() Annealable
 }
 
+// HillClimb employs the Hill Climb optimisation technique to calculate
+// the lowest possible energy of the State within maxAge steps.
+// Returns the updated, optimized state
 func HillClimb(state Annealable, maxAge int) Annealable {
 	state = state.Copy()
 	bestState := state.Copy()
@@ -33,6 +36,7 @@ func HillClimb(state Annealable, maxAge int) Annealable {
 	return bestState
 }
 
+// PreAnneal: unused function in this project.
 func PreAnneal(state Annealable, iterations int) float64 {
 	state = state.Copy()
 	previous := state.Energy()
@@ -46,6 +50,7 @@ func PreAnneal(state Annealable, iterations int) float64 {
 	return total / float64(iterations)
 }
 
+// Anneal: unused function in this project
 func Anneal(state Annealable, maxTemp, minTemp float64, steps int) Annealable {
 	factor := -math.Log(maxTemp / minTemp)
 	state = state.Copy()

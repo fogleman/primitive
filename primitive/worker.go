@@ -21,6 +21,9 @@ type Worker struct {
 	Counter    int
 }
 
+// NewWorker creates a new Worker type object with values initialized
+// according to the features of an image passed as argument.
+// Returns a pointer to the newly created Worker.
 func NewWorker(target *image.RGBA) *Worker {
 	w := target.Bounds().Size().X
 	h := target.Bounds().Size().Y
@@ -36,6 +39,8 @@ func NewWorker(target *image.RGBA) *Worker {
 	return &worker
 }
 
+// Init, implemented by the Worker type, sets some member values
+// to an initial ready-state.
 func (worker *Worker) Init(current *image.RGBA, score float64) {
 	worker.Current = current
 	worker.Score = score
@@ -43,6 +48,8 @@ func (worker *Worker) Init(current *image.RGBA, score float64) {
 	worker.Heatmap.Clear()
 }
 
+// Energy calculates the 'energy' value which the Hill Climbing algorithm
+// tries to minimise.
 func (worker *Worker) Energy(shape Shape, alpha int) float64 {
 	worker.Counter++
 	lines := shape.Rasterize()
@@ -53,6 +60,8 @@ func (worker *Worker) Energy(shape Shape, alpha int) float64 {
 	return differencePartial(worker.Target, worker.Current, worker.Buffer, worker.Score, lines)
 }
 
+// BestHillClimbState finds and returns the State object that has been selected
+// as optimal by the Hill Climbing optimisation technique.
 func (worker *Worker) BestHillClimbState(t ShapeType, a, n, age, m int) *State {
 	var bestEnergy float64
 	var bestState *State
@@ -70,6 +79,7 @@ func (worker *Worker) BestHillClimbState(t ShapeType, a, n, age, m int) *State {
 	return bestState
 }
 
+// BestRandomState, implemented by Worker, ...
 func (worker *Worker) BestRandomState(t ShapeType, a, n int) *State {
 	var bestEnergy float64
 	var bestState *State
@@ -84,6 +94,8 @@ func (worker *Worker) BestRandomState(t ShapeType, a, n int) *State {
 	return bestState
 }
 
+// RandomState uses a ShapeType value and an alpha value to return
+// a new random State.
 func (worker *Worker) RandomState(t ShapeType, a int) *State {
 	switch t {
 	default:

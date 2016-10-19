@@ -11,11 +11,14 @@ type Heatmap struct {
 	Count []uint64
 }
 
+// NewHeatmap creates a new Heatmap according to a width and height
+// passed as argument.
 func NewHeatmap(w, h int) *Heatmap {
 	count := make([]uint64, w*h)
 	return &Heatmap{w, h, count}
 }
 
+// Clear resets all values in the heatmap to zero.
 func (h *Heatmap) Clear() {
 	for i := range h.Count {
 		h.Count[i] = 0
@@ -32,6 +35,8 @@ func (h *Heatmap) Add(lines []Scanline) {
 	}
 }
 
+// AddHeatMap takes another Heatmap's values and adds them
+// into the Heatmap.
 func (h *Heatmap) AddHeatmap(a *Heatmap) {
 	for i, x := range a.Count {
 		h.Count[i] += x

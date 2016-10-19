@@ -55,12 +55,14 @@ func (i *shapeConfigArray) String() string {
 	return ""
 }
 
+// Set ...
 func (i *shapeConfigArray) Set(value string) error {
 	n, _ := strconv.ParseInt(value, 0, 0)
 	*i = append(*i, shapeConfig{int(n), Mode, Alpha, Repeat})
 	return nil
 }
 
+// init establishes the command line interface (CLI) for the program
 func init() {
 	flag.StringVar(&Input, "i", "", "input image path")
 	flag.Var(&Outputs, "o", "output image path")
@@ -88,6 +90,8 @@ func check(err error) {
 	}
 }
 
+// main parses and evaluates program arguments and options, and then
+// uses the image creation algorithm to recreate the input image file.
 func main() {
 	// parse and validate arguments
 	flag.Parse()

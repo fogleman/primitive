@@ -5,10 +5,13 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+// fix converts a float64 number to a 26.6 fixed-point number
 func fix(x float64) fixed.Int26_6 {
 	return fixed.Int26_6(x * 64)
 }
 
+// fixp converts a float64 coordinate pair into a 26.6 fixed-point number
+// coordinate pair.
 func fixp(x, y float64) fixed.Point26_6 {
 	return fixed.Point26_6{fix(x), fix(y)}
 }
@@ -23,6 +26,7 @@ func (p *painter) Paint(spans []raster.Span, done bool) {
 	}
 }
 
+// fillPath: unused in this project.
 func fillPath(worker *Worker, path raster.Path) []Scanline {
 	r := worker.Rasterizer
 	r.Clear()

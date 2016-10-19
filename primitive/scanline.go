@@ -5,6 +5,10 @@ type Scanline struct {
 	Alpha     uint32
 }
 
+// cropScanLines reduces the scanning width of a set of Scanline
+// objects so that they don't scane outside of the area defined by
+// w and h.
+// Returns a slice containing the original Scanlines, now all cropped 
 func cropScanlines(lines []Scanline, w, h int) []Scanline {
 	i := 0
 	for _, line := range lines {

@@ -5,6 +5,9 @@ import (
 	"math"
 )
 
+// computeColor calculates the color that should be used with the Scanlines to
+// best approximate the target image.
+// Returns the optimal color.
 func computeColor(target, current *image.RGBA, lines []Scanline, alpha int) Color {
 	var rsum, gsum, bsum, count int64
 	a := 0x101 * 255 / alpha
@@ -33,6 +36,7 @@ func computeColor(target, current *image.RGBA, lines []Scanline, alpha int) Colo
 	return Color{r, g, b, alpha}
 }
 
+// copyLines ....
 func copyLines(dst, src *image.RGBA, lines []Scanline) {
 	for _, line := range lines {
 		a := dst.PixOffset(line.X1, line.Y)
@@ -41,6 +45,7 @@ func copyLines(dst, src *image.RGBA, lines []Scanline) {
 	}
 }
 
+// drawLines uses raster line Scanlines to set the pixel values in im.
 func drawLines(im *image.RGBA, c Color, lines []Scanline) {
 	const m = 0xffff
 	sr, sg, sb, sa := c.NRGBA().RGBA()
@@ -62,6 +67,9 @@ func drawLines(im *image.RGBA, c Color, lines []Scanline) {
 	}
 }
 
+// differenceFull calculates the difference, or error, between image
+// a and image b.
+// Returns the difference as a floating point value.
 func differenceFull(a, b *image.RGBA) float64 {
 	size := a.Bounds().Size()
 	w, h := size.X, size.Y

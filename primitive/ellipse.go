@@ -15,6 +15,9 @@ type Ellipse struct {
 	Circle bool
 }
 
+// NewRandomEllipse returns the address of a new Ellipse type of random
+// position within an X,Y space defined by the Worker passed
+// as argument.
 func NewRandomEllipse(worker *Worker) *Ellipse {
 	rnd := worker.Rnd
 	x := rnd.Intn(worker.W)
@@ -24,6 +27,9 @@ func NewRandomEllipse(worker *Worker) *Ellipse {
 	return &Ellipse{worker, x, y, rx, ry, false}
 }
 
+// NewRandomCircle returns the address of a new Ellipse type of
+// random position within an X,Y space defined by the Worker passed,
+// and with equal x, y radii
 func NewRandomCircle(worker *Worker) *Ellipse {
 	rnd := worker.Rnd
 	x := rnd.Intn(worker.W)
@@ -32,22 +38,31 @@ func NewRandomCircle(worker *Worker) *Ellipse {
 	return &Ellipse{worker, x, y, r, r, true}
 }
 
+// Draw, implemented by Ellipse, uses the Go Graphics (gg) package,
+// to 'paint' the Ellipse with the context's current color.
 func (c *Ellipse) Draw(dc *gg.Context, scale float64) {
 	dc.DrawEllipse(float64(c.X), float64(c.Y), float64(c.Rx), float64(c.Ry))
 	dc.Fill()
 }
 
+// SVG, implemented by Ellipse, returns the SVG formatted string
+// to render the Ellipse using its attributes and some other attributes
+// passed as argument.
 func (c *Ellipse) SVG(attrs string) string {
 	return fmt.Sprintf(
 		"<ellipse %s cx=\"%d\" cy=\"%d\" rx=\"%d\" ry=\"%d\" />",
 		attrs, c.X, c.Y, c.Rx, c.Ry)
 }
 
+// Copy duplicates its Ellipse type and returns the address of the
+// new instance.
 func (c *Ellipse) Copy() Shape {
 	a := *c
 	return &a
 }
 
+// Mutate changes either the Ellipse's position, width, or height
+// to a new bounded random value.
 func (c *Ellipse) Mutate() {
 	w := c.Worker.W
 	h := c.Worker.H
@@ -69,10 +84,13 @@ func (c *Ellipse) Mutate() {
 	}
 }
 
+// Rasterize converts the Ellipse type to a renderable
+// pixel image on a row by row basis.
+// Returns
 func (c *Ellipse) Rasterize() []Scanline {
 	w := c.Worker.W
 	h := c.Worker.H
-	lines := c.Worker.Lines[:0]
+	lines := c.Worker.Lines[:0] // empty slice with same capacity
 	aspect := float64(c.Rx) / float64(c.Ry)
 	for dy := 0; dy < c.Ry; dy++ {
 		y1 := c.Y - dy
