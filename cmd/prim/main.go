@@ -58,14 +58,14 @@ func (c *Config) Step() {
 		}
 		c.Model = primitive.NewModel(image, c.Background, c.Size, workers)
 		c.Dirty = false
-		fmt.Println("clear")
+		println("clear")
 	}
 	index := len(c.Model.Shapes)
 	c.Model.Step(c.Shape, c.Alpha, c.Repeat)
 	for _, shape := range c.Model.Shapes[index:] {
-		fmt.Println(shape.Command())
+		println(shape.Command())
 	}
-	fmt.Printf("score %f\n", c.Model.Score)
+	println(fmt.Sprintf("score %f", c.Model.Score))
 }
 
 func (c *Config) Run(n int) {
@@ -279,6 +279,10 @@ func readLine(reader *bufio.Reader) (string, error) {
 	}
 }
 
+func println(x string) (int, error) {
+	return os.Stdout.Write([]byte(x + "\n"))
+}
+
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	config := NewConfig()
@@ -292,9 +296,9 @@ func main() {
 			break
 		}
 		if err := config.ParseLine(line); err != nil {
-			fmt.Println("err")
+			println("err")
 		} else {
-			fmt.Println("ok")
+			println("ok")
 		}
 	}
 }
