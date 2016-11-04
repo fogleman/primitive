@@ -9,6 +9,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -36,6 +37,7 @@ type Config struct {
 func NewConfig() *Config {
 	c := &Config{}
 	c.Alpha = 128
+	c.Background = primitive.MakeHexColor("000000")
 	c.Shape = primitive.ShapeTypeTriangle
 	c.Resize = 256
 	c.Size = 1024
@@ -56,12 +58,14 @@ func (c *Config) Step() {
 		}
 		c.Model = primitive.NewModel(image, c.Background, c.Size, workers)
 		c.Dirty = false
+		fmt.Println("clear")
 	}
 	index := len(c.Model.Shapes)
 	c.Model.Step(c.Shape, c.Alpha, c.Repeat)
 	for _, shape := range c.Model.Shapes[index:] {
 		fmt.Println(shape.Command())
 	}
+	fmt.Printf("score %f\n", c.Model.Score)
 }
 
 func (c *Config) Run(n int) {
@@ -72,12 +76,11 @@ func (c *Config) Run(n int) {
 
 func (c *Config) ParseLine(line string) error {
 	line = strings.TrimSpace(line)
-	line = strings.ToLower(line)
 	args := strings.Split(line, " ")
 	if len(args) == 0 {
 		return InvalidCommand
 	}
-	command, args := args[0], args[1:]
+	command, args := strings.ToLower(args[0]), args[1:]
 	switch command {
 	case "image":
 		return c.parseImage(args)
@@ -95,10 +98,14 @@ func (c *Config) ParseLine(line string) error {
 		return c.parseWorkers(args)
 	case "background":
 		return c.parseBackground(args)
+	case "clear":
+		return c.parseClear(args)
 	case "run":
 		return c.parseRun(args)
 	case "step":
 		return c.parseStep(args)
+	case "save":
+		return c.parseSave(args)
 	}
 	return InvalidCommand
 }
@@ -132,32 +139,23 @@ func (c *Config) parseShape(args []string) error {
 		return InvalidCommand
 	}
 	switch args[0] {
-	case "0":
-	case "any":
+	case "0", "any":
 		c.Shape = primitive.ShapeTypeAny
-	case "1":
-	case "triangle":
+	case "1", "triangle":
 		c.Shape = primitive.ShapeTypeTriangle
-	case "2":
-	case "rectangle":
+	case "2", "rectangle":
 		c.Shape = primitive.ShapeTypeRectangle
-	case "3":
-	case "ellipse":
+	case "3", "ellipse":
 		c.Shape = primitive.ShapeTypeEllipse
-	case "4":
-	case "circle":
+	case "4", "circle":
 		c.Shape = primitive.ShapeTypeCircle
-	case "5":
-	case "rotatedrectangle":
+	case "5", "rotatedrectangle":
 		c.Shape = primitive.ShapeTypeRotatedRectangle
-	case "6":
-	case "quadratic":
+	case "6", "quadratic":
 		c.Shape = primitive.ShapeTypeQuadratic
-	case "7":
-	case "rotatedellipse":
+	case "7", "rotatedellipse":
 		c.Shape = primitive.ShapeTypeRotatedEllipse
-	case "8":
-	case "polygon":
+	case "8", "polygon":
 		c.Shape = primitive.ShapeTypePolygon
 	default:
 		return InvalidCommand
@@ -222,7 +220,18 @@ func (c *Config) parseBackground(args []string) error {
 	return nil
 }
 
+func (c *Config) parseClear(args []string) error {
+	if len(args) != 0 {
+		return InvalidCommand
+	}
+	c.Dirty = true
+	return nil
+}
+
 func (c *Config) parseRun(args []string) error {
+	if c.Image == nil {
+		return InvalidCommand
+	}
 	n, err := c.parseInt(args, 0, math.MaxInt32)
 	if err != nil {
 		return err
@@ -232,11 +241,28 @@ func (c *Config) parseRun(args []string) error {
 }
 
 func (c *Config) parseStep(args []string) error {
-	if len(args) != 0 {
+	if len(args) != 0 || c.Image == nil {
 		return InvalidCommand
 	}
 	c.Step()
 	return nil
+}
+
+func (c *Config) parseSave(args []string) error {
+	if len(args) != 1 || c.Model == nil {
+		return InvalidCommand
+	}
+	path := args[0]
+	ext := strings.ToLower(filepath.Ext(path))
+	switch ext {
+	case ".png":
+		return primitive.SavePNG(path, c.Model.Context.Image())
+	case ".jpg", ".jpeg":
+		return primitive.SaveJPG(path, c.Model.Context.Image(), 95)
+	case ".svg":
+		return primitive.SaveFile(path, c.Model.SVG())
+	}
+	return InvalidCommand
 }
 
 func readLine(reader *bufio.Reader) (string, error) {
