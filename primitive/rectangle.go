@@ -49,6 +49,10 @@ func (r *Rectangle) SVG(attrs string) string {
 		attrs, x1, y1, w, h)
 }
 
+func (r *Rectangle) Command() string {
+	return fmt.Sprintf("rectangle %d %d %d %d", r.X1, r.Y1, r.X2, r.Y2)
+}
+
 func (r *Rectangle) Copy() Shape {
 	a := *r
 	return &a
@@ -110,6 +114,11 @@ func (r *RotatedRectangle) SVG(attrs string) string {
 	return fmt.Sprintf(
 		"<g transform=\"translate(%d %d) rotate(%d) scale(%d %d)\"><rect %s x=\"-0.5\" y=\"-0.5\" width=\"1\" height=\"1\" /></g>",
 		r.X, r.Y, r.Angle, r.Sx, r.Sy, attrs)
+}
+
+func (r *RotatedRectangle) Command() string {
+	return fmt.Sprintf("rotatedrectangle %d %d %d %d %d",
+		r.X, r.Y, r.Sx, r.Sy, r.Angle)
 }
 
 func (r *RotatedRectangle) Copy() Shape {

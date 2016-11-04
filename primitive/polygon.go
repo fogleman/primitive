@@ -1,6 +1,8 @@
 package primitive
 
 import (
+	"fmt"
+
 	"github.com/fogleman/gg"
 	"github.com/golang/freetype/raster"
 )
@@ -38,6 +40,14 @@ func (p *Polygon) Draw(dc *gg.Context, scale float64) {
 
 func (p *Polygon) SVG(attrs string) string {
 	return ""
+}
+
+func (p *Polygon) Command() string {
+	s := "polygon"
+	for i := 0; i < p.Order; i++ {
+		s += fmt.Sprintf(" %f %f", p.X[i], p.Y[i])
+	}
+	return s
 }
 
 func (p *Polygon) Copy() Shape {

@@ -8,6 +8,7 @@ type Shape interface {
 	Mutate()
 	Draw(dc *gg.Context, scale float64)
 	SVG(attrs string) string
+	Command() string
 }
 
 type ShapeType int

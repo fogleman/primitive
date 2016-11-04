@@ -43,6 +43,10 @@ func (c *Ellipse) SVG(attrs string) string {
 		attrs, c.X, c.Y, c.Rx, c.Ry)
 }
 
+func (c *Ellipse) Command() string {
+	return fmt.Sprintf("ellipse %d %d %d %d", c.X, c.Y, c.Rx, c.Ry)
+}
+
 func (c *Ellipse) Copy() Shape {
 	a := *c
 	return &a
@@ -128,6 +132,10 @@ func (c *RotatedEllipse) SVG(attrs string) string {
 	return fmt.Sprintf(
 		"<g transform=\"translate(%f %f) rotate(%f) scale(%f %f)\"><ellipse %s cx=\"0\" cy=\"0\" rx=\"1\" ry=\"1\" /></g>",
 		c.X, c.Y, c.Angle, c.Rx, c.Ry, attrs)
+}
+
+func (c *RotatedEllipse) Command() string {
+	return fmt.Sprintf("rotatedellipse %f %f %f %f %f", c.X, c.Y, c.Rx, c.Ry, c.Angle)
 }
 
 func (c *RotatedEllipse) Copy() Shape {

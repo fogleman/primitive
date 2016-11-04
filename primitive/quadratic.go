@@ -45,6 +45,11 @@ func (q *Quadratic) SVG(attrs string) string {
 		attrs, q.X1, q.Y1, q.X2, q.Y2, q.X3, q.Y3, q.Width)
 }
 
+func (q *Quadratic) Command() string {
+	return fmt.Sprintf("quadratic %f %f %f %f %f %f %f",
+		q.X1, q.Y1, q.X2, q.Y2, q.X3, q.Y3, q.Width)
+}
+
 func (q *Quadratic) Copy() Shape {
 	a := *q
 	return &a

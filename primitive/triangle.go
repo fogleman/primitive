@@ -41,6 +41,11 @@ func (t *Triangle) SVG(attrs string) string {
 		attrs, t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3)
 }
 
+func (t *Triangle) Command() string {
+	return fmt.Sprintf("triangle %d %d %d %d %d %d",
+		t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3)
+}
+
 func (t *Triangle) Copy() Shape {
 	a := *t
 	return &a
