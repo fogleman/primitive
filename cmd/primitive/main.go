@@ -37,7 +37,7 @@ type Config struct {
 func NewConfig() *Config {
 	c := &Config{}
 	c.Alpha = 128
-	c.Background = primitive.MakeHexColor("000000")
+	c.Background = primitive.Color{}
 	c.Shape = primitive.ShapeTypeTriangle
 	c.Resize = 256
 	c.Size = 1024
@@ -56,13 +56,17 @@ func (c *Config) Step() {
 		if workers < 1 {
 			workers = runtime.NumCPU()
 		}
-		c.Model = primitive.NewModel(image, c.Background, c.Size, workers)
+		background := c.Background
+		blank := primitive.Color{}
+		if background == blank {
+			background = primitive.MakeColor(primitive.AverageImageColor(image))
+		}
+		c.Model = primitive.NewModel(image, background, c.Size, workers)
 		c.Dirty = false
 		size := image.Bounds().Size()
 		println(fmt.Sprintf("size %d %d", size.X, size.Y))
-		color := c.Background
 		println(fmt.Sprintf("background %d %d %d %d",
-			color.R, color.G, color.B, color.A))
+			background.R, background.G, background.B, background.A))
 	}
 	index := len(c.Model.Shapes)
 	c.Model.Step(c.Shape, c.Alpha, c.Repeat)
