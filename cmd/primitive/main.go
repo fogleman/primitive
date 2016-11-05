@@ -22,16 +22,17 @@ import (
 var InvalidCommand = errors.New("invalid command")
 
 type Config struct {
-	Model      *primitive.Model
-	Background primitive.Color
-	Image      image.Image
-	Shape      primitive.ShapeType
-	Alpha      int
-	Repeat     int
-	Workers    int
-	Size       int
-	Resize     int
-	Dirty      bool
+	Model       *primitive.Model
+	Background  primitive.Color
+	Image       image.Image
+	Shape       primitive.ShapeType
+	Alpha       int
+	Repeat      int
+	Workers     int
+	Size        int
+	Resize      int
+	StrokeWidth float64
+	Dirty       bool
 }
 
 func NewConfig() *Config {
@@ -41,6 +42,7 @@ func NewConfig() *Config {
 	c.Shape = primitive.ShapeTypeTriangle
 	c.Resize = 256
 	c.Size = 1024
+	c.StrokeWidth = 1
 	c.Dirty = true
 	return c
 }
@@ -68,6 +70,7 @@ func (c *Config) Step() {
 		println(fmt.Sprintf("background %d %d %d %d",
 			background.R, background.G, background.B, background.A))
 	}
+	c.Model.StrokeWidth = c.StrokeWidth
 	index := len(c.Model.Shapes)
 	c.Model.Step(c.Shape, c.Alpha, c.Repeat)
 	shapes := c.Model.Shapes[index:]
@@ -119,6 +122,8 @@ func (c *Config) ParseLine(line string) error {
 		return c.parseStep(args)
 	case "save":
 		return c.parseSave(args)
+	case "strokewidth":
+		return c.parseStrokeWidth(args)
 	}
 	return InvalidCommand
 }
@@ -128,6 +133,20 @@ func (c *Config) parseInt(args []string, min, max int) (int, error) {
 		return 0, InvalidCommand
 	}
 	x, err := strconv.Atoi(args[0])
+	if err != nil {
+		return 0, err
+	}
+	if x < min || x > max {
+		return 0, InvalidCommand
+	}
+	return x, nil
+}
+
+func (c *Config) parseFloat(args []string, min, max float64) (float64, error) {
+	if len(args) != 1 {
+		return 0, InvalidCommand
+	}
+	x, err := strconv.ParseFloat(args[0], 64)
 	if err != nil {
 		return 0, err
 	}
@@ -173,6 +192,15 @@ func (c *Config) parseShape(args []string) error {
 	default:
 		return InvalidCommand
 	}
+	return nil
+}
+
+func (c *Config) parseStrokeWidth(args []string) error {
+	strokeWidth, err := c.parseFloat(args, 0, math.MaxFloat64)
+	if err != nil {
+		return err
+	}
+	c.StrokeWidth = strokeWidth
 	return nil
 }
 

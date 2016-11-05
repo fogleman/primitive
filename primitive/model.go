@@ -9,17 +9,18 @@ import (
 )
 
 type Model struct {
-	Sw, Sh     int
-	Scale      float64
-	Background Color
-	Target     *image.RGBA
-	Current    *image.RGBA
-	Context    *gg.Context
-	Score      float64
-	Shapes     []Shape
-	Colors     []Color
-	Scores     []float64
-	Workers    []*Worker
+	Sw, Sh      int
+	Scale       float64
+	Background  Color
+	Target      *image.RGBA
+	Current     *image.RGBA
+	Context     *gg.Context
+	Score       float64
+	Shapes      []Shape
+	Colors      []Color
+	Scores      []float64
+	Workers     []*Worker
+	StrokeWidth float64
 }
 
 func NewModel(target image.Image, background Color, size, numWorkers int) *Model {
@@ -51,6 +52,7 @@ func NewModel(target image.Image, background Color, size, numWorkers int) *Model
 		worker := NewWorker(model.Target)
 		model.Workers = append(model.Workers, worker)
 	}
+	model.StrokeWidth = 1
 	return model
 }
 
@@ -122,7 +124,7 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 	model.Add(state.Shape, state.Alpha)
 
 	for i := 0; i < repeat; i++ {
-		state.Worker.Init(model.Current, model.Score)
+		state.Worker.Init(model.Current, model.Score, model.StrokeWidth)
 		a := state.Energy()
 		state = HillClimb(state, 100).(*State)
 		b := state.Energy()
@@ -153,7 +155,7 @@ func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
 	}
 	for i := 0; i < wn; i++ {
 		worker := model.Workers[i]
-		worker.Init(model.Current, model.Score)
+		worker.Init(model.Current, model.Score, model.StrokeWidth)
 		go model.runWorker(worker, t, a, n, age, wm, ch)
 	}
 	var bestEnergy float64

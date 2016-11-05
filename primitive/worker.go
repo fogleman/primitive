@@ -9,16 +9,17 @@ import (
 )
 
 type Worker struct {
-	W, H       int
-	Target     *image.RGBA
-	Current    *image.RGBA
-	Buffer     *image.RGBA
-	Rasterizer *raster.Rasterizer
-	Lines      []Scanline
-	Heatmap    *Heatmap
-	Rnd        *rand.Rand
-	Score      float64
-	Counter    int
+	W, H        int
+	Target      *image.RGBA
+	Current     *image.RGBA
+	Buffer      *image.RGBA
+	Rasterizer  *raster.Rasterizer
+	Lines       []Scanline
+	Heatmap     *Heatmap
+	Rnd         *rand.Rand
+	Score       float64
+	Counter     int
+	StrokeWidth float64
 }
 
 func NewWorker(target *image.RGBA) *Worker {
@@ -36,9 +37,10 @@ func NewWorker(target *image.RGBA) *Worker {
 	return &worker
 }
 
-func (worker *Worker) Init(current *image.RGBA, score float64) {
+func (worker *Worker) Init(current *image.RGBA, score, strokeWidth float64) {
 	worker.Current = current
 	worker.Score = score
+	worker.StrokeWidth = strokeWidth
 	worker.Counter = 0
 	worker.Heatmap.Clear()
 }
@@ -99,7 +101,7 @@ func (worker *Worker) RandomState(t ShapeType, a int) *State {
 	case ShapeTypeRotatedRectangle:
 		return NewState(worker, NewRandomRotatedRectangle(worker), a)
 	case ShapeTypeQuadratic:
-		return NewState(worker, NewRandomQuadratic(worker), a)
+		return NewState(worker, NewRandomQuadratic(worker, worker.StrokeWidth), a)
 	case ShapeTypeRotatedEllipse:
 		return NewState(worker, NewRandomRotatedEllipse(worker), a)
 	case ShapeTypePolygon:

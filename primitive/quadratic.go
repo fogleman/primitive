@@ -16,7 +16,7 @@ type Quadratic struct {
 	Width  float64
 }
 
-func NewRandomQuadratic(worker *Worker) *Quadratic {
+func NewRandomQuadratic(worker *Worker, width float64) *Quadratic {
 	rnd := worker.Rnd
 	x1 := rnd.Float64() * float64(worker.W)
 	y1 := rnd.Float64() * float64(worker.H)
@@ -24,7 +24,6 @@ func NewRandomQuadratic(worker *Worker) *Quadratic {
 	y2 := y1 + rnd.Float64()*40 - 20
 	x3 := x2 + rnd.Float64()*40 - 20
 	y3 := y2 + rnd.Float64()*40 - 20
-	width := 1.0 / 2
 	q := &Quadratic{worker, x1, y1, x2, y2, x3, y3, width}
 	q.Mutate()
 	return q
