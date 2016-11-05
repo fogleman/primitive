@@ -58,11 +58,20 @@ func (c *Config) Step() {
 		}
 		c.Model = primitive.NewModel(image, c.Background, c.Size, workers)
 		c.Dirty = false
-		println("clear")
+		size := image.Bounds().Size()
+		println(fmt.Sprintf("size %d %d", size.X, size.Y))
+		color := c.Background
+		println(fmt.Sprintf("background %d %d %d %d",
+			color.R, color.G, color.B, color.A))
 	}
 	index := len(c.Model.Shapes)
 	c.Model.Step(c.Shape, c.Alpha, c.Repeat)
-	for _, shape := range c.Model.Shapes[index:] {
+	shapes := c.Model.Shapes[index:]
+	colors := c.Model.Colors[index:]
+	for i, shape := range shapes {
+		color := colors[i]
+		println(fmt.Sprintf("color %d %d %d %d",
+			color.R, color.G, color.B, color.A))
 		println(shape.Command())
 	}
 	println(fmt.Sprintf("score %f", c.Model.Score))
