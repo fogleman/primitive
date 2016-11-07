@@ -33,6 +33,7 @@ type Config struct {
 	Resize      int
 	StrokeWidth float64
 	Dirty       bool
+	Timestamp   time.Time
 }
 
 func NewConfig() *Config {
@@ -44,6 +45,7 @@ func NewConfig() *Config {
 	c.Size = 1024
 	c.StrokeWidth = 1
 	c.Dirty = true
+	c.Timestamp = time.Now()
 	return c
 }
 
@@ -322,9 +324,20 @@ func println(x string) (int, error) {
 	return os.Stdout.Write([]byte(x + "\n"))
 }
 
+func watchdog(config *Config) {
+	for {
+		time.Sleep(time.Second * 5)
+		age := time.Since(config.Timestamp)
+		if age > time.Second*60 {
+			os.Exit(1)
+		}
+	}
+}
+
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	config := NewConfig()
+	go watchdog(config)
 	reader := bufio.NewReaderSize(os.Stdin, 65536)
 	for {
 		line, err := readLine(reader)
@@ -334,6 +347,7 @@ func main() {
 		if len(line) == 0 {
 			break
 		}
+		config.Timestamp = time.Now()
 		if err := config.ParseLine(line); err != nil {
 			println("err")
 		} else {
