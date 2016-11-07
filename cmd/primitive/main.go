@@ -97,9 +97,10 @@ func (c *Config) ParseLine(line string) error {
 		return InvalidCommand
 	}
 	command, args := strings.ToLower(args[0]), args[1:]
+	remainder := strings.TrimSpace(line[len(command):])
 	switch command {
 	case "image":
-		return c.parseImage(args)
+		return c.parseImage(remainder)
 	case "shape":
 		return c.parseShape(args)
 	case "size":
@@ -156,11 +157,8 @@ func (c *Config) parseFloat(args []string, min, max float64) (float64, error) {
 	return x, nil
 }
 
-func (c *Config) parseImage(args []string) error {
-	if len(args) != 1 {
-		return InvalidCommand
-	}
-	im, err := primitive.LoadImage(args[0])
+func (c *Config) parseImage(path string) error {
+	im, err := primitive.LoadImage(path)
 	c.Image = im
 	c.Dirty = true
 	return err
