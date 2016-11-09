@@ -151,6 +151,10 @@ func maxInt(a, b int) int {
 	return b
 }
 
+func scaleInt(a int, s float64) int {
+	return int(float64(a) * s)
+}
+
 func rotate(x, y, theta float64) (rx, ry float64) {
 	rx = x*math.Cos(theta) - y*math.Sin(theta)
 	ry = x*math.Sin(theta) + y*math.Cos(theta)

@@ -59,6 +59,15 @@ func (p *Polygon) Copy() Shape {
 	return &a
 }
 
+func (p *Polygon) Scale(s float64) Shape {
+	a := p.Copy().(*Polygon)
+	for i := 0; i < a.Order; i++ {
+		a.X[i] *= s
+		a.Y[i] *= s
+	}
+	return a
+}
+
 func (p *Polygon) Mutate() {
 	const m = 16
 	w := p.Worker.W

@@ -51,6 +51,17 @@ func (t *Triangle) Copy() Shape {
 	return &a
 }
 
+func (t *Triangle) Scale(s float64) Shape {
+	a := t.Copy().(*Triangle)
+	a.X1 = scaleInt(a.X1, s)
+	a.Y1 = scaleInt(a.Y1, s)
+	a.X2 = scaleInt(a.X2, s)
+	a.Y2 = scaleInt(a.Y2, s)
+	a.X3 = scaleInt(a.X3, s)
+	a.Y3 = scaleInt(a.Y3, s)
+	return a
+}
+
 func (t *Triangle) Mutate() {
 	w := t.Worker.W
 	h := t.Worker.H

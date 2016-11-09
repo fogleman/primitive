@@ -58,6 +58,15 @@ func (r *Rectangle) Copy() Shape {
 	return &a
 }
 
+func (r *Rectangle) Scale(s float64) Shape {
+	a := r.Copy().(*Rectangle)
+	a.X1 = scaleInt(a.X1, s)
+	a.Y1 = scaleInt(a.Y1, s)
+	a.X2 = scaleInt(a.X2, s)
+	a.Y2 = scaleInt(a.Y2, s)
+	return a
+}
+
 func (r *Rectangle) Mutate() {
 	w := r.Worker.W
 	h := r.Worker.H
@@ -124,6 +133,15 @@ func (r *RotatedRectangle) Command() string {
 func (r *RotatedRectangle) Copy() Shape {
 	a := *r
 	return &a
+}
+
+func (r *RotatedRectangle) Scale(s float64) Shape {
+	a := r.Copy().(*RotatedRectangle)
+	a.X = scaleInt(a.X, s)
+	a.Y = scaleInt(a.Y, s)
+	a.Sx = scaleInt(a.Sx, s)
+	a.Sy = scaleInt(a.Sy, s)
+	return a
 }
 
 func (r *RotatedRectangle) Mutate() {

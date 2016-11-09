@@ -52,6 +52,15 @@ func (c *Ellipse) Copy() Shape {
 	return &a
 }
 
+func (c *Ellipse) Scale(s float64) Shape {
+	a := c.Copy().(*Ellipse)
+	a.X = scaleInt(a.X, s)
+	a.Y = scaleInt(a.Y, s)
+	a.Rx = scaleInt(a.Rx, s)
+	a.Ry = scaleInt(a.Ry, s)
+	return a
+}
+
 func (c *Ellipse) Mutate() {
 	w := c.Worker.W
 	h := c.Worker.H
@@ -141,6 +150,15 @@ func (c *RotatedEllipse) Command() string {
 func (c *RotatedEllipse) Copy() Shape {
 	a := *c
 	return &a
+}
+
+func (c *RotatedEllipse) Scale(s float64) Shape {
+	a := c.Copy().(*RotatedEllipse)
+	a.X *= s
+	a.Y *= s
+	a.Rx *= s
+	a.Ry *= s
+	return a
 }
 
 func (c *RotatedEllipse) Mutate() {
