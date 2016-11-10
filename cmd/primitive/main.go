@@ -101,6 +101,8 @@ func (c *Config) ParseLine(line string) error {
 	command, args := strings.ToLower(args[0]), args[1:]
 	remainder := strings.TrimSpace(line[len(command):])
 	switch command {
+	case "keepalive":
+		return nil
 	case "image":
 		return c.parseImage(remainder)
 	case "shape":
