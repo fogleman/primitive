@@ -8,7 +8,6 @@ import (
 )
 
 type Triangle struct {
-	Worker *Worker
 	X1, Y1 int
 	X2, Y2 int
 	X3, Y3 int
@@ -22,8 +21,8 @@ func NewRandomTriangle(worker *Worker) *Triangle {
 	y2 := y1 + rnd.Intn(31) - 15
 	x3 := x1 + rnd.Intn(31) - 15
 	y3 := y1 + rnd.Intn(31) - 15
-	t := &Triangle{worker, x1, y1, x2, y2, x3, y3}
-	t.Mutate()
+	t := &Triangle{x1, y1, x2, y2, x3, y3}
+	t.Mutate(worker)
 	return t
 }
 
@@ -62,10 +61,10 @@ func (t *Triangle) Scale(s float64) Shape {
 	return a
 }
 
-func (t *Triangle) Mutate() {
-	w := t.Worker.W
-	h := t.Worker.H
-	rnd := t.Worker.Rnd
+func (t *Triangle) Mutate(worker *Worker) {
+	w := worker.W
+	h := worker.H
+	rnd := worker.Rnd
 	const m = 16
 	for {
 		switch rnd.Intn(3) {
@@ -118,10 +117,10 @@ func (t *Triangle) Valid() bool {
 	return a1 > minDegrees && a2 > minDegrees && a3 > minDegrees
 }
 
-func (t *Triangle) Rasterize() []Scanline {
-	buf := t.Worker.Lines[:0]
+func (t *Triangle) Rasterize(worker *Worker) []Scanline {
+	buf := worker.Lines[:0]
 	lines := rasterizeTriangle(t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3, buf)
-	return cropScanlines(lines, t.Worker.W, t.Worker.H)
+	return cropScanlines(lines, worker.W, worker.H)
 }
 
 func rasterizeTriangle(x1, y1, x2, y2, x3, y3 int, buf []Scanline) []Scanline {

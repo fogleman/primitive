@@ -47,7 +47,7 @@ func (worker *Worker) Init(current *image.RGBA, score, strokeWidth float64) {
 
 func (worker *Worker) Energy(shape Shape, alpha int) float64 {
 	worker.Counter++
-	lines := shape.Rasterize()
+	lines := shape.Rasterize(worker)
 	// worker.Heatmap.Add(lines)
 	color := computeColor(worker.Target, worker.Current, lines, alpha)
 	copyLines(worker.Buffer, worker.Current, lines)

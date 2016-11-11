@@ -9,7 +9,6 @@ import (
 )
 
 type Quadratic struct {
-	Worker      *Worker
 	X1, Y1      float64
 	X2, Y2      float64
 	X3, Y3      float64
@@ -30,8 +29,8 @@ func NewRandomQuadratic(worker *Worker, width float64) *Quadratic {
 		mutateWidth = true
 		width = 1
 	}
-	q := &Quadratic{worker, x1, y1, x2, y2, x3, y3, width, mutateWidth}
-	q.Mutate()
+	q := &Quadratic{x1, y1, x2, y2, x3, y3, width, mutateWidth}
+	q.Mutate(worker)
 	return q
 }
 
@@ -72,11 +71,11 @@ func (q *Quadratic) Scale(s float64) Shape {
 	return a
 }
 
-func (q *Quadratic) Mutate() {
+func (q *Quadratic) Mutate(worker *Worker) {
 	const m = 16
-	w := q.Worker.W
-	h := q.Worker.H
-	rnd := q.Worker.Rnd
+	w := worker.W
+	h := worker.H
+	rnd := worker.Rnd
 	n := 3
 	if q.MutateWidth {
 		n = 4
@@ -114,7 +113,7 @@ func (q *Quadratic) Valid() bool {
 	return d13 > d12 && d13 > d23
 }
 
-func (q *Quadratic) Rasterize() []Scanline {
+func (q *Quadratic) Rasterize(worker *Worker) []Scanline {
 	var path raster.Path
 	p1 := fixp(q.X1, q.Y1)
 	p2 := fixp(q.X2, q.Y2)
@@ -122,5 +121,5 @@ func (q *Quadratic) Rasterize() []Scanline {
 	path.Start(p1)
 	path.Add2(p2, p3)
 	width := fix(q.Width)
-	return strokePath(q.Worker, path, width, raster.RoundCapper, raster.RoundJoiner)
+	return strokePath(worker, path, width, raster.RoundCapper, raster.RoundJoiner)
 }

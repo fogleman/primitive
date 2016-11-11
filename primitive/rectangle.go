@@ -8,7 +8,6 @@ import (
 )
 
 type Rectangle struct {
-	Worker *Worker
 	X1, Y1 int
 	X2, Y2 int
 }
@@ -19,7 +18,7 @@ func NewRandomRectangle(worker *Worker) *Rectangle {
 	y1 := rnd.Intn(worker.H)
 	x2 := clampInt(x1+rnd.Intn(32)+1, 0, worker.W-1)
 	y2 := clampInt(y1+rnd.Intn(32)+1, 0, worker.H-1)
-	return &Rectangle{worker, x1, y1, x2, y2}
+	return &Rectangle{x1, y1, x2, y2}
 }
 
 func (r *Rectangle) bounds() (x1, y1, x2, y2 int) {
@@ -67,10 +66,10 @@ func (r *Rectangle) Scale(s float64) Shape {
 	return a
 }
 
-func (r *Rectangle) Mutate() {
-	w := r.Worker.W
-	h := r.Worker.H
-	rnd := r.Worker.Rnd
+func (r *Rectangle) Mutate(worker *Worker) {
+	w := worker.W
+	h := worker.H
+	rnd := worker.Rnd
 	switch rnd.Intn(2) {
 	case 0:
 		r.X1 = clampInt(r.X1+int(rnd.NormFloat64()*16), 0, w-1)
@@ -81,9 +80,9 @@ func (r *Rectangle) Mutate() {
 	}
 }
 
-func (r *Rectangle) Rasterize() []Scanline {
+func (r *Rectangle) Rasterize(worker *Worker) []Scanline {
 	x1, y1, x2, y2 := r.bounds()
-	lines := r.Worker.Lines[:0]
+	lines := worker.Lines[:0]
 	for y := y1; y <= y2; y++ {
 		lines = append(lines, Scanline{y, x1, x2, 0xffff})
 	}
@@ -91,7 +90,6 @@ func (r *Rectangle) Rasterize() []Scanline {
 }
 
 type RotatedRectangle struct {
-	Worker *Worker
 	X, Y   int
 	Sx, Sy int
 	Angle  int
@@ -104,8 +102,8 @@ func NewRandomRotatedRectangle(worker *Worker) *RotatedRectangle {
 	sx := rnd.Intn(32) + 1
 	sy := rnd.Intn(32) + 1
 	a := rnd.Intn(360)
-	r := &RotatedRectangle{worker, x, y, sx, sy, a}
-	r.Mutate()
+	r := &RotatedRectangle{x, y, sx, sy, a}
+	r.Mutate(worker)
 	return r
 }
 
@@ -144,10 +142,10 @@ func (r *RotatedRectangle) Scale(s float64) Shape {
 	return a
 }
 
-func (r *RotatedRectangle) Mutate() {
-	w := r.Worker.W
-	h := r.Worker.H
-	rnd := r.Worker.Rnd
+func (r *RotatedRectangle) Mutate(worker *Worker) {
+	w := worker.W
+	h := worker.H
+	rnd := worker.Rnd
 	switch rnd.Intn(3) {
 	case 0:
 		r.X = clampInt(r.X+int(rnd.NormFloat64()*16), 0, w-1)
@@ -173,9 +171,9 @@ func (r *RotatedRectangle) Valid() bool {
 	return aspect <= 5
 }
 
-func (r *RotatedRectangle) Rasterize() []Scanline {
-	w := r.Worker.W
-	h := r.Worker.H
+func (r *RotatedRectangle) Rasterize(worker *Worker) []Scanline {
+	w := worker.W
+	h := worker.H
 	sx, sy := float64(r.Sx), float64(r.Sy)
 	angle := radians(float64(r.Angle))
 	rx1, ry1 := rotate(-sx/2, -sy/2, angle)
@@ -209,7 +207,7 @@ func (r *RotatedRectangle) Rasterize() []Scanline {
 			max[yi] = maxInt(max[yi], xi)
 		}
 	}
-	lines := r.Worker.Lines[:0]
+	lines := worker.Lines[:0]
 	for i := 0; i < n; i++ {
 		y := miny + i
 		if y < 0 || y >= h {

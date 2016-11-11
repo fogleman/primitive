@@ -23,6 +23,7 @@ var InvalidCommand = errors.New("invalid command")
 
 type Config struct {
 	Model       *primitive.Model
+	BigModel    *primitive.Model
 	Background  primitive.Color
 	Image       image.Image
 	Shape       primitive.ShapeType
@@ -32,6 +33,7 @@ type Config struct {
 	Size        int
 	Resize      int
 	StrokeWidth float64
+	Scale       float64
 	Dirty       bool
 	Timestamp   time.Time
 }
@@ -52,6 +54,7 @@ func NewConfig() *Config {
 func (c *Config) Step() {
 	if c.Dirty {
 		image := c.Image
+		bigImage := c.Image
 		if c.Resize > 0 {
 			size := uint(c.Resize)
 			image = resize.Thumbnail(size, size, image, resize.Bilinear)
@@ -66,24 +69,37 @@ func (c *Config) Step() {
 			background = primitive.MakeColor(primitive.AverageImageColor(image))
 		}
 		c.Model = primitive.NewModel(image, background, c.Size, workers)
+		c.BigModel = primitive.NewModel(bigImage, background, c.Size, workers)
+		c.Scale = float64(c.BigModel.Target.Bounds().Size().X) / float64(c.Model.Target.Bounds().Size().X)
 		c.Dirty = false
-		size := image.Bounds().Size()
+		size := bigImage.Bounds().Size()
 		println(fmt.Sprintf("size %d %d", size.X, size.Y))
 		println(fmt.Sprintf("background %d %d %d %d",
 			background.R, background.G, background.B, background.A))
 	}
 	c.Model.StrokeWidth = c.StrokeWidth
-	index := len(c.Model.Shapes)
-	c.Model.Step(c.Shape, c.Alpha, c.Repeat)
-	shapes := c.Model.Shapes[index:]
-	colors := c.Model.Colors[index:]
-	for i, shape := range shapes {
-		color := colors[i]
+	c.BigModel.StrokeWidth = c.StrokeWidth * c.Scale
+	for i := 0; i <= c.Repeat; i++ {
+		if i == 0 {
+			state := c.Model.GlobalSearch(c.Shape, c.Alpha)
+			state = c.BigModel.LocalSearch(state.Shape.Scale(c.Scale), c.Alpha)
+			c.BigModel.AddState(state, 1)
+			c.Model.AddState(state, 1/c.Scale)
+		} else {
+			shape := c.BigModel.Shapes[len(c.BigModel.Shapes)-1]
+			state := c.BigModel.LocalSearch(shape, c.Alpha)
+			c.BigModel.AddState(state, 1)
+			c.Model.AddState(state, 1/c.Scale)
+		}
+		color := c.BigModel.Colors[len(c.BigModel.Colors)-1]
+		shape := c.BigModel.Shapes[len(c.BigModel.Shapes)-1]
 		println(fmt.Sprintf("color %d %d %d %d",
 			color.R, color.G, color.B, color.A))
 		println(shape.Command())
 	}
-	println(fmt.Sprintf("score %f", c.Model.Score))
+	println(fmt.Sprintf("score %f", c.BigModel.Score))
+	// primitive.SavePNG("1.png", c.Model.Current)
+	// primitive.SavePNG("2.png", c.BigModel.Current)
 }
 
 func (c *Config) Run(n int) {

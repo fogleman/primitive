@@ -104,7 +104,7 @@ func (model *Model) SVG() string {
 
 func (model *Model) Add(shape Shape, alpha int) {
 	before := copyRGBA(model.Current)
-	lines := shape.Rasterize()
+	lines := shape.Rasterize(model.Workers[0])
 	color := computeColor(model.Target, model.Current, lines, alpha)
 	drawLines(model.Current, color, lines)
 	score := differencePartial(model.Target, before, model.Current, model.Score, lines)
@@ -116,6 +116,20 @@ func (model *Model) Add(shape Shape, alpha int) {
 
 	model.Context.SetRGBA255(color.R, color.G, color.B, color.A)
 	shape.Draw(model.Context, model.Scale)
+}
+
+func (model *Model) AddState(state *State, scale float64) {
+	model.Add(state.Shape.Scale(scale), state.Alpha)
+}
+
+func (model *Model) GlobalSearch(shapeType ShapeType, alpha int) *State {
+	return model.runWorkers(shapeType, alpha, 1000, 100, 16)
+}
+
+func (model *Model) LocalSearch(shape Shape, alpha int) *State {
+	state := NewState(model.Workers[0], shape, alpha)
+	state.Worker.Init(model.Current, model.Score, model.StrokeWidth)
+	return HillClimb(state, 100).(*State)
 }
 
 func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {

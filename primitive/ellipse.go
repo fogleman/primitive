@@ -9,7 +9,6 @@ import (
 )
 
 type Ellipse struct {
-	Worker *Worker
 	X, Y   int
 	Rx, Ry int
 	Circle bool
@@ -21,7 +20,7 @@ func NewRandomEllipse(worker *Worker) *Ellipse {
 	y := rnd.Intn(worker.H)
 	rx := rnd.Intn(32) + 1
 	ry := rnd.Intn(32) + 1
-	return &Ellipse{worker, x, y, rx, ry, false}
+	return &Ellipse{x, y, rx, ry, false}
 }
 
 func NewRandomCircle(worker *Worker) *Ellipse {
@@ -29,7 +28,7 @@ func NewRandomCircle(worker *Worker) *Ellipse {
 	x := rnd.Intn(worker.W)
 	y := rnd.Intn(worker.H)
 	r := rnd.Intn(32) + 1
-	return &Ellipse{worker, x, y, r, r, true}
+	return &Ellipse{x, y, r, r, true}
 }
 
 func (c *Ellipse) Draw(dc *gg.Context, scale float64) {
@@ -61,10 +60,10 @@ func (c *Ellipse) Scale(s float64) Shape {
 	return a
 }
 
-func (c *Ellipse) Mutate() {
-	w := c.Worker.W
-	h := c.Worker.H
-	rnd := c.Worker.Rnd
+func (c *Ellipse) Mutate(worker *Worker) {
+	w := worker.W
+	h := worker.H
+	rnd := worker.Rnd
 	switch rnd.Intn(3) {
 	case 0:
 		c.X = clampInt(c.X+int(rnd.NormFloat64()*16), 0, w-1)
@@ -82,10 +81,10 @@ func (c *Ellipse) Mutate() {
 	}
 }
 
-func (c *Ellipse) Rasterize() []Scanline {
-	w := c.Worker.W
-	h := c.Worker.H
-	lines := c.Worker.Lines[:0]
+func (c *Ellipse) Rasterize(worker *Worker) []Scanline {
+	w := worker.W
+	h := worker.H
+	lines := worker.Lines[:0]
 	aspect := float64(c.Rx) / float64(c.Ry)
 	for dy := 0; dy < c.Ry; dy++ {
 		y1 := c.Y - dy
@@ -113,7 +112,6 @@ func (c *Ellipse) Rasterize() []Scanline {
 }
 
 type RotatedEllipse struct {
-	Worker *Worker
 	X, Y   float64
 	Rx, Ry float64
 	Angle  float64
@@ -126,7 +124,7 @@ func NewRandomRotatedEllipse(worker *Worker) *RotatedEllipse {
 	rx := rnd.Float64()*32 + 1
 	ry := rnd.Float64()*32 + 1
 	a := rnd.Float64() * 360
-	return &RotatedEllipse{worker, x, y, rx, ry, a}
+	return &RotatedEllipse{x, y, rx, ry, a}
 }
 
 func (c *RotatedEllipse) Draw(dc *gg.Context, scale float64) {
@@ -161,10 +159,10 @@ func (c *RotatedEllipse) Scale(s float64) Shape {
 	return a
 }
 
-func (c *RotatedEllipse) Mutate() {
-	w := c.Worker.W
-	h := c.Worker.H
-	rnd := c.Worker.Rnd
+func (c *RotatedEllipse) Mutate(worker *Worker) {
+	w := worker.W
+	h := worker.H
+	rnd := worker.Rnd
 	switch rnd.Intn(3) {
 	case 0:
 		c.X = clamp(c.X+rnd.NormFloat64()*16, 0, float64(w-1))
@@ -177,7 +175,7 @@ func (c *RotatedEllipse) Mutate() {
 	}
 }
 
-func (c *RotatedEllipse) Rasterize() []Scanline {
+func (c *RotatedEllipse) Rasterize(worker *Worker) []Scanline {
 	var path raster.Path
 	const n = 16
 	for i := 0; i < n; i++ {
@@ -201,5 +199,5 @@ func (c *RotatedEllipse) Rasterize() []Scanline {
 		}
 		path.Add2(fixp(cx+c.X, cy+c.Y), fixp(x2+c.X, y2+c.Y))
 	}
-	return fillPath(c.Worker, path)
+	return fillPath(worker, path)
 }

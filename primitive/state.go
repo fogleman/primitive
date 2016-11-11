@@ -27,7 +27,7 @@ func (state *State) Energy() float64 {
 func (state *State) DoMove() interface{} {
 	rnd := state.Worker.Rnd
 	oldState := state.Copy()
-	state.Shape.Mutate()
+	state.Shape.Mutate(state.Worker)
 	if state.MutateAlpha {
 		state.Alpha = clampInt(state.Alpha+rnd.Intn(21)-10, 1, 255)
 	}

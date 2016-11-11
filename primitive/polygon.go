@@ -8,7 +8,6 @@ import (
 )
 
 type Polygon struct {
-	Worker *Worker
 	Order  int
 	Convex bool
 	X, Y   []float64
@@ -24,8 +23,8 @@ func NewRandomPolygon(worker *Worker, order int, convex bool) *Polygon {
 		x[i] = x[0] + rnd.Float64()*40 - 20
 		y[i] = y[0] + rnd.Float64()*40 - 20
 	}
-	p := &Polygon{worker, order, convex, x, y}
-	p.Mutate()
+	p := &Polygon{order, convex, x, y}
+	p.Mutate(worker)
 	return p
 }
 
@@ -68,11 +67,11 @@ func (p *Polygon) Scale(s float64) Shape {
 	return a
 }
 
-func (p *Polygon) Mutate() {
+func (p *Polygon) Mutate(worker *Worker) {
 	const m = 16
-	w := p.Worker.W
-	h := p.Worker.H
-	rnd := p.Worker.Rnd
+	w := worker.W
+	h := worker.H
+	rnd := worker.Rnd
 	for {
 		if rnd.Float64() < 0.25 {
 			i := rnd.Intn(p.Order)
@@ -116,7 +115,7 @@ func cross3(x1, y1, x2, y2, x3, y3 float64) float64 {
 	return dx1*dy2 - dy1*dx2
 }
 
-func (p *Polygon) Rasterize() []Scanline {
+func (p *Polygon) Rasterize(worker *Worker) []Scanline {
 	var path raster.Path
 	for i := 0; i <= p.Order; i++ {
 		f := fixp(p.X[i%p.Order], p.Y[i%p.Order])
@@ -126,5 +125,5 @@ func (p *Polygon) Rasterize() []Scanline {
 			path.Add1(f)
 		}
 	}
-	return fillPath(p.Worker, path)
+	return fillPath(worker, path)
 }
