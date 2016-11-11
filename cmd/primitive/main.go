@@ -315,18 +315,18 @@ func (c *Config) parseStep(args []string) error {
 }
 
 func (c *Config) parseSave(args []string) error {
-	if len(args) != 1 || c.Model == nil {
+	if len(args) != 1 || c.BigModel == nil {
 		return InvalidCommand
 	}
 	path := args[0]
 	ext := strings.ToLower(filepath.Ext(path))
 	switch ext {
 	case ".png":
-		return primitive.SavePNG(path, c.Model.Context.Image())
+		return primitive.SavePNG(path, c.BigModel.Context.Image())
 	case ".jpg", ".jpeg":
-		return primitive.SaveJPG(path, c.Model.Context.Image(), 95)
+		return primitive.SaveJPG(path, c.BigModel.Context.Image(), 95)
 	case ".svg":
-		return primitive.SaveFile(path, c.Model.SVG())
+		return primitive.SaveFile(path, c.BigModel.SVG())
 	}
 	return InvalidCommand
 }
