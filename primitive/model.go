@@ -126,10 +126,13 @@ func (model *Model) GlobalSearch(shapeType ShapeType, alpha int) *State {
 	return model.runWorkers(shapeType, alpha, 1000, 100, 16)
 }
 
-func (model *Model) LocalSearch(shape Shape, alpha int) *State {
+func (model *Model) LocalSearch(shape Shape, alpha int) (*State, bool) {
 	state := NewState(model.Workers[0], shape, alpha)
 	state.Worker.Init(model.Current, model.Score, model.StrokeWidth)
-	return HillClimb(state, 100).(*State)
+	before := state.Energy()
+	state = HillClimb(state, 100).(*State)
+	after := state.Energy()
+	return state, before != after
 }
 
 func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {

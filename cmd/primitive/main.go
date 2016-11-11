@@ -24,14 +24,14 @@ var InvalidCommand = errors.New("invalid command")
 type Config struct {
 	Model       *primitive.Model
 	BigModel    *primitive.Model
+	Size        int
+	BigSize     int
 	Background  primitive.Color
 	Image       image.Image
 	Shape       primitive.ShapeType
 	Alpha       int
 	Repeat      int
 	Workers     int
-	Size        int
-	Resize      int
 	StrokeWidth float64
 	Scale       float64
 	Dirty       bool
@@ -43,8 +43,8 @@ func NewConfig() *Config {
 	c.Alpha = 128
 	c.Background = primitive.Color{}
 	c.Shape = primitive.ShapeTypeTriangle
-	c.Resize = 256
-	c.Size = 1024
+	c.Size = 256
+	c.BigSize = 512
 	c.StrokeWidth = 1
 	c.Dirty = true
 	c.Timestamp = time.Now()
@@ -54,11 +54,17 @@ func NewConfig() *Config {
 func (c *Config) Step() {
 	if c.Dirty {
 		image := c.Image
-		bigImage := c.Image
-		if c.Resize > 0 {
-			size := uint(c.Resize)
+		if c.Size > 0 {
+			size := uint(c.Size)
 			image = resize.Thumbnail(size, size, image, resize.Bilinear)
 		}
+		bigImage := c.Image
+		if c.BigSize > 0 {
+			size := uint(c.BigSize)
+			bigImage = resize.Thumbnail(size, size, bigImage, resize.Bilinear)
+		}
+		c.Scale = (float64(bigImage.Bounds().Size().X) /
+			float64(image.Bounds().Size().X))
 		workers := c.Workers
 		if workers < 1 {
 			workers = runtime.NumCPU()
@@ -68,9 +74,8 @@ func (c *Config) Step() {
 		if background == blank {
 			background = primitive.MakeColor(primitive.AverageImageColor(image))
 		}
-		c.Model = primitive.NewModel(image, background, c.Size, workers)
-		c.BigModel = primitive.NewModel(bigImage, background, c.Size, workers)
-		c.Scale = float64(c.BigModel.Target.Bounds().Size().X) / float64(c.Model.Target.Bounds().Size().X)
+		c.Model = primitive.NewModel(image, background, 1024, workers)
+		c.BigModel = primitive.NewModel(bigImage, background, 1024, workers)
 		c.Dirty = false
 		size := bigImage.Bounds().Size()
 		println(fmt.Sprintf("size %d %d", size.X, size.Y))
@@ -82,12 +87,15 @@ func (c *Config) Step() {
 	for i := 0; i <= c.Repeat; i++ {
 		if i == 0 {
 			state := c.Model.GlobalSearch(c.Shape, c.Alpha)
-			state = c.BigModel.LocalSearch(state.Shape.Scale(c.Scale), c.Alpha)
+			state, _ = c.BigModel.LocalSearch(state.Shape.Scale(c.Scale), c.Alpha)
 			c.BigModel.AddState(state, 1)
 			c.Model.AddState(state, 1/c.Scale)
 		} else {
 			shape := c.BigModel.Shapes[len(c.BigModel.Shapes)-1]
-			state := c.BigModel.LocalSearch(shape, c.Alpha)
+			state, ok := c.BigModel.LocalSearch(shape, c.Alpha)
+			if !ok {
+				break
+			}
 			c.BigModel.AddState(state, 1)
 			c.Model.AddState(state, 1/c.Scale)
 		}
@@ -125,8 +133,6 @@ func (c *Config) ParseLine(line string) error {
 		return c.parseShape(args)
 	case "size":
 		return c.parseSize(args)
-	case "resize":
-		return c.parseResize(args)
 	case "alpha":
 		return c.parseAlpha(args)
 	case "repeat":
@@ -223,21 +229,19 @@ func (c *Config) parseStrokeWidth(args []string) error {
 }
 
 func (c *Config) parseSize(args []string) error {
-	size, err := c.parseInt(args, 1, math.MaxInt32)
+	if len(args) != 2 {
+		return InvalidCommand
+	}
+	size, err := c.parseInt(args[:1], 0, math.MaxInt32)
+	if err != nil {
+		return err
+	}
+	bigSize, err := c.parseInt(args[1:], 0, math.MaxInt32)
 	if err != nil {
 		return err
 	}
 	c.Size = size
-	c.Dirty = true
-	return nil
-}
-
-func (c *Config) parseResize(args []string) error {
-	resize, err := c.parseInt(args, 0, math.MaxInt32)
-	if err != nil {
-		return err
-	}
-	c.Resize = resize
+	c.BigSize = bigSize
 	c.Dirty = true
 	return nil
 }
