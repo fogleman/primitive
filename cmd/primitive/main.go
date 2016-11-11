@@ -26,6 +26,8 @@ type Config struct {
 	BigModel    *primitive.Model
 	Size        int
 	BigSize     int
+	Scale       float64
+	BigScale    float64
 	Background  primitive.Color
 	Image       image.Image
 	Shape       primitive.ShapeType
@@ -33,7 +35,6 @@ type Config struct {
 	Repeat      int
 	Workers     int
 	StrokeWidth float64
-	Scale       float64
 	Dirty       bool
 	Timestamp   time.Time
 }
@@ -65,6 +66,8 @@ func (c *Config) Step() {
 		}
 		c.Scale = (float64(bigImage.Bounds().Size().X) /
 			float64(image.Bounds().Size().X))
+		c.BigScale = (float64(c.Image.Bounds().Size().X) /
+			float64(bigImage.Bounds().Size().X))
 		workers := c.Workers
 		if workers < 1 {
 			workers = runtime.NumCPU()
@@ -82,8 +85,8 @@ func (c *Config) Step() {
 		println(fmt.Sprintf("background %d %d %d %d",
 			background.R, background.G, background.B, background.A))
 	}
-	c.Model.StrokeWidth = c.StrokeWidth
-	c.BigModel.StrokeWidth = c.StrokeWidth * c.Scale
+	c.BigModel.StrokeWidth = c.StrokeWidth / c.BigScale
+	c.Model.StrokeWidth = c.StrokeWidth / c.BigScale / c.Scale
 	for i := 0; i <= c.Repeat; i++ {
 		if i == 0 {
 			state := c.Model.GlobalSearch(c.Shape, c.Alpha)
