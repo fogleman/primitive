@@ -85,8 +85,8 @@ func (c *Config) Step() {
 		println(fmt.Sprintf("background %d %d %d %d",
 			background.R, background.G, background.B, background.A))
 	}
-	c.BigModel.StrokeWidth = c.StrokeWidth / c.BigScale
-	c.Model.StrokeWidth = c.StrokeWidth / c.BigScale / c.Scale
+	c.BigModel.StrokeWidth = math.Max(0.5, c.StrokeWidth/c.BigScale)
+	c.Model.StrokeWidth = math.Max(0.5, c.StrokeWidth/c.BigScale/c.Scale)
 	for i := 0; i <= c.Repeat; i++ {
 		if i == 0 {
 			state := c.Model.GlobalSearch(c.Shape, c.Alpha)
