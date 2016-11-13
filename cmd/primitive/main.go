@@ -22,19 +22,20 @@ import (
 var InvalidCommand = errors.New("invalid command")
 
 type Config struct {
-	Model       *primitive.Model
-	Background  primitive.Color
-	Image       image.Image
-	Shape       primitive.ShapeType
-	Alpha       int
-	Repeat      int
-	Workers     int
-	Size        int
-	Resize      int
-	StrokeWidth float64
-	Scale       float64
-	Dirty       bool
-	Timestamp   time.Time
+	Model         *primitive.Model
+	Background    primitive.Color
+	Image         image.Image
+	Shape         primitive.ShapeType
+	Alpha         int
+	Repeat        int
+	Workers       int
+	JobsPerWorker int
+	Size          int
+	Resize        int
+	StrokeWidth   float64
+	Scale         float64
+	Dirty         bool
+	Timestamp     time.Time
 }
 
 func NewConfig() *Config {
@@ -45,6 +46,7 @@ func NewConfig() *Config {
 	c.Resize = 256
 	c.Size = 1024
 	c.StrokeWidth = 1
+	c.JobsPerWorker = 2
 	c.Dirty = true
 	c.Timestamp = time.Now()
 	return c
@@ -76,7 +78,7 @@ func (c *Config) Step() {
 	}
 	c.Model.StrokeWidth = c.StrokeWidth * c.Scale
 	index := len(c.Model.Shapes)
-	c.Model.Step(c.Shape, c.Alpha, c.Repeat)
+	c.Model.Step(c.Shape, c.Alpha, c.Repeat, c.JobsPerWorker)
 	shapes := c.Model.Shapes[index:]
 	colors := c.Model.Colors[index:]
 	for i, shape := range shapes {
@@ -119,6 +121,8 @@ func (c *Config) ParseLine(line string) error {
 		return c.parseRepeat(args)
 	case "workers":
 		return c.parseWorkers(args)
+	case "jobs":
+		return c.parseJobs(args)
 	case "background":
 		return c.parseBackground(args)
 	case "clear":
@@ -253,6 +257,15 @@ func (c *Config) parseWorkers(args []string) error {
 	}
 	c.Workers = workers
 	c.Dirty = true
+	return nil
+}
+
+func (c *Config) parseJobs(args []string) error {
+	jobs, err := c.parseInt(args, 1, math.MaxInt32)
+	if err != nil {
+		return err
+	}
+	c.JobsPerWorker = jobs
 	return nil
 }
 

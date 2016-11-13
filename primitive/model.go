@@ -123,7 +123,7 @@ func (model *Model) AddState(state *State, scale float64) {
 }
 
 func (model *Model) GlobalSearch(shapeType ShapeType, alpha int) *State {
-	return model.runWorkers(shapeType, alpha, 1000, 100, 16)
+	return model.runWorkers(shapeType, alpha, 1000, 100, 4)
 }
 
 func (model *Model) LocalSearch(shape Shape, alpha int) (*State, bool) {
@@ -135,8 +135,8 @@ func (model *Model) LocalSearch(shape Shape, alpha int) (*State, bool) {
 	return state, before != after
 }
 
-func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
-	state := model.runWorkers(shapeType, alpha, 1000, 100, 16)
+func (model *Model) Step(shapeType ShapeType, alpha, repeat, jobs int) int {
+	state := model.runWorkers(shapeType, alpha, 1000, 100, jobs)
 	// state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape, state.Alpha)
 
@@ -166,14 +166,14 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
 	wn := len(model.Workers)
 	ch := make(chan *State, wn)
-	wm := m / wn
-	if m%wn != 0 {
-		wm++
-	}
+	// wm := m / wn
+	// if m%wn != 0 {
+	// 	wm++
+	// }
 	for i := 0; i < wn; i++ {
 		worker := model.Workers[i]
 		worker.Init(model.Current, model.Score, model.StrokeWidth)
-		go model.runWorker(worker, t, a, n, age, wm, ch)
+		go model.runWorker(worker, t, a, n, age, m, ch)
 	}
 	var bestEnergy float64
 	var bestState *State
