@@ -40,6 +40,7 @@ Small input images should be used (like 256x256px). You don't need the detail an
 | `bg` | avg | starting background color (hex) |
 | `j` | 0 | number of parallel workers (default uses all cores) |
 | `v` | off | verbose output |
+| `vv` | off | very verbose output |
 
 ### Output Formats
 
