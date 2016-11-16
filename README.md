@@ -8,6 +8,12 @@ Reproducing images with geometric primitives.
 
 A target image is provided as input. The algorithm tries to find the single most optimal shape that can be drawn to minimize the error between the target image and the drawn image. It repeats this process, adding *one shape at a time*. Around 50 to 200 shapes are needed to reach a result that is recognizable yet artistic and abstract.
 
+### Primitive for macOS
+
+Now available as a native Mac application!
+
+https://primitive.lol/
+
 ### Twitter
 
 Follow [@PrimitivePic](https://twitter.com/PrimitivePic) on Twitter to see a new primitive picture every 30 minutes!
