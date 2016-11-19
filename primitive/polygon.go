@@ -19,6 +19,12 @@ func NewRandomPolygon(worker *Worker, order int, convex bool) *Polygon {
 	y := make([]float64, order)
 	x[0] = rnd.Float64() * float64(worker.W)
 	y[0] = rnd.Float64() * float64(worker.H)
+	if worker.X != 0 {
+		x[0] = float64(worker.X)
+	}
+	if worker.Y != 0 {
+		y[0] = float64(worker.Y)
+	}
 	for i := 1; i < order; i++ {
 		x[i] = x[0] + rnd.Float64()*40 - 20
 		y[i] = y[0] + rnd.Float64()*40 - 20

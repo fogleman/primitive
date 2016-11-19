@@ -18,6 +18,12 @@ func NewRandomEllipse(worker *Worker) *Ellipse {
 	rnd := worker.Rnd
 	x := rnd.Intn(worker.W)
 	y := rnd.Intn(worker.H)
+	if worker.X != 0 {
+		x = worker.X
+	}
+	if worker.Y != 0 {
+		y = worker.Y
+	}
 	rx := rnd.Intn(32) + 1
 	ry := rnd.Intn(32) + 1
 	return &Ellipse{x, y, rx, ry, false}
@@ -121,6 +127,12 @@ func NewRandomRotatedEllipse(worker *Worker) *RotatedEllipse {
 	rnd := worker.Rnd
 	x := rnd.Float64() * float64(worker.W)
 	y := rnd.Float64() * float64(worker.H)
+	if worker.X != 0 {
+		x = float64(worker.X)
+	}
+	if worker.Y != 0 {
+		y = float64(worker.Y)
+	}
 	rx := rnd.Float64()*32 + 1
 	ry := rnd.Float64()*32 + 1
 	a := rnd.Float64() * 360

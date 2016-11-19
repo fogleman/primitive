@@ -10,6 +10,7 @@ import (
 
 type Model struct {
 	Sw, Sh      int
+	X, Y        int
 	Scale       float64
 	Background  Color
 	Target      *image.RGBA
@@ -118,30 +119,43 @@ func (model *Model) Add(shape Shape, alpha int) {
 	shape.Draw(model.Context, model.Scale)
 }
 
-func (model *Model) AddState(state *State, scale float64) {
-	model.Add(state.Shape.Scale(scale), state.Alpha)
-}
+// func (model *Model) AddState(state *State, scale float64) {
+// 	model.Add(state.Shape.Scale(scale), state.Alpha)
+// }
 
-func (model *Model) GlobalSearch(shapeType ShapeType, alpha int) *State {
-	return model.runWorkers(shapeType, alpha, 1000, 100, 4)
-}
+// func (model *Model) GlobalSearch(shapeType ShapeType, alpha int) *State {
+// 	return model.runWorkers(shapeType, alpha, 1000, 100, 4)
+// }
 
-func (model *Model) LocalSearch(shape Shape, alpha int) (*State, bool) {
-	state := NewState(model.Workers[0], shape, alpha)
-	state.Worker.Init(model.Current, model.Score, model.StrokeWidth)
-	before := state.Energy()
-	state = HillClimb(state, 100).(*State)
-	after := state.Energy()
-	return state, before != after
-}
+// func (model *Model) LocalSearch(shape Shape, alpha int) (*State, bool) {
+// 	state := NewState(model.Workers[0], shape, alpha)
+// 	state.Worker.Init(model.Current, model.Score, model.StrokeWidth, model.X, model.Y)
+// 	before := state.Energy()
+// 	state = HillClimb(state, 100).(*State)
+// 	after := state.Energy()
+// 	return state, before != after
+// }
 
 func (model *Model) Step(shapeType ShapeType, alpha, repeat, jobs int) int {
-	state := model.runWorkers(shapeType, alpha, 1000, 100, jobs)
-	// state = HillClimb(state, 1000).(*State)
-	model.Add(state.Shape, state.Alpha)
+	var state *State
+
+	if model.X == 0 && model.Y == 0 {
+		state = model.runWorkers(shapeType, alpha, 1000, 100, jobs)
+		// state = HillClimb(state, 1000).(*State)
+		model.Add(state.Shape, state.Alpha)
+	} else {
+		worker := model.Workers[0]
+		worker.Init(model.Current, model.Score, model.StrokeWidth, model.X, model.Y)
+		state = worker.RandomState(shapeType, alpha)
+		state = HillClimb(state, 100).(*State)
+		score := state.Energy()
+		if score < model.Score {
+			model.Add(state.Shape, state.Alpha)
+		}
+	}
 
 	for i := 0; i < repeat; i++ {
-		state.Worker.Init(model.Current, model.Score, model.StrokeWidth)
+		state.Worker.Init(model.Current, model.Score, model.StrokeWidth, model.X, model.Y)
 		a := state.Energy()
 		state = HillClimb(state, 100).(*State)
 		b := state.Energy()
@@ -166,13 +180,9 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat, jobs int) int {
 func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
 	wn := len(model.Workers)
 	ch := make(chan *State, wn)
-	// wm := m / wn
-	// if m%wn != 0 {
-	// 	wm++
-	// }
 	for i := 0; i < wn; i++ {
 		worker := model.Workers[i]
-		worker.Init(model.Current, model.Score, model.StrokeWidth)
+		worker.Init(model.Current, model.Score, model.StrokeWidth, model.X, model.Y)
 		go model.runWorker(worker, t, a, n, age, m, ch)
 	}
 	var bestEnergy float64

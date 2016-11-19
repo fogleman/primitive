@@ -17,6 +17,12 @@ func NewRandomTriangle(worker *Worker) *Triangle {
 	rnd := worker.Rnd
 	x1 := rnd.Intn(worker.W)
 	y1 := rnd.Intn(worker.H)
+	if worker.X != 0 {
+		x1 = worker.X
+	}
+	if worker.Y != 0 {
+		y1 = worker.Y
+	}
 	x2 := x1 + rnd.Intn(31) - 15
 	y2 := y1 + rnd.Intn(31) - 15
 	x3 := x1 + rnd.Intn(31) - 15

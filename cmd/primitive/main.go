@@ -32,6 +32,7 @@ type Config struct {
 	JobsPerWorker int
 	Size          int
 	Resize        int
+	X, Y          int
 	StrokeWidth   float64
 	Scale         float64
 	Dirty         bool
@@ -77,6 +78,8 @@ func (c *Config) Step() {
 			background.R, background.G, background.B, background.A))
 	}
 	c.Model.StrokeWidth = c.StrokeWidth * c.Scale
+	c.Model.X = c.X
+	c.Model.Y = c.Y
 	index := len(c.Model.Shapes)
 	c.Model.Step(c.Shape, c.Alpha, c.Repeat, c.JobsPerWorker)
 	shapes := c.Model.Shapes[index:]
@@ -123,6 +126,8 @@ func (c *Config) ParseLine(line string) error {
 		return c.parseWorkers(args)
 	case "jobs":
 		return c.parseJobs(args)
+	case "position":
+		return c.parsePosition(args)
 	case "background":
 		return c.parseBackground(args)
 	case "clear":
@@ -266,6 +271,23 @@ func (c *Config) parseJobs(args []string) error {
 		return err
 	}
 	c.JobsPerWorker = jobs
+	return nil
+}
+
+func (c *Config) parsePosition(args []string) error {
+	if len(args) != 2 {
+		return InvalidCommand
+	}
+	x, err := c.parseInt(args[:1], 0, math.MaxInt32)
+	if err != nil {
+		return err
+	}
+	y, err := c.parseInt(args[1:], 0, math.MaxInt32)
+	if err != nil {
+		return err
+	}
+	c.X = x
+	c.Y = y
 	return nil
 }
 

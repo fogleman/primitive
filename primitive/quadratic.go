@@ -20,6 +20,12 @@ func NewRandomQuadratic(worker *Worker, width float64) *Quadratic {
 	rnd := worker.Rnd
 	x1 := rnd.Float64() * float64(worker.W)
 	y1 := rnd.Float64() * float64(worker.H)
+	if worker.X != 0 {
+		x1 = float64(worker.X)
+	}
+	if worker.Y != 0 {
+		y1 = float64(worker.Y)
+	}
 	x2 := x1 + rnd.Float64()*40 - 20
 	y2 := y1 + rnd.Float64()*40 - 20
 	x3 := x2 + rnd.Float64()*40 - 20
