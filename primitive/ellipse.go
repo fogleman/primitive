@@ -16,6 +16,7 @@ type Ellipse struct {
 
 func NewRandomEllipse(worker *Worker) *Ellipse {
 	rnd := worker.Rnd
+	m := int(worker.Mutation)
 	x := rnd.Intn(worker.W)
 	y := rnd.Intn(worker.H)
 	if worker.X != 0 {
@@ -24,8 +25,8 @@ func NewRandomEllipse(worker *Worker) *Ellipse {
 	if worker.Y != 0 {
 		y = worker.Y
 	}
-	rx := rnd.Intn(32) + 1
-	ry := rnd.Intn(32) + 1
+	rx := rnd.Intn(m) + 1
+	ry := rnd.Intn(m) + 1
 	return &Ellipse{x, y, rx, ry, false}
 }
 
@@ -33,13 +34,14 @@ func NewRandomCircle(worker *Worker) *Ellipse {
 	rnd := worker.Rnd
 	x := rnd.Intn(worker.W)
 	y := rnd.Intn(worker.H)
+	m := int(worker.Mutation)
 	if worker.X != 0 {
 		x = worker.X
 	}
 	if worker.Y != 0 {
 		y = worker.Y
 	}
-	r := rnd.Intn(32) + 1
+	r := rnd.Intn(m) + 1
 	return &Ellipse{x, y, r, r, true}
 }
 
@@ -75,18 +77,19 @@ func (c *Ellipse) Scale(s float64) Shape {
 func (c *Ellipse) Mutate(worker *Worker) {
 	w := worker.W
 	h := worker.H
+	m := worker.Mutation
 	rnd := worker.Rnd
 	switch rnd.Intn(3) {
 	case 0:
-		c.X = clampInt(c.X+int(rnd.NormFloat64()*16), 0, w-1)
-		c.Y = clampInt(c.Y+int(rnd.NormFloat64()*16), 0, h-1)
+		c.X = clampInt(c.X+int(rnd.NormFloat64()*m), 0, w-1)
+		c.Y = clampInt(c.Y+int(rnd.NormFloat64()*m), 0, h-1)
 	case 1:
-		c.Rx = clampInt(c.Rx+int(rnd.NormFloat64()*16), 1, w-1)
+		c.Rx = clampInt(c.Rx+int(rnd.NormFloat64()*m), 1, w-1)
 		if c.Circle {
 			c.Ry = c.Rx
 		}
 	case 2:
-		c.Ry = clampInt(c.Ry+int(rnd.NormFloat64()*16), 1, w-1)
+		c.Ry = clampInt(c.Ry+int(rnd.NormFloat64()*m), 1, w-1)
 		if c.Circle {
 			c.Rx = c.Ry
 		}
@@ -131,6 +134,7 @@ type RotatedEllipse struct {
 
 func NewRandomRotatedEllipse(worker *Worker) *RotatedEllipse {
 	rnd := worker.Rnd
+	m := worker.Mutation
 	x := rnd.Float64() * float64(worker.W)
 	y := rnd.Float64() * float64(worker.H)
 	if worker.X != 0 {
@@ -139,8 +143,8 @@ func NewRandomRotatedEllipse(worker *Worker) *RotatedEllipse {
 	if worker.Y != 0 {
 		y = float64(worker.Y)
 	}
-	rx := rnd.Float64()*32 + 1
-	ry := rnd.Float64()*32 + 1
+	rx := rnd.Float64()*m + 1
+	ry := rnd.Float64()*m + 1
 	a := rnd.Float64() * 360
 	return &RotatedEllipse{x, y, rx, ry, a}
 }
@@ -180,16 +184,17 @@ func (c *RotatedEllipse) Scale(s float64) Shape {
 func (c *RotatedEllipse) Mutate(worker *Worker) {
 	w := worker.W
 	h := worker.H
+	m := worker.Mutation
 	rnd := worker.Rnd
 	switch rnd.Intn(3) {
 	case 0:
-		c.X = clamp(c.X+rnd.NormFloat64()*16, 0, float64(w-1))
-		c.Y = clamp(c.Y+rnd.NormFloat64()*16, 0, float64(h-1))
+		c.X = clamp(c.X+rnd.NormFloat64()*m, 0, float64(w-1))
+		c.Y = clamp(c.Y+rnd.NormFloat64()*m, 0, float64(h-1))
 	case 1:
-		c.Rx = clamp(c.Rx+rnd.NormFloat64()*16, 1, float64(w-1))
-		c.Ry = clamp(c.Ry+rnd.NormFloat64()*16, 1, float64(w-1))
+		c.Rx = clamp(c.Rx+rnd.NormFloat64()*m, 1, float64(w-1))
+		c.Ry = clamp(c.Ry+rnd.NormFloat64()*m, 1, float64(w-1))
 	case 2:
-		c.Angle = c.Angle + rnd.NormFloat64()*32
+		c.Angle = c.Angle + rnd.NormFloat64()*m
 	}
 }
 

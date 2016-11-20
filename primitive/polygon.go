@@ -15,6 +15,7 @@ type Polygon struct {
 
 func NewRandomPolygon(worker *Worker, order int, convex bool) *Polygon {
 	rnd := worker.Rnd
+	m := worker.Mutation
 	x := make([]float64, order)
 	y := make([]float64, order)
 	x[0] = rnd.Float64() * float64(worker.W)
@@ -26,8 +27,8 @@ func NewRandomPolygon(worker *Worker, order int, convex bool) *Polygon {
 		y[0] = float64(worker.Y)
 	}
 	for i := 1; i < order; i++ {
-		x[i] = x[0] + rnd.Float64()*40 - 20
-		y[i] = y[0] + rnd.Float64()*40 - 20
+		x[i] = x[0] + rnd.Float64()*m*2 - m
+		y[i] = y[0] + rnd.Float64()*m*2 - m
 	}
 	p := &Polygon{order, convex, x, y}
 	p.Mutate(worker)
@@ -74,9 +75,10 @@ func (p *Polygon) Scale(s float64) Shape {
 }
 
 func (p *Polygon) Mutate(worker *Worker) {
-	const m = 16
+	const q = 16
 	w := worker.W
 	h := worker.H
+	m := worker.Mutation
 	rnd := worker.Rnd
 	for {
 		if rnd.Float64() < 0.25 {
@@ -85,8 +87,8 @@ func (p *Polygon) Mutate(worker *Worker) {
 			p.X[i], p.Y[i], p.X[j], p.Y[j] = p.X[j], p.Y[j], p.X[i], p.Y[i]
 		} else {
 			i := rnd.Intn(p.Order)
-			p.X[i] = clamp(p.X[i]+rnd.NormFloat64()*16, -m, float64(w-1+m))
-			p.Y[i] = clamp(p.Y[i]+rnd.NormFloat64()*16, -m, float64(h-1+m))
+			p.X[i] = clamp(p.X[i]+rnd.NormFloat64()*m, -q, float64(w-1+q))
+			p.Y[i] = clamp(p.Y[i]+rnd.NormFloat64()*m, -q, float64(h-1+q))
 		}
 		if p.Valid() {
 			break

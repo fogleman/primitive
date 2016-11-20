@@ -11,6 +11,7 @@ import (
 type Model struct {
 	Sw, Sh      int
 	X, Y        int
+	Mutation    float64
 	Scale       float64
 	Background  Color
 	Target      *image.RGBA
@@ -43,6 +44,7 @@ func NewModel(target image.Image, background Color, size, numWorkers int) *Model
 	model := &Model{}
 	model.Sw = sw
 	model.Sh = sh
+	model.Mutation = 16
 	model.Scale = scale
 	model.Background = background
 	model.Target = imageToRGBA(target)
@@ -129,7 +131,7 @@ func (model *Model) Add(shape Shape, alpha int) {
 
 // func (model *Model) LocalSearch(shape Shape, alpha int) (*State, bool) {
 // 	state := NewState(model.Workers[0], shape, alpha)
-// 	state.Worker.Init(model.Current, model.Score, model.StrokeWidth, model.X, model.Y)
+// 	state.Worker.Init(model.Current, model.Score, model.StrokeWidth, model.Mutation, model.X, model.Y)
 // 	before := state.Energy()
 // 	state = HillClimb(state, 100).(*State)
 // 	after := state.Energy()
@@ -145,7 +147,7 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat, jobs int) int {
 		model.Add(state.Shape, state.Alpha)
 	} else {
 		worker := model.Workers[0]
-		worker.Init(model.Current, model.Score, model.StrokeWidth, model.X, model.Y)
+		worker.Init(model.Current, model.Score, model.StrokeWidth, model.Mutation, model.X, model.Y)
 		state = worker.RandomState(shapeType, alpha)
 		state = HillClimb(state, 100).(*State)
 		score := state.Energy()
@@ -155,7 +157,7 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat, jobs int) int {
 	}
 
 	for i := 0; i < repeat; i++ {
-		state.Worker.Init(model.Current, model.Score, model.StrokeWidth, model.X, model.Y)
+		state.Worker.Init(model.Current, model.Score, model.StrokeWidth, model.Mutation, model.X, model.Y)
 		a := state.Energy()
 		state = HillClimb(state, 100).(*State)
 		b := state.Energy()
@@ -182,7 +184,7 @@ func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
 	ch := make(chan *State, wn)
 	for i := 0; i < wn; i++ {
 		worker := model.Workers[i]
-		worker.Init(model.Current, model.Score, model.StrokeWidth, model.X, model.Y)
+		worker.Init(model.Current, model.Score, model.StrokeWidth, model.Mutation, model.X, model.Y)
 		go model.runWorker(worker, t, a, n, age, m, ch)
 	}
 	var bestEnergy float64

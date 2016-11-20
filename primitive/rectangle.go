@@ -14,6 +14,7 @@ type Rectangle struct {
 
 func NewRandomRectangle(worker *Worker) *Rectangle {
 	rnd := worker.Rnd
+	m := int(worker.Mutation)
 	x1 := rnd.Intn(worker.W)
 	y1 := rnd.Intn(worker.H)
 	if worker.X != 0 {
@@ -22,8 +23,8 @@ func NewRandomRectangle(worker *Worker) *Rectangle {
 	if worker.Y != 0 {
 		y1 = worker.Y
 	}
-	x2 := clampInt(x1+rnd.Intn(32)+1, 0, worker.W-1)
-	y2 := clampInt(y1+rnd.Intn(32)+1, 0, worker.H-1)
+	x2 := clampInt(x1+rnd.Intn(m)+1, 0, worker.W-1)
+	y2 := clampInt(y1+rnd.Intn(m)+1, 0, worker.H-1)
 	return &Rectangle{x1, y1, x2, y2}
 }
 
@@ -75,14 +76,15 @@ func (r *Rectangle) Scale(s float64) Shape {
 func (r *Rectangle) Mutate(worker *Worker) {
 	w := worker.W
 	h := worker.H
+	m := worker.Mutation
 	rnd := worker.Rnd
 	switch rnd.Intn(2) {
 	case 0:
-		r.X1 = clampInt(r.X1+int(rnd.NormFloat64()*16), 0, w-1)
-		r.Y1 = clampInt(r.Y1+int(rnd.NormFloat64()*16), 0, h-1)
+		r.X1 = clampInt(r.X1+int(rnd.NormFloat64()*m), 0, w-1)
+		r.Y1 = clampInt(r.Y1+int(rnd.NormFloat64()*m), 0, h-1)
 	case 1:
-		r.X2 = clampInt(r.X2+int(rnd.NormFloat64()*16), 0, w-1)
-		r.Y2 = clampInt(r.Y2+int(rnd.NormFloat64()*16), 0, h-1)
+		r.X2 = clampInt(r.X2+int(rnd.NormFloat64()*m), 0, w-1)
+		r.Y2 = clampInt(r.Y2+int(rnd.NormFloat64()*m), 0, h-1)
 	}
 }
 
@@ -103,6 +105,7 @@ type RotatedRectangle struct {
 
 func NewRandomRotatedRectangle(worker *Worker) *RotatedRectangle {
 	rnd := worker.Rnd
+	m := int(worker.Mutation)
 	x := rnd.Intn(worker.W)
 	y := rnd.Intn(worker.H)
 	if worker.X != 0 {
@@ -111,8 +114,8 @@ func NewRandomRotatedRectangle(worker *Worker) *RotatedRectangle {
 	if worker.Y != 0 {
 		y = worker.Y
 	}
-	sx := rnd.Intn(32) + 1
-	sy := rnd.Intn(32) + 1
+	sx := rnd.Intn(m) + 1
+	sy := rnd.Intn(m) + 1
 	a := rnd.Intn(360)
 	r := &RotatedRectangle{x, y, sx, sy, a}
 	r.Mutate(worker)
@@ -157,20 +160,21 @@ func (r *RotatedRectangle) Scale(s float64) Shape {
 func (r *RotatedRectangle) Mutate(worker *Worker) {
 	w := worker.W
 	h := worker.H
+	m := worker.Mutation
 	rnd := worker.Rnd
 	switch rnd.Intn(3) {
 	case 0:
-		r.X = clampInt(r.X+int(rnd.NormFloat64()*16), 0, w-1)
-		r.Y = clampInt(r.Y+int(rnd.NormFloat64()*16), 0, h-1)
+		r.X = clampInt(r.X+int(rnd.NormFloat64()*m), 0, w-1)
+		r.Y = clampInt(r.Y+int(rnd.NormFloat64()*m), 0, h-1)
 	case 1:
-		r.Sx = clampInt(r.Sx+int(rnd.NormFloat64()*16), 1, w-1)
-		r.Sy = clampInt(r.Sy+int(rnd.NormFloat64()*16), 1, h-1)
+		r.Sx = clampInt(r.Sx+int(rnd.NormFloat64()*m), 1, w-1)
+		r.Sy = clampInt(r.Sy+int(rnd.NormFloat64()*m), 1, h-1)
 	case 2:
-		r.Angle = r.Angle + int(rnd.NormFloat64()*32)
+		r.Angle = r.Angle + int(rnd.NormFloat64()*m)
 	}
 	// for !r.Valid() {
-	// 	r.Sx = clampInt(r.Sx+int(rnd.NormFloat64()*16), 0, w-1)
-	// 	r.Sy = clampInt(r.Sy+int(rnd.NormFloat64()*16), 0, h-1)
+	// 	r.Sx = clampInt(r.Sx+int(rnd.NormFloat64()*m), 0, w-1)
+	// 	r.Sy = clampInt(r.Sy+int(rnd.NormFloat64()*m), 0, h-1)
 	// }
 }
 

@@ -33,6 +33,7 @@ type Config struct {
 	Size          int
 	Resize        int
 	X, Y          int
+	Mutation      float64
 	StrokeWidth   float64
 	Scale         float64
 	Dirty         bool
@@ -47,6 +48,7 @@ func NewConfig() *Config {
 	c.Resize = 256
 	c.Size = 1024
 	c.StrokeWidth = 1
+	c.Mutation = 16
 	c.JobsPerWorker = 2
 	c.Dirty = true
 	c.Timestamp = time.Now()
@@ -80,6 +82,7 @@ func (c *Config) Step() {
 	c.Model.StrokeWidth = c.StrokeWidth * c.Scale
 	c.Model.X = c.X
 	c.Model.Y = c.Y
+	c.Model.Mutation = c.Mutation
 	index := len(c.Model.Shapes)
 	c.Model.Step(c.Shape, c.Alpha, c.Repeat, c.JobsPerWorker)
 	shapes := c.Model.Shapes[index:]
@@ -128,6 +131,8 @@ func (c *Config) ParseLine(line string) error {
 		return c.parseJobs(args)
 	case "position":
 		return c.parsePosition(args)
+	case "mutation":
+		return c.parseMutation(args)
 	case "background":
 		return c.parseBackground(args)
 	case "clear":
@@ -214,6 +219,15 @@ func (c *Config) parseStrokeWidth(args []string) error {
 		return err
 	}
 	c.StrokeWidth = strokeWidth
+	return nil
+}
+
+func (c *Config) parseMutation(args []string) error {
+	mutation, err := c.parseFloat(args, 1, math.MaxFloat64)
+	if err != nil {
+		return err
+	}
+	c.Mutation = mutation
 	return nil
 }
 

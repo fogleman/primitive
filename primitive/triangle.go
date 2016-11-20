@@ -15,6 +15,7 @@ type Triangle struct {
 
 func NewRandomTriangle(worker *Worker) *Triangle {
 	rnd := worker.Rnd
+	m := int(worker.Mutation)
 	x1 := rnd.Intn(worker.W)
 	y1 := rnd.Intn(worker.H)
 	if worker.X != 0 {
@@ -23,10 +24,10 @@ func NewRandomTriangle(worker *Worker) *Triangle {
 	if worker.Y != 0 {
 		y1 = worker.Y
 	}
-	x2 := x1 + rnd.Intn(31) - 15
-	y2 := y1 + rnd.Intn(31) - 15
-	x3 := x1 + rnd.Intn(31) - 15
-	y3 := y1 + rnd.Intn(31) - 15
+	x2 := x1 + rnd.Intn(m*2) - m
+	y2 := y1 + rnd.Intn(m*2) - m
+	x3 := x1 + rnd.Intn(m*2) - m
+	y3 := y1 + rnd.Intn(m*2) - m
 	t := &Triangle{x1, y1, x2, y2, x3, y3}
 	t.Mutate(worker)
 	return t
@@ -70,19 +71,20 @@ func (t *Triangle) Scale(s float64) Shape {
 func (t *Triangle) Mutate(worker *Worker) {
 	w := worker.W
 	h := worker.H
+	m := worker.Mutation
 	rnd := worker.Rnd
-	const m = 16
+	const p = 16
 	for {
 		switch rnd.Intn(3) {
 		case 0:
-			t.X1 = clampInt(t.X1+int(rnd.NormFloat64()*16), -m, w-1+m)
-			t.Y1 = clampInt(t.Y1+int(rnd.NormFloat64()*16), -m, h-1+m)
+			t.X1 = clampInt(t.X1+int(rnd.NormFloat64()*m), -p, w-1+p)
+			t.Y1 = clampInt(t.Y1+int(rnd.NormFloat64()*m), -p, h-1+p)
 		case 1:
-			t.X2 = clampInt(t.X2+int(rnd.NormFloat64()*16), -m, w-1+m)
-			t.Y2 = clampInt(t.Y2+int(rnd.NormFloat64()*16), -m, h-1+m)
+			t.X2 = clampInt(t.X2+int(rnd.NormFloat64()*m), -p, w-1+p)
+			t.Y2 = clampInt(t.Y2+int(rnd.NormFloat64()*m), -p, h-1+p)
 		case 2:
-			t.X3 = clampInt(t.X3+int(rnd.NormFloat64()*16), -m, w-1+m)
-			t.Y3 = clampInt(t.Y3+int(rnd.NormFloat64()*16), -m, h-1+m)
+			t.X3 = clampInt(t.X3+int(rnd.NormFloat64()*m), -p, w-1+p)
+			t.Y3 = clampInt(t.Y3+int(rnd.NormFloat64()*m), -p, h-1+p)
 		}
 		if t.Valid() {
 			break
