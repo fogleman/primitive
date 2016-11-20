@@ -33,6 +33,12 @@ func NewRandomCircle(worker *Worker) *Ellipse {
 	rnd := worker.Rnd
 	x := rnd.Intn(worker.W)
 	y := rnd.Intn(worker.H)
+	if worker.X != 0 {
+		x = worker.X
+	}
+	if worker.Y != 0 {
+		y = worker.Y
+	}
 	r := rnd.Intn(32) + 1
 	return &Ellipse{x, y, r, r, true}
 }
