@@ -55,29 +55,33 @@ func NewConfig() *Config {
 	return c
 }
 
+func (c *Config) Apply() {
+	image := c.Image
+	if c.Resize > 0 {
+		size := uint(c.Resize)
+		image = resize.Thumbnail(size, size, image, resize.Bilinear)
+	}
+	c.Scale = float64(image.Bounds().Size().X) / float64(c.Image.Bounds().Size().X)
+	workers := c.Workers
+	if workers < 1 {
+		workers = runtime.NumCPU()
+	}
+	background := c.Background
+	blank := primitive.Color{}
+	if background == blank {
+		background = primitive.MakeColor(primitive.AverageImageColor(image))
+	}
+	c.Model = primitive.NewModel(image, background, c.Size, workers)
+	c.Dirty = false
+	size := image.Bounds().Size()
+	println(fmt.Sprintf("size %d %d", size.X, size.Y))
+	println(fmt.Sprintf("background %d %d %d %d",
+		background.R, background.G, background.B, background.A))
+}
+
 func (c *Config) Step() {
 	if c.Dirty {
-		image := c.Image
-		if c.Resize > 0 {
-			size := uint(c.Resize)
-			image = resize.Thumbnail(size, size, image, resize.Bilinear)
-		}
-		c.Scale = float64(image.Bounds().Size().X) / float64(c.Image.Bounds().Size().X)
-		workers := c.Workers
-		if workers < 1 {
-			workers = runtime.NumCPU()
-		}
-		background := c.Background
-		blank := primitive.Color{}
-		if background == blank {
-			background = primitive.MakeColor(primitive.AverageImageColor(image))
-		}
-		c.Model = primitive.NewModel(image, background, c.Size, workers)
-		c.Dirty = false
-		size := image.Bounds().Size()
-		println(fmt.Sprintf("size %d %d", size.X, size.Y))
-		println(fmt.Sprintf("background %d %d %d %d",
-			background.R, background.G, background.B, background.A))
+		c.Apply()
 	}
 	c.Model.StrokeWidth = c.StrokeWidth * c.Scale
 	c.Model.X = c.X
@@ -141,6 +145,8 @@ func (c *Config) ParseLine(line string) error {
 		return c.parseRun(args)
 	case "step":
 		return c.parseStep(args)
+	case "apply":
+		return c.parseApply(args)
 	case "save":
 		return c.parseSave(args)
 	case "strokewidth":
@@ -339,6 +345,14 @@ func (c *Config) parseStep(args []string) error {
 		return InvalidCommand
 	}
 	c.Step()
+	return nil
+}
+
+func (c *Config) parseApply(args []string) error {
+	if len(args) != 0 || c.Image == nil {
+		return InvalidCommand
+	}
+	c.Apply()
 	return nil
 }
 
