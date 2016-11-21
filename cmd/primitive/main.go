@@ -56,6 +56,9 @@ func NewConfig() *Config {
 }
 
 func (c *Config) Apply() {
+	if !c.Dirty {
+		return
+	}
 	image := c.Image
 	if c.Resize > 0 {
 		size := uint(c.Resize)
@@ -80,9 +83,7 @@ func (c *Config) Apply() {
 }
 
 func (c *Config) Step() {
-	if c.Dirty {
-		c.Apply()
-	}
+	c.Apply()
 	c.Model.StrokeWidth = c.StrokeWidth * c.Scale
 	c.Model.X = c.X
 	c.Model.Y = c.Y
