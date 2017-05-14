@@ -104,5 +104,7 @@ func (worker *Worker) RandomState(t ShapeType, a int) *State {
 		return NewState(worker, NewRandomRotatedEllipse(worker), a)
 	case ShapeTypePolygon:
 		return NewState(worker, NewRandomPolygon(worker, 4, false), a)
+	case ShapeTypeChord:
+		return NewState(worker, NewRandomChord(worker), a)
 	}
 }
