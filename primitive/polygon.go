@@ -1,6 +1,9 @@
 package primitive
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/fogleman/gg"
 	"github.com/golang/freetype/raster"
 )
@@ -37,7 +40,15 @@ func (p *Polygon) Draw(dc *gg.Context, scale float64) {
 }
 
 func (p *Polygon) SVG(attrs string) string {
-	return ""
+	ret := fmt.Sprintf(
+		"<polygon %s points=\"",
+		attrs)
+	points := make([]string, len(p.X))
+	for i := 0; i < len(p.X); i++ {
+		points[i] = fmt.Sprintf("%f,%f", p.X[i], p.Y[i])
+	}
+
+	return ret + strings.Join(points, ",") + "\" />"
 }
 
 func (p *Polygon) Copy() Shape {
