@@ -66,7 +66,7 @@ func init() {
 	flag.StringVar(&Input, "i", "", "input image path")
 	flag.Var(&Outputs, "o", "output image path")
 	flag.Var(&Configs, "n", "number of primitives")
-	flag.IntVar(&BlurFilter, "blur", 0, "make N bloor (for svg, 0 - disabled)")
+	flag.IntVar(&BlurFilter, "blur", 0, "make N blur (for svg, 0 - disabled)")
 	flag.StringVar(&Background, "bg", "", "background color (hex)")
 	flag.IntVar(&Alpha, "a", 128, "alpha value")
 	flag.IntVar(&InputSize, "r", 256, "resize large input images to this size")
