@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/nfnt/resize"
-	"github.com/ramainen/primitive/primitive"
+	"github.com/fogleman/primitive/primitive"
 )
 
 var (
