@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nfnt/resize"
 	"github.com/fogleman/primitive/primitive"
+	"github.com/nfnt/resize"
 )
 
 var (
