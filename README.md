@@ -44,6 +44,7 @@ Small input images should be used (like 256x256px). You don't need the detail an
 | `s` | 1024 | output image size |
 | `a` | 128 | color alpha (use `0` to let the algorithm choose alpha for each shape) |
 | `bg` | avg | starting background color (hex) |
+| `blur` | 0 | making SVG blured, adds blur filter witn N deviation. 0 - disabled. |
 | `j` | 0 | number of parallel workers (default uses all cores) |
 | `v` | off | verbose output |
 | `vv` | off | very verbose output |
