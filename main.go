@@ -14,6 +14,9 @@ import (
 
 	"github.com/fogleman/primitive/primitive"
 	"github.com/nfnt/resize"
+
+	"github.com/sbwhitecap/tqdm"
+	
 )
 
 var (
@@ -161,7 +164,7 @@ func main() {
 		primitive.Log(1, "count=%d, mode=%d, alpha=%d, repeat=%d\n",
 			config.Count, config.Mode, config.Alpha, config.Repeat)
 
-		for i := 0; i < config.Count; i++ {
+		tqdm.R(0, config.Count, func(i interface{}) (brk bool) {
 			frame++
 
 			// find optimal shape and add it to the model
@@ -199,6 +202,7 @@ func main() {
 					}
 				}
 			}
-		}
+			return;
+		})
 	}
 }
