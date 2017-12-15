@@ -56,6 +56,7 @@ Depending on the output filename extension provided, you can produce different t
 - `JPG`: raster output
 - `SVG`: vector output
 - `GIF`: animated output showing shapes being added - requires ImageMagick (specifically the `convert` command)
+- `MP4`: mp4 output showing shapes being added - requires ImageMagick and [ffmpeg](https://www.ffmpeg.org/documentation.html) (specifically the command `ffmpeg -i "$pattern" -q 5 -pix_fmt yuv420p "${out_base}.mp4` command)
 
 For PNG and SVG outputs, you can also include `%d`, `%03d`, etc. in the filename. In this case, each frame will be saved separately.
 

@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/fogleman/primitive/primitive"
+	"github.com/nfnt/resize"
 	"log"
 	"math/rand"
 	"os"
@@ -11,9 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/fogleman/primitive/primitive"
-	"github.com/nfnt/resize"
 )
 
 var (
@@ -196,6 +195,9 @@ func main() {
 					case ".gif":
 						frames := model.Frames(0.001)
 						check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
+					case ".mp4":
+						frames := model.Frames(0.001)
+						check(primitive.SaveMp4(path, frames))
 					}
 				}
 			}

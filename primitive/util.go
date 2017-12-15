@@ -98,6 +98,42 @@ func SaveGIFImageMagick(path string, frames []image.Image, delay, lastDelay int)
 	return os.RemoveAll(dir)
 }
 
+//SaveMp4 output images to mp4 file
+func SaveMp4(outputMp4Path string, frames []image.Image) error {
+	//check ffmpeg if is installed
+	cmd := exec.Command("ffmpeg", "-h")
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("you should install ffmpeg first,macOS user `brew install ffmpeg`,more info mation https://www.ffmpeg.org/download.html#build-linux ")
+		return err
+	}
+	//make temp dir
+	tempDir, err := ioutil.TempDir("", "")
+	if err != nil {
+		return err
+	}
+	//output batch pngs for converting
+	pngNamePatern := "%06d.png"
+	for i, im := range frames {
+		path := filepath.Join(tempDir, fmt.Sprintf(pngNamePatern, i))
+		SavePNG(path, im)
+	}
+	//create mp4 file from pngs
+	cmd = exec.Command("ffmpeg",
+		"-i", pngNamePatern,
+		"-pix_fmt", "yuv420p",
+		"-vf", "scale=trunc(in_w/2)*2:trunc(in_h/2)*2",
+		outputMp4Path)
+	cmd.Dir = tempDir
+
+	if err = cmd.Run(); err != nil {
+		fmt.Println(err)
+	}
+	//move temp mp4 file to flag.output path
+	os.Rename(filepath.Join(tempDir, outputMp4Path), outputMp4Path)
+	//remove temp folder content
+	return os.RemoveAll(tempDir)
+}
 func NumberString(x float64) string {
 	suffixes := []string{"", "k", "M", "G"}
 	for _, suffix := range suffixes {
