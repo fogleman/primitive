@@ -152,6 +152,7 @@ func main() {
 	}
 
 	// run algorithm
+	//跑算法
 	model := primitive.NewModel(input, bg, OutputSize, Workers)
 	primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
 	start := time.Now()

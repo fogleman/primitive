@@ -113,7 +113,7 @@ func SaveMp4(outputMp4Path string, frames []image.Image) error {
 		return err
 	}
 	//output batch pngs for converting
-	pngNamePatern := "%06d.png"
+	pngNamePatern := "%07d.png"
 	for i, im := range frames {
 		path := filepath.Join(tempDir, fmt.Sprintf(pngNamePatern, i))
 		SavePNG(path, im)

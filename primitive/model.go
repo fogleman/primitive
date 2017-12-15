@@ -66,7 +66,6 @@ func (model *Model) newContext() *gg.Context {
 func (model *Model) Frames(scoreDelta float64) []image.Image {
 	var result []image.Image
 	dc := model.newContext()
-	result = append(result, imageToRGBA(dc.Image()))
 	previous := 10.0
 	for i, shape := range model.Shapes {
 		c := model.Colors[i]
@@ -77,6 +76,26 @@ func (model *Model) Frames(scoreDelta float64) []image.Image {
 		delta := previous - score
 		if delta >= scoreDelta {
 			previous = score
+			result = append(result, imageToRGBA(dc.Image()))
+		}
+	}
+	//result = append(result,  imageToRGBA(model.Context.Image()))
+	return result
+}
+
+//	FramesForGif return nice gif frame
+func (model *Model) FramesForGif(gifFrameCount int) []image.Image {
+	//get max score
+	var result []image.Image
+	dc := model.newContext()
+	deltaFrameCount := len(model.Shapes) / gifFrameCount
+	deltaBgin := len(model.Shapes) % deltaFrameCount
+	for i, shape := range model.Shapes {
+		c := model.Colors[i]
+		dc.SetRGBA255(c.R, c.G, c.B, c.A)
+		shape.Draw(dc, model.Scale)
+		dc.Fill()
+		if deltaBgin == (i+1)%deltaFrameCount {
 			result = append(result, imageToRGBA(dc.Image()))
 		}
 	}
