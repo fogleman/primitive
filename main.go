@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/fogleman/primitive/primitive"
+	"github.com/mojocn/primitive/primitive"
 	"github.com/nfnt/resize"
 	"log"
 	"math/rand"
