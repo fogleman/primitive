@@ -2,9 +2,9 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -57,16 +57,15 @@ func Upload(WeiboShareURL, fileNameOrPath, shareContent string) (err error) {
 	}
 
 	// Check the response
+	bodyBytes, _ := ioutil.ReadAll(res.Body)
+	bodyString := string(bodyBytes)
 	if res.StatusCode != http.StatusOK {
 
-		bodyBytes, _ := ioutil.ReadAll(res.Body)
-		bodyString := string(bodyBytes)
-		err = fmt.Errorf("bad status: %s,\n%s", res.Status, bodyString)
+		log.Printf("bad status: %s,\n%s", res.Status, bodyString)
 
 	}
-	var bytess []byte
-	res.Body.Read(bytess)
-	fmt.Println(string(bytess))
+
+	log.Println(bodyString)
 	return
 }
 
