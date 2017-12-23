@@ -71,7 +71,6 @@ func ProccessImage(inputImgPath, outputImagePath string, mode, shapeCount, frame
 			if percent {
 				path = fmt.Sprintf(outputImagePath, i/frameDelta+1)
 			}
-
 			switch ext {
 			default:
 				check(fmt.Errorf("unrecognized file extension: %s", ext))
@@ -86,7 +85,7 @@ func ProccessImage(inputImgPath, outputImagePath string, mode, shapeCount, frame
 				fmt.Printf("%d,frames count", len(model.Shapes))
 				check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
 			case ".mp4":
-				frames := model.Frames(0.00000001)
+				frames := model.Frames(0.0001)
 				check(primitive.SaveMp4(path, frames))
 			}
 		}

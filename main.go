@@ -61,12 +61,12 @@ func (i *shapeConfigArray) Set(value string) error {
 }
 
 func init() {
-	flag.StringVar(&Input, "i", "", "input image path")
-	flag.Var(&Outputs, "o", "output image path")
-	flag.Var(&Configs, "n", "number of primitives")
-	flag.StringVar(&Background, "bg", "", "background color (hex)")
+	flag.StringVar(&Input, "i", "", "input image path,图片地址")
+	flag.Var(&Outputs, "o", "output image path,输出地址")
+	flag.Var(&Configs, "n", "number of primitives,输出图像的数量数值越大图像越细腻")
+	flag.StringVar(&Background, "bg", "", "background color (hex),背景颜色")
 	flag.IntVar(&Alpha, "a", 128, "alpha value")
-	flag.IntVar(&InputSize, "r", 256, "resize large input images to this size")
+	flag.IntVar(&InputSize, "r", 256, "resize large input images to this size,缩放输出图片的尺寸")
 	flag.IntVar(&OutputSize, "s", 1024, "output image size")
 	flag.IntVar(&Mode, "m", 1, "0=combo 1=triangle 2=rect 3=ellipse 4=circle 5=rotatedrect 6=beziers 7=rotatedellipse 8=polygon")
 	flag.IntVar(&Workers, "j", 0, "number of parallel workers (default uses all cores)")

@@ -5,8 +5,8 @@ import (
 )
 
 func TestProccessImage(t *testing.T) {
-	inputPath := "/Users/ericzhou/go/src/github.com/mojocn/primitive/examples/lenna.png"
-	outputPath := "/Users/ericzhou/go/src/github.com/mojocn/primitive/examples/lenna.mp4"
+	inputPath := "/Users/ericzhou/go/src/github.com/mojocn/primitive/examples/monalisa.png"
+	outputPath := "/Users/ericzhou/go/src/github.com/mojocn/primitive/examples/monalisa%2d.png"
 
-	ProccessImage(inputPath, outputPath, 0, 100, 4, 1024)
+	ProccessImage(inputPath, outputPath, 0, 1024, 8, 1024)
 }
