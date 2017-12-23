@@ -70,5 +70,5 @@ func Upload(WeiboShareURL, fileNameOrPath, shareContent string) (err error) {
 }
 
 func main() {
-	Upload(WeiboShareURL, "/Users/ericzhou/go/src/github.com/fogleman/primitive/examples/monalisa.png", "hello_world jjj !")
+	Upload(WeiboShareURL, "monalisa 8.png", "hello_world jjj !")
 }
