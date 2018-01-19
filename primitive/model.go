@@ -9,17 +9,17 @@ import (
 )
 
 type Model struct {
-	Sw, Sh     int
-	Scale      float64
-	Background Color
-	Target     *image.RGBA
-	Current    *image.RGBA
-	Context    *gg.Context
-	Score      float64
-	Shapes     []Shape
-	Colors     []Color
-	Scores     []float64
-	Workers    []*Worker
+	Sw, Sh, Vw, Vh int
+	Scale          float64
+	Background     Color
+	Target         *image.RGBA
+	Current        *image.RGBA
+	Context        *gg.Context
+	Score          float64
+	Shapes         []Shape
+	Colors         []Color
+	Scores         []float64
+	Workers        []*Worker
 }
 
 func NewModel(target image.Image, background Color, size, numWorkers int) *Model {
@@ -41,6 +41,8 @@ func NewModel(target image.Image, background Color, size, numWorkers int) *Model
 	model := &Model{}
 	model.Sw = sw
 	model.Sh = sh
+	model.Vw = sw / int(scale)
+	model.Vh = sh / int(scale)
 	model.Scale = scale
 	model.Background = background
 	model.Target = imageToRGBA(target)
@@ -85,15 +87,23 @@ func (model *Model) Frames(scoreDelta float64) []image.Image {
 
 func (model *Model) SVG() string {
 	bg := model.Background
+	fillA := model.Colors[0].A
 	var lines []string
-	lines = append(lines, fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%d\" height=\"%d\">", model.Sw, model.Sh))
-	lines = append(lines, fmt.Sprintf("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#%02x%02x%02x\" />", model.Sw, model.Sh, bg.R, bg.G, bg.B))
-	lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f) translate(0.5 0.5)\">", model.Scale))
+	lines = append(lines, fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 %d %d\">", model.Vw, model.Vh))
+	lines = append(lines, fmt.Sprintf("<rect width=\"100%%\" height=\"100%%\" fill=\"#%02x%02x%02x\" />", bg.R, bg.G, bg.B))
+	group := "<g fill-opacity=\"%f\">"
+	lines = append(lines, fmt.Sprintf(group, float64(fillA)/255))
 	for i, shape := range model.Shapes {
+		var attrs []string
 		c := model.Colors[i]
-		attrs := "fill=\"#%02x%02x%02x\" fill-opacity=\"%f\""
-		attrs = fmt.Sprintf(attrs, c.R, c.G, c.B, float64(c.A)/255)
-		lines = append(lines, shape.SVG(attrs))
+		fill := "fill=\"#%02x%02x%02x\""
+		fill = fmt.Sprintf(fill, c.R, c.G, c.B)
+		attrs = append(attrs, fill)
+		if c.A != fillA {
+			opacity := "fill-opacity=\"%f\""
+			attrs = append(attrs, fmt.Sprintf(opacity, float64(c.A)/255))
+		}
+		lines = append(lines, shape.SVG(strings.Join(attrs, " ")))
 	}
 	lines = append(lines, "</g>")
 	lines = append(lines, "</svg>")
