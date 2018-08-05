@@ -86,7 +86,7 @@ func (model *Model) Frames(scoreDelta float64) []image.Image {
 func (model *Model) SVG() string {
 	bg := model.Background
 	var lines []string
-	lines = append(lines, fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%d\" height=\"%d\">", model.Sw, model.Sh))
+	lines = append(lines, fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"100%%\" height=\"100%%\">"))
 	lines = append(lines, fmt.Sprintf("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#%02x%02x%02x\" />", model.Sw, model.Sh, bg.R, bg.G, bg.B))
 	lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f) translate(0.5 0.5)\">", model.Scale))
 	for i, shape := range model.Shapes {
@@ -133,7 +133,7 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 	}
 
 	// for _, w := range model.Workers[1:] {
-	// 	model.Workers[0].Heatmap.AddHeatmap(w.Heatmap)
+	//	model.Workers[0].Heatmap.AddHeatmap(w.Heatmap)
 	// }
 	// SavePNG("heatmap.png", model.Workers[0].Heatmap.Image(0.5))
 
