@@ -1,8 +1,8 @@
 name: primitive
 version: '1.0'
-summary: Complete container management platform 
+summary: Reproducing images with geometric primitives
 description: |
-  Complete container management platform.
+  Reproducing images with geometric primitives.
 grade: stable
 confinement: strict
 base: core18
