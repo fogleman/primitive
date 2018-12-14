@@ -1,0 +1,21 @@
+name: primitive
+version: '1.0'
+summary: Complete container management platform 
+description: |
+  Complete container management platform.
+grade: stable
+confinement: strict
+base: core18
+parts:
+  primitive:
+    plugin: go
+    source: https://github.com/fogleman/primitive.git
+    go-importpath: github.com/fogleman/primitive
+    build-packages:
+      - build-essential
+apps:
+  primitive:
+    command: bin/primitive
+    plugs:
+      - home
+      - x11
