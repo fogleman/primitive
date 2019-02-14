@@ -17,23 +17,33 @@ import (
 )
 
 func LoadImage(path string) (image.Image, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
+	if path == "-" {
+		im, _, err := image.Decode(os.Stdin)
+		return im, err
+	} else {
+		file, err := os.Open(path)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+		im, _, err := image.Decode(file)
+		return im, err
 	}
-	defer file.Close()
-	im, _, err := image.Decode(file)
-	return im, err
 }
 
 func SaveFile(path, contents string) error {
-	file, err := os.Create(path)
-	if err != nil {
+	if path == "-" {
+		_, err := fmt.Fprint(os.Stdout, contents)
+		return err
+	} else {
+		file, err := os.Create(path)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		_, err = file.WriteString(contents)
 		return err
 	}
-	defer file.Close()
-	_, err = file.WriteString(contents)
-	return err
 }
 
 func SavePNG(path string, im image.Image) error {
