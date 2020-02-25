@@ -8,4 +8,5 @@
   
     B) 
 
-3) 
+3) Create an image filter option to change the appearance of the photo by altering the shades and/or colors of the primitive shapes. 
+    A) As an App user, I want to apply a filter so that I can produce my picture in gray scale, sepia, or negative.  
