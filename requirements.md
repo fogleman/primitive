@@ -1,4 +1,4 @@
-# Software Requirements Specification for Spring 2020 "Software Engineering" Primitives Project at Wright Stet University
+# Software Requirements Specification for Spring 2020 "Software Engineering" Primitives Project at Wright State University
 
 ## Overview
 
@@ -25,4 +25,8 @@ Req. 2.2 The App shall output an image consisting of outlines for each area of d
  
 Req. 2.2.1 Output outlines shall be annotated in the same manner as specified for areas of distict color in Req. 2.1.
 
-Req. 2.3 The shall output a table correlating numbers with distinct colors that appears in the output image.
+Req. 2.3 The App shall output a table correlating numbers with distinct colors that appears in the output image.
+
+### [User Story 3 ](features.md "Ref. Features And User Stories")
+
+Req. 3.0 The App shall have the ability to output in the filter types of gray scale, sepia, or negative.
