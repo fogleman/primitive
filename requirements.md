@@ -30,3 +30,7 @@ Req. 2.3 The App shall output a table correlating numbers with distinct colors t
 ### [User Story 3 ](features.md "Ref. Features And User Stories")
 
 Req. 3.0 The App shall have the ability to output in the filter types of gray scale, sepia, or negative.
+
+### [User Story 4 ](features.md "Ref. Features And User Stories")
+
+Req. 4.0 The app shall have a GUI
