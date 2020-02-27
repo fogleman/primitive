@@ -1,6 +1,7 @@
 # Planned Features
 
 1) Privide a GUI for configuring and running program
+    A) As an App user, I want to use the program through a GUI. This GUI should have options like; select file and how many polygons used.
 
 2) Keep track of each color used, and output an image that identifies each primitive with a number corresponding to the color of that primitive.
 
