@@ -29,11 +29,15 @@ Req. 2.3 The App shall output a table correlating numbers with distinct colors t
 
 ### [User Story 3 ](features.md "Ref. Features And User Stories")
 
-Req. 3.0 The App shall output the image in gray scale.
+Req. 3.0 The User shall have an option to apply a filter to the output image. 
 
-Req. 3.1 The App shall output the image in sepia. 
+Req. 3.1 The App shall produce an output image in gray scale.
 
-Req. 3.2 The App shall output the image in negative.
+Req. 3.2 The App shall produce an output image in sepia. 
+
+Req. 3.3 The App shall produce an output image in negative.
+
+Req. 3.4 The User shall be able to choose which filter to apply
 
 ### [User Story 4 ](features.md "Ref. Features And User Stories")
 
