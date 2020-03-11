@@ -8,6 +8,21 @@ This document specifies the project modifation to Fogleman's Primitive Applicati
 
 ## Functional Requirements
 
+### [User Story 1 ](features.md "Ref. Features And User Stories")
+
+Req. 1.0 The User Interface shall have a help button to walk the user through how to use primitive.
+
+Req. 1.1 The User Interface shall have an export option to export the image as a paint by numbers.
+
+Req. 1.2 The User Interface shall allow the user to select the number of geometric shapes to form their image.
+
+Req. 1.3 The User Interface shall allow the user to select up to five different geometric shapes.
+
+Req. 1.4 The User Interface shall display the final image.
+
+Req. 1.5 The User Interface shall allow the user to select an image from their device to modify.
+
+
 ### [User Story 2 ](features.md "Ref. Features And User Stories")
 
 
@@ -37,7 +52,9 @@ Req. 2.4.3 The App shall have a hard level consisting of 150 geometric shapes.
 
 Req. 2.4.4 The App shall have an expert level consisting of 300 geometric shapes. 
 
+
 ### [User Story 3 ](features.md "Ref. Features And User Stories")
+
 
 Req. 3.0 The User shall have an option to apply a filter to the output image. 
 
@@ -48,17 +65,3 @@ Req. 3.2 The App shall produce an output image in sepia.
 Req. 3.3 The App shall produce an output image in negative.
 
 Req. 3.4 The User shall be able to select a filter.
-
-### [User Story 4 ](features.md "Ref. Features And User Stories")
-
-Req. 4.0 The User Interface shall have a help button to walk the user through how to use primitive.
-
-Req. 4.1 The User Interface shall have an export option to export the image as a paint by numbers.
-
-Req. 4.2 The User Interface shall allow the user to select the number of geometric shapes to form their image.
-
-Req. 4.3 The User Interface shall allow the user to select up to five different geometric shapes.
-
-Req. 4.4 The User Interface shall display the final image.
-
-Req. 4.5 The User Interface shall allow the user to select an image from their device to modify.
