@@ -60,3 +60,5 @@ Req. 4.2 The User Interface shall allow the user to select the number of geometr
 Req. 4.3 The User Interface shall allow the user to select up to five different geometric shapes.
 
 Req. 4.4 The User Interface shall display the final image.
+
+Req. 4.5 The User shall be able to select an image from their device to modify.
