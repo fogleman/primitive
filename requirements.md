@@ -8,7 +8,7 @@ This document specifies the project modifation to Fogleman's Primitive Applicati
 
 ## Functional Requirements
 
-### [User Story 2A ](features.md "Ref. Features And User Stories")
+### [User Story 2 ](features.md "Ref. Features And User Stories")
 
 
 Req. 2.0 The App shall for each output image identify each distinct color within the output image using a different number per color.
