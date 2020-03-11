@@ -57,6 +57,6 @@ Req. 4.1 The User Interface shall have an export option to export the image as a
 
 Req. 4.2 The User Interface shall allow the user to select the number of geometric shapes to form their image.
 
-Req. 4.3 The User Interface shall allow the user to select up to nine different geometric shapes.
+Req. 4.3 The User Interface shall allow the user to select up to five different geometric shapes.
 
-Req. 4.3 The User Interface shall display the final image.
+Req. 4.4 The User Interface shall display the final image.
