@@ -8,7 +8,6 @@
 
     A) As an App user, I want to produce an image with numbers identifying each color so that I can produce "Paint by Numbers" and a person can maunually reproduce the image by filling each primitive with the numbered color.
   
-    B) 
 
 3) Create an image filter option to change the appearance of the photo by altering the shades and/or colors of the primitive shapes. 
 
