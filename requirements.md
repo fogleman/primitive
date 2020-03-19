@@ -32,7 +32,7 @@ Req. 2.1 The App shall annotate each output image to show the number correspondi
 
 Req. 2.1.1 Each annotation shall consist of text in 8pt font or greater.
 
-Req. 2.1.2 Each annotation shall be presented in each output image directly above the distict color to which the annotation corresponds.
+Req. 2.1.2 Each annotation shall be presented in each output image directly above the distict color to which the annotation corresponds
 
 Req. 2.1.2.1 Each area of distinct color in the output shall have a corresponding annotation.
 
