@@ -42,3 +42,21 @@ func MakeHexColor(x string) Color {
 func (c *Color) NRGBA() color.NRGBA {
 	return color.NRGBA{uint8(c.R), uint8(c.G), uint8(c.B), uint8(c.A)}
 }
+
+// Req. 3.1
+func GrayScaleFilter(c color.Color) Color {
+	// TODO: apply gray scale algorithm
+	return Color{}
+}
+
+// Req. 3.2
+func SepiaFilter(c color.Color) Color {
+	// TODO: apply sepia algorithm
+	return Color{}
+}
+
+// Req. 3.3
+func NegativeFilter(c color.Color) Color {
+	// TODO: apply negative algorithm
+	return Color{}
+}

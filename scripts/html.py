@@ -1,6 +1,9 @@
 import os
 import sys
-
+#This is a comment to test godoc
+#This is a comment to test godoc
+#This is a comment to test godoc
+#This is a comment to test godoc
 def run(in_folder, out_folder):
     seen = set()
     for name in os.listdir(out_folder):

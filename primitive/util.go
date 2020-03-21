@@ -203,3 +203,8 @@ func AverageImageColor(im image.Image) color.NRGBA {
 	b /= w * h
 	return color.NRGBA{uint8(r), uint8(g), uint8(b), 255}
 }
+
+//REQ 2.3
+func printKey(colorMap *map) {
+
+}
