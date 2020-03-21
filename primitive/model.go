@@ -8,6 +8,8 @@ import (
 	"github.com/fogleman/gg"
 )
 
+//TODO: add FILTER
+//Note: default = none
 type Model struct {
 	Sw, Sh     int
 	Scale      float64

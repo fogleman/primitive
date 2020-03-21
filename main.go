@@ -62,6 +62,7 @@ func (i *shapeConfigArray) Set(value string) error {
 }
 
 func init() {
+	//TODO ADD FILTER OPTION REQ 3.0 & 3.4
 	flag.StringVar(&Input, "i", "", "input image path")
 	flag.Var(&Outputs, "o", "output image path")
 	flag.Var(&Configs, "n", "number of primitives")
