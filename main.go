@@ -20,6 +20,8 @@ var (
 	Input      string
 	Outputs    flagArray
 	Background string
+	ShapeColorsStr string
+	ShapeColors []string
 	Configs    shapeConfigArray
 	Alpha      int
 	InputSize  int
@@ -66,6 +68,7 @@ func init() {
 	flag.Var(&Outputs, "o", "output image path")
 	flag.Var(&Configs, "n", "number of primitives")
 	flag.StringVar(&Background, "bg", "", "background color (hex)")
+	flag.StringVar(&ShapeColorsStr, "col", "", "colors to use in shapes(comma seperated hex)")
 	flag.IntVar(&Alpha, "a", 128, "alpha value")
 	flag.IntVar(&InputSize, "r", 256, "resize large input images to this size")
 	flag.IntVar(&OutputSize, "s", 1024, "output image size")
@@ -111,11 +114,14 @@ func main() {
 			ok = errorMessage("ERROR: number argument must be > 0")
 		}
 	}
+
+	ShapeColors = strings.Split(ShapeColorsStr,",")
 	if !ok {
 		fmt.Println("Usage: primitive [OPTIONS] -i input -o output -n count")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
+
 
 	// set log level
 	if V {
