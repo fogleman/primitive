@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-func computeColor(target, current *image.RGBA, lines []Scanline, alpha int) Color {
+func computeColor(target, current *image.RGBA, lines []Scanline, alpha int, sc []Color) Color {
 	var rsum, gsum, bsum, count int64
 	a := 0x101 * 255 / alpha
 	for _, line := range lines {
@@ -27,9 +27,26 @@ func computeColor(target, current *image.RGBA, lines []Scanline, alpha int) Colo
 	if count == 0 {
 		return Color{}
 	}
-	r := clampInt(int(rsum/count)>>8, 0, 255)
-	g := clampInt(int(gsum/count)>>8, 0, 255)
-	b := clampInt(int(bsum/count)>>8, 0, 255)
+	natr := clampInt(int(rsum/count)>>8, 0, 255)
+	natg := clampInt(int(gsum/count)>>8, 0, 255)
+	natb := clampInt(int(bsum/count)>>8, 0, 255)
+	r := natr
+	g := natg
+	b := natb
+	dist := 255*255*3 + 1
+	if(len(sc) >0){
+		for i,v := range(sc){
+			bob := i
+			bob = bob
+			newdist := (natr -v.R)*(natr -v.R) +  (natg -v.G)*(natg -v.G) + (natb -v.B)*(natb -v.B)
+			if(newdist < dist){
+				dist = newdist
+				r = v.R
+				g = v.G
+				b = v.B
+			}
+		}
+	}
 	return Color{r, g, b, alpha}
 }
 

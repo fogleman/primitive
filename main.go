@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fogleman/primitive/primitive"
+	"github.com/laurenceforshaw/primitive/primitive"
 	"github.com/nfnt/resize"
 )
 
@@ -21,7 +21,6 @@ var (
 	Outputs    flagArray
 	Background string
 	ShapeColorsStr string
-	ShapeColors []string
 	Configs    shapeConfigArray
 	Alpha      int
 	InputSize  int
@@ -115,7 +114,6 @@ func main() {
 		}
 	}
 
-	ShapeColors = strings.Split(ShapeColorsStr,",")
 	if !ok {
 		fmt.Println("Usage: primitive [OPTIONS] -i input -o output -n count")
 		flag.PrintDefaults()
@@ -151,6 +149,14 @@ func main() {
 	}
 
 	// determine background color
+	var sc  []primitive.Color
+	if ShapeColorsStr != "" {
+		var ShapeColorsStrAr = strings.Split(ShapeColorsStr, ",")
+		sc = make([]primitive.Color, len(ShapeColorsStrAr))
+		for i, v := range ShapeColorsStrAr {
+			sc[i] = primitive.MakeHexColor(v)
+		}
+	}
 	var bg primitive.Color
 	if Background == "" {
 		bg = primitive.MakeColor(primitive.AverageImageColor(input))
@@ -159,7 +165,7 @@ func main() {
 	}
 
 	// run algorithm
-	model := primitive.NewModel(input, bg, OutputSize, Workers)
+	model := primitive.NewModel(input, bg, sc, OutputSize, Workers)
 	primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
 	start := time.Now()
 	frame := 0

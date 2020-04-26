@@ -19,9 +19,10 @@ type Worker struct {
 	Rnd        *rand.Rand
 	Score      float64
 	Counter    int
+	sc         []Color
 }
 
-func NewWorker(target *image.RGBA) *Worker {
+func NewWorker(target *image.RGBA,sc []Color)*Worker {
 	w := target.Bounds().Size().X
 	h := target.Bounds().Size().Y
 	worker := Worker{}
@@ -33,6 +34,7 @@ func NewWorker(target *image.RGBA) *Worker {
 	worker.Lines = make([]Scanline, 0, 4096) // TODO: based on height
 	worker.Heatmap = NewHeatmap(w, h)
 	worker.Rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
+	worker.sc = sc
 	return &worker
 }
 
@@ -47,7 +49,7 @@ func (worker *Worker) Energy(shape Shape, alpha int) float64 {
 	worker.Counter++
 	lines := shape.Rasterize()
 	// worker.Heatmap.Add(lines)
-	color := computeColor(worker.Target, worker.Current, lines, alpha)
+	color := computeColor(worker.Target, worker.Current, lines, alpha ,worker.sc)
 	copyLines(worker.Buffer, worker.Current, lines)
 	drawLines(worker.Buffer, color, lines)
 	return differencePartial(worker.Target, worker.Current, worker.Buffer, worker.Score, lines)
