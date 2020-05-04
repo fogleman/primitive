@@ -6,7 +6,7 @@ Reproducing images with geometric primitives.
 
 ### How it Works
 
-A target image is provided as input. The algorithm tries to find the single most optimal shape that can be drawn to minimize the error between the target image and the drawn image. It repeats this process, adding *one shape at a time*. Around 50 to 200 shapes are needed to reach a result that is recognizable yet artistic and abstract.
+A target image is provided as input. The algorithm tries to find the optimal shape that can be drawn to minimize the error between the target image and the drawn image. It repeats this process, adding *one shape at a time*. Around 50 to 200 shapes are needed to reach a result that is recognizable yet artistic and abstract.
 
 ### Primitive for macOS
 
