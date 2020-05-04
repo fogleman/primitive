@@ -47,6 +47,7 @@ Small input images should be used (like 256x256px). You don't need the detail an
 | `j` | 0 | number of parallel workers (default uses all cores) |
 | `v` | off | verbose output |
 | `vv` | off | very verbose output |
+| `int` | 50 | interval between frame in a gif in millis (works only with .gif output)|
 
 ### Output Formats
 

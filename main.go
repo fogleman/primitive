@@ -29,6 +29,7 @@ var (
 	Nth        int
 	Repeat     int
 	V, VV      bool
+	Interval   int
 )
 
 type flagArray []string
@@ -75,6 +76,7 @@ func init() {
 	flag.IntVar(&Repeat, "rep", 0, "add N extra shapes per iteration with reduced search")
 	flag.BoolVar(&V, "v", false, "verbose")
 	flag.BoolVar(&VV, "vv", false, "very verbose")
+	flag.IntVar(&Interval, "int", 50, "interval between frame in a gif")
 }
 
 func errorMessage(message string) bool {
@@ -110,6 +112,9 @@ func main() {
 		if config.Count < 1 {
 			ok = errorMessage("ERROR: number argument must be > 0")
 		}
+	}
+	if Interval < 0 {
+		ok = errorMessage("ERROR: negative frame interval not accepted")
 	}
 	if !ok {
 		fmt.Println("Usage: primitive [OPTIONS] -i input -o output -n count")
@@ -198,7 +203,7 @@ func main() {
 						check(primitive.SaveFile(path, model.SVG()))
 					case ".gif":
 						frames := model.Frames(0.001)
-						check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
+						check(primitive.SaveGIFImageMagick(path, frames, Interval, 250))
 					}
 				}
 			}
