@@ -12,6 +12,7 @@ type Model struct {
 	Sw, Sh     int
 	Scale      float64
 	Background Color
+	BlurFilter int
 	Target     *image.RGBA
 	Current    *image.RGBA
 	Context    *gg.Context
@@ -22,7 +23,7 @@ type Model struct {
 	Workers    []*Worker
 }
 
-func NewModel(target image.Image, background Color, size, numWorkers int) *Model {
+func NewModel(target image.Image, background Color, size, numWorkers int, blurFilter int) *Model {
 	w := target.Bounds().Size().X
 	h := target.Bounds().Size().Y
 	aspect := float64(w) / float64(h)
@@ -43,6 +44,7 @@ func NewModel(target image.Image, background Color, size, numWorkers int) *Model
 	model.Sh = sh
 	model.Scale = scale
 	model.Background = background
+	model.BlurFilter = blurFilter
 	model.Target = imageToRGBA(target)
 	model.Current = uniformRGBA(target.Bounds(), background.NRGBA())
 	model.Score = differenceFull(model.Target, model.Current)
@@ -87,8 +89,16 @@ func (model *Model) SVG() string {
 	bg := model.Background
 	var lines []string
 	lines = append(lines, fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%d\" height=\"%d\">", model.Sw, model.Sh))
+	if model.BlurFilter != 0 {
+		lines = append(lines, fmt.Sprintf("<defs><filter id=\"f1\" x=\"0\" y=\"0\"><feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"%d\" /></filter></defs>", model.BlurFilter))
+	}
 	lines = append(lines, fmt.Sprintf("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#%02x%02x%02x\" />", model.Sw, model.Sh, bg.R, bg.G, bg.B))
-	lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f) translate(0.5 0.5)\">", model.Scale))
+	if model.BlurFilter != 0 {
+		lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f) translate(0.5 0.5)\" filter=\"url(#f1)\">", model.Scale))
+	} else {
+		lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f) translate(0.5 0.5)\">", model.Scale))
+	}
+
 	for i, shape := range model.Shapes {
 		c := model.Colors[i]
 		attrs := "fill=\"#%02x%02x%02x\" fill-opacity=\"%f\""
