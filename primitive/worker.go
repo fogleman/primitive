@@ -10,6 +10,8 @@ import (
 
 type Worker struct {
 	W, H       int
+	Frame      int
+	N          int
 	Target     *image.RGBA
 	Current    *image.RGBA
 	Buffer     *image.RGBA
@@ -36,10 +38,12 @@ func NewWorker(target *image.RGBA) *Worker {
 	return &worker
 }
 
-func (worker *Worker) Init(current *image.RGBA, score float64) {
+func (worker *Worker) Init(current *image.RGBA, score float64, frame int, n int) {
 	worker.Current = current
 	worker.Score = score
 	worker.Counter = 0
+	worker.N = n
+	worker.Frame = frame
 	worker.Heatmap.Clear()
 }
 

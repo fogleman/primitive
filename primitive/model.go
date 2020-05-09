@@ -12,6 +12,7 @@ type Model struct {
 	Sw, Sh     int
 	Scale      float64
 	Background Color
+	Frame      int
 	Target     *image.RGBA
 	Current    *image.RGBA
 	Context    *gg.Context
@@ -116,13 +117,13 @@ func (model *Model) Add(shape Shape, alpha int) {
 	shape.Draw(model.Context, model.Scale)
 }
 
-func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
-	state := model.runWorkers(shapeType, alpha, 1000, 100, 16)
+func (model *Model) Step(shapeType ShapeType, alpha, repeat int, frame int, n int) int {
+	state := model.runWorkers(shapeType, alpha, 1000, 100, 16, frame, n)
 	// state = HillClimb(state, 1000).(*State)
 	model.Add(state.Shape, state.Alpha)
 
 	for i := 0; i < repeat; i++ {
-		state.Worker.Init(model.Current, model.Score)
+		state.Worker.Init(model.Current, model.Score, frame, n)
 		a := state.Energy()
 		state = HillClimb(state, 100).(*State)
 		b := state.Energy()
@@ -144,7 +145,7 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 	return counter
 }
 
-func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
+func (model *Model) runWorkers(t ShapeType, a, n, age, m int, frame int, totN int) *State {
 	wn := len(model.Workers)
 	ch := make(chan *State, wn)
 	wm := m / wn
@@ -153,7 +154,7 @@ func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
 	}
 	for i := 0; i < wn; i++ {
 		worker := model.Workers[i]
-		worker.Init(model.Current, model.Score)
+		worker.Init(model.Current, model.Score, frame, totN)
 		go model.runWorker(worker, t, a, n, age, wm, ch)
 	}
 	var bestEnergy float64

@@ -5,6 +5,33 @@ import (
 	"math"
 )
 
+func closestColor(r1 int, g1 int, b1 int) Color {
+	palette := [8][3]int{
+		{255, 255, 255},
+		{255, 0, 25},
+		{247, 236, 70},
+		{0, 225, 132},
+		{21, 54, 177},
+		{102, 74, 41},
+		{208, 0, 250},
+		{0, 0, 0}}
+
+	var closestDis = float64(10000)
+	var cc = Color{0, 0, 0, 0}
+	for _, rgb2 := range palette {
+		r2 := rgb2[0]
+		g2 := rgb2[1]
+		b2 := rgb2[2]
+		dis := float64(math.Pow(math.Pow(float64(r1-r2), 2)+math.Pow(float64(g1-g2), 2)+math.Pow(float64(b1-b2), 2), 0.5))
+		if dis < closestDis {
+			closestDis = dis
+			cc = Color{r2, g2, b2, 255}
+		}
+	}
+	return cc
+
+}
+
 func computeColor(target, current *image.RGBA, lines []Scanline, alpha int) Color {
 	var rsum, gsum, bsum, count int64
 	a := 0x101 * 255 / alpha
@@ -30,7 +57,7 @@ func computeColor(target, current *image.RGBA, lines []Scanline, alpha int) Colo
 	r := clampInt(int(rsum/count)>>8, 0, 255)
 	g := clampInt(int(gsum/count)>>8, 0, 255)
 	b := clampInt(int(bsum/count)>>8, 0, 255)
-	return Color{r, g, b, alpha}
+	return closestColor(r, g, b)
 }
 
 func copyLines(dst, src *image.RGBA, lines []Scanline) {

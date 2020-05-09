@@ -24,11 +24,25 @@ func NewRandomEllipse(worker *Worker) *Ellipse {
 	return &Ellipse{worker, x, y, rx, ry, false}
 }
 
+func Max(x, y int) int {
+	if x < y {
+		return y
+	}
+	return x
+}
+
 func NewRandomCircle(worker *Worker) *Ellipse {
 	rnd := worker.Rnd
 	x := rnd.Intn(worker.W)
 	y := rnd.Intn(worker.H)
-	r := rnd.Intn(32) + 1
+	var r = int(0)
+	if worker.Frame < (worker.N / 3) {
+		r = Max(worker.W, worker.H) * 3 / 100
+	} else if worker.Frame < (worker.N * 2 / 3) {
+		r = Max(worker.W, worker.H) * 18 / 1000
+	} else {
+		r = Max(worker.W, worker.H) * 74 / 10000
+	}
 	return &Ellipse{worker, x, y, r, r, true}
 }
 
@@ -52,21 +66,8 @@ func (c *Ellipse) Mutate() {
 	w := c.Worker.W
 	h := c.Worker.H
 	rnd := c.Worker.Rnd
-	switch rnd.Intn(3) {
-	case 0:
-		c.X = clampInt(c.X+int(rnd.NormFloat64()*16), 0, w-1)
-		c.Y = clampInt(c.Y+int(rnd.NormFloat64()*16), 0, h-1)
-	case 1:
-		c.Rx = clampInt(c.Rx+int(rnd.NormFloat64()*16), 1, w-1)
-		if c.Circle {
-			c.Ry = c.Rx
-		}
-	case 2:
-		c.Ry = clampInt(c.Ry+int(rnd.NormFloat64()*16), 1, h-1)
-		if c.Circle {
-			c.Rx = c.Ry
-		}
-	}
+	c.X = clampInt(c.X+int(rnd.NormFloat64()*16), 0, w-1)
+	c.Y = clampInt(c.Y+int(rnd.NormFloat64()*16), 0, h-1)
 }
 
 func (c *Ellipse) Rasterize() []Scanline {
