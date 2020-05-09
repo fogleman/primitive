@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -18,6 +19,7 @@ import (
 
 var (
 	Input      string
+	Colors     string
 	Outputs    flagArray
 	Background string
 	Configs    shapeConfigArray
@@ -62,7 +64,8 @@ func (i *shapeConfigArray) Set(value string) error {
 }
 
 func init() {
-	flag.StringVar(&Input, "i", "", "input image path")
+	flag.StringVar(&Input, "i", "", "Input image path")
+	flag.StringVar(&Colors, "c", "", "input image with example colors")
 	flag.Var(&Outputs, "o", "output image path")
 	flag.Var(&Configs, "n", "number of primitives")
 	flag.StringVar(&Background, "bg", "", "background color (hex)")
@@ -132,6 +135,19 @@ func main() {
 	if Workers < 1 {
 		Workers = runtime.NumCPU()
 	}
+	if Colors != "" {
+		fmt.Println("here")
+		args := []string{
+			Input,
+			"-dither",
+			"Riemersma",
+			"-remap",
+			Colors,
+			"dithered.png"}
+		cmd := exec.Command("convert", args...)
+		cmd.Run()
+		Input = "dithered.png"
+	}
 
 	// read input image
 	primitive.Log(1, "reading %s\n", Input)
@@ -166,7 +182,7 @@ func main() {
 
 			// find optimal shape and add it to the model
 			t := time.Now()
-			n := model.Step(primitive.ShapeType(config.Mode), config.Alpha, config.Repeat)
+			n := model.Step(primitive.ShapeType(config.Mode), config.Alpha, config.Repeat, frame, config.Count)
 			nps := primitive.NumberString(float64(n) / time.Since(t).Seconds())
 			elapsed := time.Since(start).Seconds()
 			primitive.Log(1, "%d: t=%.3f, score=%.6f, n=%d, n/s=%s\n", frame, elapsed, model.Score, n, nps)

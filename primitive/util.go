@@ -185,6 +185,30 @@ func uniformRGBA(r image.Rectangle, c color.Color) *image.RGBA {
 	return im
 }
 
+func closestBGColor(r1 int, g1 int, b1 int) (int, int, int) {
+	palette := [5][3]int{{39, 79, 156},
+		{95, 98, 103},
+		{8, 8, 8},
+		{117, 14, 30},
+		{98, 92, 74}}
+
+	var closestDis = float64(10000)
+	var cc = [3]int{0, 0, 0}
+
+	for _, rgb2 := range palette {
+		r2 := rgb2[0]
+		g2 := rgb2[1]
+		b2 := rgb2[2]
+		dis := float64(math.Pow(math.Pow(float64(r1-r2), 2)+math.Pow(float64(g1-g2), 2)+math.Pow(float64(b1-b2), 2), 0.5))
+		if dis < closestDis {
+			closestDis = dis
+			cc = [3]int{r2, g2, b2}
+		}
+	}
+	return cc[0], cc[1], cc[2]
+
+}
+
 func AverageImageColor(im image.Image) color.NRGBA {
 	rgba := imageToRGBA(im)
 	size := rgba.Bounds().Size()
@@ -198,8 +222,12 @@ func AverageImageColor(im image.Image) color.NRGBA {
 			b += int(c.B)
 		}
 	}
+
 	r /= w * h
 	g /= w * h
 	b /= w * h
-	return color.NRGBA{uint8(r), uint8(g), uint8(b), 255}
+
+	r1, g1, b1 := closestBGColor(r, g, b)
+
+	return color.NRGBA{uint8(r1), uint8(g1), uint8(b1), 255}
 }
