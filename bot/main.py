@@ -41,6 +41,7 @@ except ImportError:
     print 'no config found!'
 
 class AttrDict(dict):
+    # This is a test for Doxygen
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self

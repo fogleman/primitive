@@ -15,6 +15,7 @@ type Polygon struct {
 	X, Y   []float64
 }
 
+//NewRandomPolygon creates random polygon
 func NewRandomPolygon(worker *Worker, order int, convex bool) *Polygon {
 	rnd := worker.Rnd
 	x := make([]float64, order)
