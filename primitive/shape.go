@@ -22,4 +22,5 @@ const (
 	ShapeTypeQuadratic
 	ShapeTypeRotatedEllipse
 	ShapeTypePolygon
+	ShapeTypeChord
 )
