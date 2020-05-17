@@ -1,0 +1,21 @@
+name: primitive
+version: '1.0'
+summary: Reproducing images with geometric primitives
+description: |
+  Reproducing images with geometric primitives.
+grade: stable
+confinement: strict
+base: core18
+parts:
+  primitive:
+    plugin: go
+    source: https://github.com/fogleman/primitive.git
+    go-importpath: github.com/fogleman/primitive
+    build-packages:
+      - build-essential
+apps:
+  primitive:
+    command: bin/primitive
+    plugs:
+      - home
+      - x11
