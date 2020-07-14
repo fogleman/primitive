@@ -14,6 +14,10 @@ Now available as a native Mac application!
 
 https://primitive.lol/
 
+### Primitive for your Web Server
+
+Process images using primitive as a route [in your web server](https://github.com/fogleman/primitive/tree/master/server/README.md).
+
 ### Twitter
 
 Follow [@PrimitivePic](https://twitter.com/PrimitivePic) on Twitter to see a new primitive picture every 30 minutes!
