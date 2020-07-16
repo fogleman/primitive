@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fogleman/primitive/build"
 	"github.com/fogleman/primitive/primitive"
 	"github.com/nfnt/resize"
 )
@@ -144,33 +145,24 @@ func main() {
 		input = resize.Thumbnail(size, size, input, resize.Bilinear)
 	}
 
-	// determine background color
-	var bg primitive.Color
-	if Background == "" {
-		bg = primitive.MakeColor(primitive.AverageImageColor(input))
-	} else {
-		bg = primitive.MakeHexColor(Background)
-	}
-
 	// run algorithm
-	model := primitive.NewModel(input, bg, OutputSize, Workers)
-	primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
-	start := time.Now()
-	frame := 0
 	for j, config := range Configs {
 		primitive.Log(1, "count=%d, mode=%d, alpha=%d, repeat=%d\n",
 			config.Count, config.Mode, config.Alpha, config.Repeat)
 
-		for i := 0; i < config.Count; i++ {
-			frame++
+		buildConfig := build.Config{
+			Input:      input,
+			Background: Background,
+			Alpha:      config.Alpha,
+			Count:      config.Count,
+			OutputSize: OutputSize,
+			Mode:       config.Mode,
+			Repeat:     config.Repeat,
+			V:          V,
+			VV:         VV,
+		}
 
-			// find optimal shape and add it to the model
-			t := time.Now()
-			n := model.Step(primitive.ShapeType(config.Mode), config.Alpha, config.Repeat)
-			nps := primitive.NumberString(float64(n) / time.Since(t).Seconds())
-			elapsed := time.Since(start).Seconds()
-			primitive.Log(1, "%d: t=%.3f, score=%.6f, n=%d, n/s=%s\n", frame, elapsed, model.Score, n, nps)
-
+		build.Build(buildConfig, func(model *primitive.Model, frame int, i int) {
 			// write output image(s)
 			for _, output := range Outputs {
 				ext := strings.ToLower(filepath.Ext(output))
@@ -202,6 +194,6 @@ func main() {
 					}
 				}
 			}
-		}
+		})
 	}
 }
