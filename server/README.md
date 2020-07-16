@@ -8,14 +8,14 @@ primitive. The response returns a raw PNG buffer with Content-Type `image/png`.
 
 ```go
 import (
-  "net/http"
+	"net/http"
 
 	pr "github.com/fogleman/primitive/server/route"
 )
 
 handler := pr.PrimitiveRoute(pr.Config{
-  MaxUploadMb: 10,
-  FileKey: "file",
+	MaxUploadMb: 10,
+	FileKey: "file",
 })
 http.HandleFunc("/primitive", handler)
 ```

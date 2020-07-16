@@ -157,7 +157,6 @@ func main() {
 			Count:      config.Count,
 			OutputSize: OutputSize,
 			Mode:       config.Mode,
-			Workers:    Workers,
 			Repeat:     config.Repeat,
 			V:          V,
 			VV:         VV,
