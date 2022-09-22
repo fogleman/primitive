@@ -62,7 +62,7 @@ func (c *Ellipse) Mutate() {
 			c.Ry = c.Rx
 		}
 	case 2:
-		c.Ry = clampInt(c.Ry+int(rnd.NormFloat64()*16), 1, w-1)
+		c.Ry = clampInt(c.Ry+int(rnd.NormFloat64()*16), 1, h-1)
 		if c.Circle {
 			c.Rx = c.Ry
 		}
