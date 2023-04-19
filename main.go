@@ -16,6 +16,7 @@ import (
 	"github.com/nfnt/resize"
 )
 
+// Define command line inputs
 var (
 	Input      string
 	Outputs    flagArray
@@ -33,10 +34,16 @@ var (
 
 type flagArray []string
 
+// When interepreted as a string, a flagArray will print out all of its
+// Constituent strings as a comma delimited list
 func (i *flagArray) String() string {
 	return strings.Join(*i, ", ")
 }
 
+// Calling 'Set' on a flagArray will add a string to the list.
+// The purpose of being able to define multiple outputs is that
+// for a given set of primitives, the result can be output as
+// multiple filetypes based on extension. i.e. 'primitive -o result.png -o result.jpg'
 func (i *flagArray) Set(value string) error {
 	*i = append(*i, value)
 	return nil
@@ -51,16 +58,26 @@ type shapeConfig struct {
 
 type shapeConfigArray []shapeConfig
 
+//Flags must be able to interpret the value of Config as a string
 func (i *shapeConfigArray) String() string {
 	return ""
 }
 
+// Add to the shapeConfigArray 'Config' based on the value passed in at the command line.
+// Set the 'count' attribute as the Int parsed from the input value provided and current values of
+// Mode, Alpha, and Repeat.
+// If multiple flags are set for -n.. i.e. 'primitive -n 100 -n 600', two elements will be generated.
 func (i *shapeConfigArray) Set(value string) error {
 	n, _ := strconv.ParseInt(value, 0, 0)
 	*i = append(*i, shapeConfig{int(n), Mode, Alpha, Repeat})
 	return nil
 }
 
+// Read in flags from command line
+//
+// note: command lines are evaluated in order, so for multiple values of n, different values can be
+// specified for the other flags i.e. 'primitive -m 1 -n 20 -m 4 -n 100' would yeild a Config with a
+// count or 20 and a mode of 1 followed by a count of 100 with a mode of 4.
 func init() {
 	flag.StringVar(&Input, "i", "", "input image path")
 	flag.Var(&Outputs, "o", "output image path")
@@ -77,11 +94,13 @@ func init() {
 	flag.BoolVar(&VV, "vv", false, "very verbose")
 }
 
+// Send invocation errors to STDERR
 func errorMessage(message string) bool {
 	fmt.Fprintln(os.Stderr, message)
 	return false
 }
 
+// Handle fatal errors from downstream code
 func check(err error) {
 	if err != nil {
 		log.Fatal(err)
@@ -92,25 +111,37 @@ func main() {
 	// parse and validate arguments
 	flag.Parse()
 	ok := true
+
+	// Error if no input file is given
 	if Input == "" {
-		ok = errorMessage("ERROR: input argument required")
+		ok = errorMessage("ERROR: input image path required")
 	}
+
+	// Error if no output file is given
 	if len(Outputs) == 0 {
-		ok = errorMessage("ERROR: output argument required")
+		ok = errorMessage("ERROR: output image path required")
 	}
+
+	// Error if the number of primitives is not defined
 	if len(Configs) == 0 {
-		ok = errorMessage("ERROR: number argument required")
+		ok = errorMessage("ERROR: number of primitives required")
 	}
+
+	// If only one config was specified, assign mode, alpha, and repeat as they may have been included
+	// as flags after the -n value and thus were not set when the config was created.
 	if len(Configs) == 1 {
 		Configs[0].Mode = Mode
 		Configs[0].Alpha = Alpha
 		Configs[0].Repeat = Repeat
 	}
+
 	for _, config := range Configs {
 		if config.Count < 1 {
-			ok = errorMessage("ERROR: number argument must be > 0")
+			ok = errorMessage("ERROR: number of primitives must be > 0")
 		}
 	}
+
+	// If there was any error with the command invocation, show the usage
 	if !ok {
 		fmt.Println("Usage: primitive [OPTIONS] -i input -o output -n count")
 		flag.PrintDefaults()
