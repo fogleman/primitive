@@ -9,34 +9,71 @@ import (
 	"image/gif"
 	"image/jpeg"
 	"image/png"
+	"io"
 	"io/ioutil"
 	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 )
+
+//Interface types for mocking os.File
+type closableWriter interface {
+	Write(p []byte) (n int, err error)
+	WriteString(s string) (n int, err error)
+	Close() error
+}
+
+type closableReader interface {
+	Read(p []byte) (n int, err error)
+	Close() error
+}
+
+type runable interface {
+	Run() error
+}
+
+// alias downstream functions to enable mocking for unit test
+var osStdin = func() io.Reader { return os.Stdin }
+var osStdout = func() io.Writer { return os.Stdout }
+var osOpen = func(p string) (closableReader, error) { return os.Open(p) }
+var osCreate = func(p string) (closableWriter, error) { return os.Create(p) }
+var execCommand = func(cmd string, arg ...string) runable { return exec.Command(cmd, arg...) }
+var pngEncode = png.Encode
+
+var osRemoveAll = os.RemoveAll
+var imageDecode = image.Decode
+var fmtFprint = fmt.Fprint
+var jpegEncode = jpeg.Encode
+var imageNewPaletted = image.NewPaletted
+var drawDraw = draw.Draw
+
+var gifEncodeAll = gif.EncodeAll
+var imageNewRGBA = image.NewRGBA
+var ioutilTempDir = ioutil.TempDir
 
 func LoadImage(path string) (image.Image, error) {
 	if path == "-" {
-		im, _, err := image.Decode(os.Stdin)
+		im, _, err := imageDecode(osStdin())
 		return im, err
 	} else {
-		file, err := os.Open(path)
+		file, err := osOpen(path)
 		if err != nil {
 			return nil, err
 		}
 		defer file.Close()
-		im, _, err := image.Decode(file)
+		im, _, err := imageDecode(file)
 		return im, err
 	}
 }
 
 func SaveFile(path, contents string) error {
 	if path == "-" {
-		_, err := fmt.Fprint(os.Stdout, contents)
+		_, err := fmtFprint(osStdout(), contents)
 		return err
 	} else {
-		file, err := os.Create(path)
+		file, err := osCreate(path)
 		if err != nil {
 			return err
 		}
@@ -47,28 +84,28 @@ func SaveFile(path, contents string) error {
 }
 
 func SavePNG(path string, im image.Image) error {
-	file, err := os.Create(path)
+	file, err := osCreate(path)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	return png.Encode(file, im)
+	return pngEncode(file, im)
 }
 
 func SaveJPG(path string, im image.Image, quality int) error {
-	file, err := os.Create(path)
+	file, err := osCreate(path)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	return jpeg.Encode(file, im, &jpeg.Options{quality})
+	return jpegEncode(file, im, &jpeg.Options{quality})
 }
 
 func SaveGIF(path string, frames []image.Image, delay, lastDelay int) error {
 	g := gif.GIF{}
 	for i, src := range frames {
-		dst := image.NewPaletted(src.Bounds(), palette.Plan9)
-		draw.Draw(dst, dst.Rect, src, image.ZP, draw.Src)
+		dst := imageNewPaletted(src.Bounds(), palette.Plan9)
+		drawDraw(dst, dst.Rect, src, image.ZP, draw.Src)
 		g.Image = append(g.Image, dst)
 		if i == len(frames)-1 {
 			g.Delay = append(g.Delay, lastDelay)
@@ -76,22 +113,25 @@ func SaveGIF(path string, frames []image.Image, delay, lastDelay int) error {
 			g.Delay = append(g.Delay, delay)
 		}
 	}
-	file, err := os.Create(path)
+	file, err := osCreate(path)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	return gif.EncodeAll(file, &g)
+	return gifEncodeAll(file, &g)
 }
 
 func SaveGIFImageMagick(path string, frames []image.Image, delay, lastDelay int) error {
-	dir, err := ioutil.TempDir("", "")
+	dir, err := ioutilTempDir("", "")
 	if err != nil {
 		return err
 	}
 	for i, im := range frames {
 		path := filepath.Join(dir, fmt.Sprintf("%06d.png", i))
-		SavePNG(path, im)
+		err = SavePNG(path, im)
+		if err != nil {
+			return err
+		}
 	}
 	args := []string{
 		"-loop", "0",
@@ -101,22 +141,27 @@ func SaveGIFImageMagick(path string, frames []image.Image, delay, lastDelay int)
 		filepath.Join(dir, fmt.Sprintf("%06d.png", len(frames)-1)),
 		path,
 	}
-	cmd := exec.Command("convert", args...)
+	cmd := execCommand("convert", args...)
 	if err := cmd.Run(); err != nil {
 		return err
 	}
-	return os.RemoveAll(dir)
+	return osRemoveAll(dir)
 }
 
-func NumberString(x float64) string {
-	suffixes := []string{"", "k", "M", "G"}
-	for _, suffix := range suffixes {
-		if x < 1000 {
-			return fmt.Sprintf("%.1f%s", x, suffix)
+func NumberString(bf float64) string {
+	for _, unit := range []string{"", "K", "M", "G", "T", "P", "E", "Z"} {
+		if math.Abs(bf) < 1000.0 {
+			formatted := strconv.FormatFloat(bf, 'f', 2, 64) + unit + "B"
+			if len(formatted) >= 9 {
+				//Seeing it say 1000.00KB instead of 1.00MB was making me itch
+				bf /= 1000
+				continue
+			}
+			return (formatted)
 		}
-		x /= 1000
+		bf /= 1000
 	}
-	return fmt.Sprintf("%.1f%s", x, "T")
+	return strconv.FormatFloat(bf, 'f', 2, 64) + "YB"
 }
 
 func radians(degrees float64) float64 {
@@ -168,20 +213,20 @@ func rotate(x, y, theta float64) (rx, ry float64) {
 }
 
 func imageToRGBA(src image.Image) *image.RGBA {
-	dst := image.NewRGBA(src.Bounds())
-	draw.Draw(dst, dst.Rect, src, image.ZP, draw.Src)
+	dst := imageNewRGBA(src.Bounds())
+	drawDraw(dst, dst.Rect, src, image.ZP, draw.Src)
 	return dst
 }
 
 func copyRGBA(src *image.RGBA) *image.RGBA {
-	dst := image.NewRGBA(src.Bounds())
+	dst := imageNewRGBA(src.Bounds())
 	copy(dst.Pix, src.Pix)
 	return dst
 }
 
 func uniformRGBA(r image.Rectangle, c color.Color) *image.RGBA {
-	im := image.NewRGBA(r)
-	draw.Draw(im, im.Bounds(), &image.Uniform{c}, image.ZP, draw.Src)
+	im := imageNewRGBA(r)
+	drawDraw(im, im.Bounds(), &image.Uniform{c}, image.ZP, draw.Src)
 	return im
 }
 
