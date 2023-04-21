@@ -486,9 +486,9 @@ func TestNumberString(t *testing.T) {
 	cases[24] = numstr{num: 7590732498760209384908757, str: "7.59YB"}
 	cases[25] = numstr{num: 999999999999999999999999999999, str: "1000000.00YB"}
 
-	for _, numstr := range cases {
-		if numstr.str != NumberString(numstr.num) {
-			t.Error(fmt.Sprintf("bad conversion in NumberString on %f -> %s", numstr.num, numstr.str))
+	for _, nstr := range cases {
+		if nstr.str != NumberString(nstr.num) {
+			t.Error(fmt.Sprintf("bad conversion in NumberString on %f -> %s", nstr.num, nstr.str))
 		}
 	}
 }

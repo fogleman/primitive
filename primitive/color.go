@@ -18,6 +18,11 @@ func MakeColor(c color.Color) Color {
 func MakeHexColor(x string) Color {
 	x = strings.Trim(x, "#")
 	var r, g, b, a int
+	// Default mask is 255. Fall through with all zeros if no cases match
+	r = 0
+	g = 0
+	b = 0
+	a = 0
 	a = 255
 	switch len(x) {
 	case 3:
