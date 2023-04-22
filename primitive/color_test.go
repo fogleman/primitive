@@ -2,9 +2,7 @@ package primitive
 
 import (
 	"fmt"
-	"math/rand"
 	"testing"
-	"time"
 )
 
 type testingColor struct {
@@ -15,11 +13,10 @@ type testingColor struct {
 }
 
 func (c *testingColor) RGBA() (r, g, b, a uint32) {
-	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	c.r = uint32(rnd.Intn(65535))
-	c.g = uint32(rnd.Intn(65535))
-	c.b = uint32(rnd.Intn(65535))
-	c.a = uint32(rnd.Intn(65535))
+	c.r = 62535
+	c.g = 0
+	c.b = 65400
+	c.a = 22456
 
 	return c.r, c.g, c.b, c.a
 }

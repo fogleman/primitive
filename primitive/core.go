@@ -10,7 +10,11 @@ func computeColor(target, current *image.RGBA, lines []Scanline, alpha int) Colo
 	a := 0x101 * 255 / alpha
 	for _, line := range lines {
 		i := target.PixOffset(line.X1, line.Y)
+		// For every pixel in every line in the shape
 		for x := line.X1; x <= line.X2; x++ {
+
+			// load the r,g,b values into memory for the target and current
+			// versions of the shape area
 			tr := int(target.Pix[i])
 			tg := int(target.Pix[i+1])
 			tb := int(target.Pix[i+2])
@@ -18,6 +22,10 @@ func computeColor(target, current *image.RGBA, lines []Scanline, alpha int) Colo
 			cg := int(current.Pix[i+1])
 			cb := int(current.Pix[i+2])
 			i += 4
+
+			// Add them into the sum, multiplying the premultiplied values and applying
+			// the alpha mask to the differece. The sum is increased by the masked difference
+			// added on top of the multiplied corrent value.
 			rsum += int64((tr-cr)*a + cr*0x101)
 			gsum += int64((tg-cg)*a + cg*0x101)
 			bsum += int64((tb-cb)*a + cb*0x101)
@@ -27,6 +35,11 @@ func computeColor(target, current *image.RGBA, lines []Scanline, alpha int) Colo
 	if count == 0 {
 		return Color{}
 	}
+
+	// Because it is possible for a multiplied target value of 255 * 255 to be averaged with
+	// a multiplied current value of 255*257 for an average of 255*256, we need to make sure
+	// our max value in that case when divided by 255 ends up as 255 and not 256
+
 	r := clampInt(int(rsum/count)>>8, 0, 255)
 	g := clampInt(int(gsum/count)>>8, 0, 255)
 	b := clampInt(int(bsum/count)>>8, 0, 255)
