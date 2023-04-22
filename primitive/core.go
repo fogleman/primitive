@@ -41,7 +41,8 @@ func copyLines(dst, src *image.RGBA, lines []Scanline) {
 	}
 }
 
-func drawLines(im *image.RGBA, c Color, lines []Scanline) {
+func drawLines(im *image.RGBA, c Color, lines []Scanline, notify Notifier) {
+	notify.Notify("drawLines was called")
 	const m = 0xffff
 	sr, sg, sb, sa := c.NRGBA().RGBA()
 	for _, line := range lines {
@@ -88,6 +89,9 @@ func differenceFull(a, b *image.RGBA) float64 {
 	return math.Sqrt(float64(total)/float64(w*h*4)) / 255
 }
 
+// This is the core comparison algorithm that determines the degree of
+// likness between a 'before' approximation, and 'after' aproximation,
+// and the reference (or target) image
 func differencePartial(target, before, after *image.RGBA, score float64, lines []Scanline) float64 {
 	size := target.Bounds().Size()
 	w, h := size.X, size.Y

@@ -235,6 +235,9 @@ func AverageImageColor(im image.Image) color.NRGBA {
 	size := rgba.Bounds().Size()
 	w, h := size.X, size.Y
 	var r, g, b int
+
+	// Scan through every pixel at every x,y location and add up their
+	// total r, g, and b values
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
 			c := rgba.RGBAAt(x, y)
@@ -243,8 +246,11 @@ func AverageImageColor(im image.Image) color.NRGBA {
 			b += int(c.B)
 		}
 	}
+	// Divide r, g, and b by the total number of pixles to get the
+	// average r, g, and b
 	r /= w * h
 	g /= w * h
 	b /= w * h
+	//Return the averages in NRGAB format with an alpha of 255
 	return color.NRGBA{uint8(r), uint8(g), uint8(b), 255}
 }

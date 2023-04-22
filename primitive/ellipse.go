@@ -32,7 +32,8 @@ func NewRandomCircle(worker *Worker) *Ellipse {
 	return &Ellipse{worker, x, y, r, r, true}
 }
 
-func (c *Ellipse) Draw(dc *gg.Context, scale float64) {
+func (c *Ellipse) Draw(dc *gg.Context, scale float64, notify Notifier) {
+	notify.Notify("Draw was called")
 	dc.DrawEllipse(float64(c.X), float64(c.Y), float64(c.Rx), float64(c.Ry))
 	dc.Fill()
 }
@@ -116,7 +117,8 @@ func NewRandomRotatedEllipse(worker *Worker) *RotatedEllipse {
 	return &RotatedEllipse{worker, x, y, rx, ry, a}
 }
 
-func (c *RotatedEllipse) Draw(dc *gg.Context, scale float64) {
+func (c *RotatedEllipse) Draw(dc *gg.Context, scale float64, notify Notifier) {
+	notify.Notify("Draw was called")
 	dc.Push()
 	dc.RotateAbout(radians(c.Angle), c.X, c.Y)
 	dc.DrawEllipse(c.X, c.Y, c.Rx, c.Ry)

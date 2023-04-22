@@ -30,7 +30,8 @@ func NewRandomPolygon(worker *Worker, order int, convex bool) *Polygon {
 	return p
 }
 
-func (p *Polygon) Draw(dc *gg.Context, scale float64) {
+func (p *Polygon) Draw(dc *gg.Context, scale float64, notify Notifier) {
+	notify.Notify("Draw was called")
 	dc.NewSubPath()
 	for i := 0; i < p.Order; i++ {
 		dc.LineTo(p.X[i], p.Y[i])

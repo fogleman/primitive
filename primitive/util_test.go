@@ -8,8 +8,10 @@ import (
 	"image/gif"
 	"image/jpeg"
 	"io"
+	"math/rand"
 	"strings"
 	"testing"
+	"time"
 )
 
 const jpgData = `
@@ -489,6 +491,64 @@ func TestNumberString(t *testing.T) {
 	for _, nstr := range cases {
 		if nstr.str != NumberString(nstr.num) {
 			t.Error(fmt.Sprintf("bad conversion in NumberString on %f -> %s", nstr.num, nstr.str))
+		}
+	}
+}
+
+// Construct a random image, adding up all the r,g, and b values
+// to find the average, then pass the image into AverageImageColor
+// to make sure the averages match.
+func TestAverageImageColor(t *testing.T) {
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	for i := 0; i < 5; i++ {
+
+		size := rnd.Intn(10000)
+		rect := image.Rect(0, 0, size, size)
+		pix := make([]uint8, rect.Dx()*rect.Dy()*4)
+
+		rTotal := 0
+		gTotal := 0
+		bTotal := 0
+
+		for p := 0; p < rect.Dx()*rect.Dy()*4; p += 4 {
+			r := uint8(rnd.Intn(255))
+			g := uint8(rnd.Intn(255))
+			b := uint8(rnd.Intn(255))
+			a := uint8(255)
+
+			rTotal += int(r)
+			gTotal += int(g)
+			bTotal += int(b)
+
+			pix[p] = r
+			pix[p+1] = g
+			pix[p+2] = b
+			pix[p+3] = a
+		}
+
+		image := &image.NRGBA{
+			Pix:    pix,
+			Stride: rect.Dx() * 4,
+			Rect:   rect,
+		}
+
+		rAvg := uint8(rTotal / (rect.Dx() * rect.Dy()))
+		gAvg := uint8(gTotal / (rect.Dx() * rect.Dy()))
+		bAvg := uint8(bTotal / (rect.Dx() * rect.Dy()))
+
+		testAVG := AverageImageColor(image)
+
+		if rAvg != testAVG.R {
+			t.Error("mismached average red in AverageImageColor")
+		}
+
+		if gAvg != testAVG.G {
+			t.Error("mismached average green in AverageImageColor")
+		}
+
+		if bAvg != testAVG.B {
+			t.Error("mismached average blue in AverageImageColor")
 		}
 	}
 }

@@ -166,25 +166,25 @@ func main() {
 
 	// read input image
 	primitive.Log(1, "reading %s\n", Input)
-	input, err := primitive.LoadImage(Input)
+	inputImage, err := primitive.LoadImage(Input)
 	check(err)
 
 	// scale down input image if needed
 	size := uint(InputSize)
 	if size > 0 {
-		input = resize.Thumbnail(size, size, input, resize.Bilinear)
+		inputImage = resize.Thumbnail(size, size, inputImage, resize.Bilinear)
 	}
 
 	// determine background color
 	var bg primitive.Color
 	if Background == "" {
-		bg = primitive.MakeColor(primitive.AverageImageColor(input))
+		bg = primitive.MakeColor(primitive.AverageImageColor(inputImage))
 	} else {
 		bg = primitive.MakeHexColor(Background)
 	}
 
 	// run algorithm
-	model := primitive.NewModel(input, bg, OutputSize, Workers)
+	model := primitive.NewModel(inputImage, bg, OutputSize, Workers)
 	primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
 	start := time.Now()
 	frame := 0
@@ -197,7 +197,9 @@ func main() {
 
 			// find optimal shape and add it to the model
 			t := time.Now()
-			n := model.Step(primitive.ShapeType(config.Mode), config.Alpha, config.Repeat)
+			notify := primitive.NewTestStringNotifier()
+			n := model.Step(
+				primitive.ShapeType(config.Mode), config.Alpha, config.Repeat, notify)
 			nps := primitive.NumberString(float64(n) / time.Since(t).Seconds())
 			elapsed := time.Since(start).Seconds()
 			primitive.Log(1, "%d: t=%.3f, score=%.6f, n=%d, n/s=%s\n", frame, elapsed, model.Score, n, nps)
@@ -228,7 +230,9 @@ func main() {
 					case ".svg":
 						check(primitive.SaveFile(path, model.SVG()))
 					case ".gif":
-						frames := model.Frames(0.001)
+						// In the case of a gif, rather than saving an image, we save
+						// a slice of images that are built from the existing model
+						frames := model.Frames(0.001, notify)
 						check(primitive.SaveGIFImageMagick(path, frames, 50, 250))
 					}
 				}

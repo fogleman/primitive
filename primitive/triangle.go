@@ -27,7 +27,8 @@ func NewRandomTriangle(worker *Worker) *Triangle {
 	return t
 }
 
-func (t *Triangle) Draw(dc *gg.Context, scale float64) {
+func (t *Triangle) Draw(dc *gg.Context, scale float64, notify Notifier) {
+	notify.Notify("Draw was called")
 	dc.LineTo(float64(t.X1), float64(t.Y1))
 	dc.LineTo(float64(t.X2), float64(t.Y2))
 	dc.LineTo(float64(t.X3), float64(t.Y3))

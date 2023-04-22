@@ -30,7 +30,8 @@ func NewRandomQuadratic(worker *Worker) *Quadratic {
 	return q
 }
 
-func (q *Quadratic) Draw(dc *gg.Context, scale float64) {
+func (q *Quadratic) Draw(dc *gg.Context, scale float64, notify Notifier) {
+	notify.Notify("Draw was called")
 	dc.MoveTo(q.X1, q.Y1)
 	dc.QuadraticTo(q.X2, q.Y2, q.X3, q.Y3)
 	dc.SetLineWidth(q.Width * scale)

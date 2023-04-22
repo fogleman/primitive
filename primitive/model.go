@@ -9,38 +9,59 @@ import (
 )
 
 type Model struct {
-	Sw, Sh     int
-	Scale      float64
-	Background Color
-	Target     *image.RGBA
-	Current    *image.RGBA
-	Context    *gg.Context
-	Score      float64
-	Shapes     []Shape
-	Colors     []Color
-	Scores     []float64
-	Workers    []*Worker
+	ScaledWidth  int
+	ScaledHeight int
+	Scale        float64
+	Background   Color
+	Target       *image.RGBA
+	Current      *image.RGBA
+	Context      *gg.Context
+	Score        float64
+	Shapes       []Shape
+	Colors       []Color
+	Scores       []float64
+	Workers      []*Worker
 }
 
+// A model handles state for the operation of reading from an imput image and
+// translating it into primitives.
+// During this process, each iteration is a 'step' initiated by the Step method
 func NewModel(target image.Image, background Color, size, numWorkers int) *Model {
-	w := target.Bounds().Size().X
-	h := target.Bounds().Size().Y
-	aspect := float64(w) / float64(h)
-	var sw, sh int
+	width := target.Bounds().Size().X
+	height := target.Bounds().Size().Y
+	aspect := float64(width) / float64(height)
+	var scaledWidth, scaledHeight int
 	var scale float64
+
+	//If the image is wider than it is tall, the width should be set to 'size'
 	if aspect >= 1 {
-		sw = size
-		sh = int(float64(size) / aspect)
-		scale = float64(size) / float64(w)
+		scaledWidth = size
+		scaledHeight = int(float64(size) / aspect)
+		scale = float64(size) / float64(width)
 	} else {
-		sw = int(float64(size) * aspect)
-		sh = size
-		scale = float64(size) / float64(h)
+
+		// If the image is taller than it is wide, the height should instead be set to 'size'
+		scaledWidth = int(float64(size) * aspect)
+		scaledHeight = size
+		scale = float64(size) / float64(height)
 	}
 
+	// Set up the model instance with:
+	// * scale values
+	// * background color
+	// * the image we're operating on in RGB format
+	// * the image we're going to generate set to an image of the same size as our input image
+	//   initialized to our background color
+	// * a reference to the input image
+	// * a reference to the current state of the new image
+	// * a score value, which will represent how closely a
+	//   given shape describes the original image
+	// * a context object, which will hold the state of the in-process image modification
+	//   as well as provide helper methods for modifying the image
+	// * an initialized set of workers in the number specified at the command line
 	model := &Model{}
-	model.Sw = sw
-	model.Sh = sh
+	model.ScaledWidth = scaledWidth
+	model.ScaledHeight = scaledHeight
 	model.Scale = scale
 	model.Background = background
 	model.Target = imageToRGBA(target)
@@ -54,8 +75,9 @@ func NewModel(target image.Image, background Color, size, numWorkers int) *Model
 	return model
 }
 
+// Creates a new context from values in model
 func (model *Model) newContext() *gg.Context {
-	dc := gg.NewContext(model.Sw, model.Sh)
+	dc := gg.NewContext(model.ScaledWidth, model.ScaledHeight)
 	dc.Scale(model.Scale, model.Scale)
 	dc.Translate(0.5, 0.5)
 	dc.SetColor(model.Background.NRGBA())
@@ -63,18 +85,35 @@ func (model *Model) newContext() *gg.Context {
 	return dc
 }
 
-func (model *Model) Frames(scoreDelta float64) []image.Image {
+func (model *Model) Frames(scoreDelta float64, notify Notifier) []image.Image {
 	var result []image.Image
 	dc := model.newContext()
+
+	// Populate the initial value of the result with the current blank context image
 	result = append(result, imageToRGBA(dc.Image()))
+
+	// Initialize previous to a high value that should be easy to improve on.
 	previous := 10.0
+
+	// iterate over all of the shapes in the model
 	for i, shape := range model.Shapes {
+		notify.Notify("Evaulating shape in Frames")
+		// find the color origionally associated with this shape
 		c := model.Colors[i]
+
+		// set the current context color to the color for this shape
 		dc.SetRGBA255(c.R, c.G, c.B, c.A)
-		shape.Draw(dc, model.Scale)
+
+		// draw the shape and ifll it in with the current color
+		shape.Draw(dc, model.Scale, notify)
 		dc.Fill()
+		notify.Notify("Called Fill")
+		// Find the score associated with this shape
 		score := model.Scores[i]
 		delta := previous - score
+
+		// If this shape improved the likeness by at least the passed in delta
+		// Append this image to the result.
 		if delta >= scoreDelta {
 			previous = score
 			result = append(result, imageToRGBA(dc.Image()))
@@ -86,8 +125,12 @@ func (model *Model) Frames(scoreDelta float64) []image.Image {
 func (model *Model) SVG() string {
 	bg := model.Background
 	var lines []string
-	lines = append(lines, fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%d\" height=\"%d\">", model.Sw, model.Sh))
-	lines = append(lines, fmt.Sprintf("<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#%02x%02x%02x\" />", model.Sw, model.Sh, bg.R, bg.G, bg.B))
+	svgTag := "<svg xmlns=\"http://www.w3.org/2000/svg\"" +
+		" version=\"1.1\" width=\"%d\" height=\"%d\">"
+	lines = append(lines,
+		fmt.Sprintf(svgTag, model.ScaledWidth, model.ScaledHeight))
+	rectTag := "<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#%02x%02x%02x\" />"
+	lines = append(lines, fmt.Sprintf(rectTag, model.ScaledWidth, model.ScaledHeight, bg.R, bg.G, bg.B))
 	lines = append(lines, fmt.Sprintf("<g transform=\"scale(%f) translate(0.5 0.5)\">", model.Scale))
 	for i, shape := range model.Shapes {
 		c := model.Colors[i]
@@ -100,11 +143,12 @@ func (model *Model) SVG() string {
 	return strings.Join(lines, "\n")
 }
 
-func (model *Model) Add(shape Shape, alpha int) {
+func (model *Model) Add(shape Shape, alpha int, notify Notifier) {
+	notify.Notify("Model.Add was called")
 	before := copyRGBA(model.Current)
 	lines := shape.Rasterize()
 	color := computeColor(model.Target, model.Current, lines, alpha)
-	drawLines(model.Current, color, lines)
+	drawLines(model.Current, color, lines, notify)
 	score := differencePartial(model.Target, before, model.Current, model.Score, lines)
 
 	model.Score = score
@@ -113,29 +157,29 @@ func (model *Model) Add(shape Shape, alpha int) {
 	model.Scores = append(model.Scores, score)
 
 	model.Context.SetRGBA255(color.R, color.G, color.B, color.A)
-	shape.Draw(model.Context, model.Scale)
+	shape.Draw(model.Context, model.Scale, notify)
 }
 
-func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
-	state := model.runWorkers(shapeType, alpha, 1000, 100, 16)
+// Add a shape to the model
+func (model *Model) Step(shapeType ShapeType, alpha, repeat int, notify Notifier) int {
+	resultState := model.runWorkers(shapeType, alpha, 1000, 100, 16)
 	// state = HillClimb(state, 1000).(*State)
-	model.Add(state.Shape, state.Alpha)
+	model.Add(resultState.Shape, resultState.Alpha, notify)
 
+	//Optional additional optimizations and shape additions
 	for i := 0; i < repeat; i++ {
-		state.Worker.Init(model.Current, model.Score)
-		a := state.Energy()
-		state = HillClimb(state, 100).(*State)
-		b := state.Energy()
-		if a == b {
+		resultState.Worker.Init(model.Current, model.Score)
+		beforeEnergy := resultState.Energy()
+		resultState = HillClimb(resultState, 100).(*State)
+		afterEnergy := resultState.Energy()
+
+		//If we are no longer effectively optimizing, quit.
+		if beforeEnergy == afterEnergy {
+			notify.Notify("breaking out due to no optimization")
 			break
 		}
-		model.Add(state.Shape, state.Alpha)
+		model.Add(resultState.Shape, resultState.Alpha, notify)
 	}
-
-	// for _, w := range model.Workers[1:] {
-	// 	model.Workers[0].Heatmap.AddHeatmap(w.Heatmap)
-	// }
-	// SavePNG("heatmap.png", model.Workers[0].Heatmap.Image(0.5))
 
 	counter := 0
 	for _, worker := range model.Workers {
@@ -144,22 +188,27 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat int) int {
 	return counter
 }
 
-func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
-	wn := len(model.Workers)
-	ch := make(chan *State, wn)
-	wm := m / wn
-	if m%wn != 0 {
-		wm++
+func (model *Model) runWorkers(
+	t ShapeType, alpha, triesPerWorker, age, totalClimbes int) *State {
+	number_of_workers := len(model.Workers)
+	worker_channel := make(chan *State, number_of_workers)
+
+	climbesPerWorker := totalClimbes / number_of_workers
+
+	//Err on the side of more climbes rather than less climbes
+	if climbesPerWorker%number_of_workers != 0 {
+		climbesPerWorker++
 	}
-	for i := 0; i < wn; i++ {
+	for i := 0; i < number_of_workers; i++ {
 		worker := model.Workers[i]
 		worker.Init(model.Current, model.Score)
-		go model.runWorker(worker, t, a, n, age, wm, ch)
+		go model.runWorker(
+			worker, t, alpha, triesPerWorker, age, climbesPerWorker, worker_channel)
 	}
 	var bestEnergy float64
 	var bestState *State
-	for i := 0; i < wn; i++ {
-		state := <-ch
+	for i := 0; i < number_of_workers; i++ {
+		state := <-worker_channel
 		energy := state.Energy()
 		if i == 0 || energy < bestEnergy {
 			bestEnergy = energy
@@ -169,6 +218,7 @@ func (model *Model) runWorkers(t ShapeType, a, n, age, m int) *State {
 	return bestState
 }
 
-func (model *Model) runWorker(worker *Worker, t ShapeType, a, n, age, m int, ch chan *State) {
-	ch <- worker.BestHillClimbState(t, a, n, age, m)
+func (model *Model) runWorker(
+	worker *Worker, t ShapeType, alpha, triesPerWorker, age, climbs int, ch chan *State) {
+	ch <- worker.BestHillClimbState(t, alpha, triesPerWorker, age, climbs)
 }

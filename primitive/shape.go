@@ -6,7 +6,7 @@ type Shape interface {
 	Rasterize() []Scanline
 	Copy() Shape
 	Mutate()
-	Draw(dc *gg.Context, scale float64)
+	Draw(dc *gg.Context, scale float64, notify Notifier)
 	SVG(attrs string) string
 }
 

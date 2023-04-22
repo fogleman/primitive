@@ -34,7 +34,8 @@ func (r *Rectangle) bounds() (x1, y1, x2, y2 int) {
 	return
 }
 
-func (r *Rectangle) Draw(dc *gg.Context, scale float64) {
+func (r *Rectangle) Draw(dc *gg.Context, scale float64, notify Notifier) {
+	notify.Notify("Draw was called")
 	x1, y1, x2, y2 := r.bounds()
 	dc.DrawRectangle(float64(x1), float64(y1), float64(x2-x1+1), float64(y2-y1+1))
 	dc.Fill()
@@ -96,7 +97,8 @@ func NewRandomRotatedRectangle(worker *Worker) *RotatedRectangle {
 	return r
 }
 
-func (r *RotatedRectangle) Draw(dc *gg.Context, scale float64) {
+func (r *RotatedRectangle) Draw(dc *gg.Context, scale float64, notify Notifier) {
+	notify.Notify("Draw was called")
 	sx, sy := float64(r.Sx), float64(r.Sy)
 	dc.Push()
 	dc.Translate(float64(r.X), float64(r.Y))
