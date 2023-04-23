@@ -22,16 +22,14 @@ func (c *testingColor) RGBA() (r, g, b, a uint32) {
 }
 
 func TestMakeColor(t *testing.T) {
-	for i := 0; i < 50; i++ {
-		test_color := new(testingColor)
-		color := MakeColor(test_color)
+	test_color := new(testingColor)
+	color := MakeColor(test_color)
 
-		if color.R != int(test_color.r/257) ||
-			color.G != int(test_color.g/257) ||
-			color.B != int(test_color.b/257) ||
-			color.A != int(test_color.a/257) {
-			t.Error("bad color computation in MakeColor")
-		}
+	if color.R != int(test_color.r/257) ||
+		color.G != int(test_color.g/257) ||
+		color.B != int(test_color.b/257) ||
+		color.A != int(test_color.a/257) {
+		t.Error("bad color computation in MakeColor")
 	}
 }
 

@@ -38,14 +38,11 @@ func TestCopyLines(t *testing.T) {
 
 	copyLines(rgbaImage1, rgbaImage2, lines)
 
-	pixTotal := 0
-	for _, pix_val := range rgbaImage1.Pix {
-		pixTotal += int(pix_val)
-	}
+	imageHash := Hash(rgbaImage1)
 
 	// This value was pre-computed from static inputs
-	if pixTotal != 8167308 {
-		t.Error(fmt.Sprintf("Bad result image after copy in CopyLines: %d", pixTotal))
+	if imageHash != "fe247f8d1d4eaf12f57605a73129b3c3" {
+		t.Error(fmt.Sprintf("Bad result image after copy in CopyLines: %s", imageHash))
 	}
 }
 

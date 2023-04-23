@@ -43,14 +43,10 @@ func TestNewModel(t *testing.T) {
 		t.Error("Target Image size mismatch in NewModel")
 	}
 
-	fail_image_eq := false
-	for key, val := range testingImageRGBA.Pix {
-		if testModel.Target.Pix[key] != val {
-			fail_image_eq = true
-			break
-		}
-	}
-	if fail_image_eq {
+	testingHash := Hash(testModel.Target.Pix)
+	comparePixHash := Hash(testingImageRGBA.Pix)
+
+	if testingHash != comparePixHash {
 		t.Error("Target Image byte mismatch in NewModel")
 	}
 
@@ -60,7 +56,7 @@ func TestNewModel(t *testing.T) {
 		t.Error("Current Image size mismatch in NewModel")
 	}
 
-	// check that a score is at leaset set
+	// check that a score is at least set
 	if testModel.Score == 0 {
 		t.Error("Score not set in NewModel")
 	}
@@ -109,10 +105,6 @@ func TestNewContext(t *testing.T) {
 		if nrgba_image.Pix[p] != nrgba_color.R ||
 			nrgba_image.Pix[p+1] != nrgba_color.G ||
 			nrgba_image.Pix[p+2] != nrgba_color.B {
-			fmt.Println(fmt.Sprintf("r: %d %d g: %d %d b %d %d",
-				nrgba_image.Pix[p], nrgba_color.R,
-				nrgba_image.Pix[p+1], nrgba_color.B,
-				nrgba_image.Pix[p+2], nrgba_color.G))
 			color_check_fail = true
 			break
 		}

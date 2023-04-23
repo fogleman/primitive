@@ -1,7 +1,10 @@
 package primitive
 
 import (
+	"crypto/md5"
 	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"image"
 	"image/color"
 	"strings"
@@ -334,6 +337,13 @@ ubeK6t3gnXdG4wwziiii/UTKMOg6dbzJLFE4dSCP3rEdeOM8805tDsGMvySgSsS6rM6gk9eAcUUVftZt
 3uyVGNthuq3Eei6DK8H7sRR7YuMgHtXkc8rzTNLM26RyWY+p70UVnLY0iEsUipG7rhZBlDkc1HgYoorM
 0HwyBXGeRjmrcUhMg2ghezd//rUUVcTKW5s2jZtY/QDaOKKKK8ip8bPRj8KP/9k=
 `
+
+// Get a string which represents a hash of an arbitrary object
+func Hash(i interface{}) string {
+	json_encoded, _ := json.Marshal(i)
+	md5_hashed := md5.Sum(json_encoded)
+	return fmt.Sprintf("%x", md5_hashed)
+}
 
 func getStaticScanLines() []Scanline {
 	scanlines := []Scanline{{Y: 0, X1: 0, X2: 147, Alpha: 0xffff},
