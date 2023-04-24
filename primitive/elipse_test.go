@@ -7,7 +7,7 @@ import (
 	"github.com/fogleman/gg"
 )
 
-func TestDrawElipse(t *testing.T) {
+func TestDrawEllipse(t *testing.T) {
 
 	worker := NewWorker(imageToRGBA(createTestImage()))
 	context := gg.NewContext(100, 100)
@@ -38,7 +38,7 @@ func TestSVGEllipse(t *testing.T) {
 	}
 }
 
-func TestRasterizeElipse(t *testing.T) {
+func TestRasterizeEllipse(t *testing.T) {
 	worker := NewWorker(imageToRGBA(createTestImage()))
 	context := gg.NewContext(100, 100)
 	context.SetRGBA255(224, 117, 232, 187)

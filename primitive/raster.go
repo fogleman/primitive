@@ -23,6 +23,7 @@ func (p *painter) Paint(spans []raster.Span, done bool) {
 	}
 }
 
+// Use a worker to translate a path into a sequence of scanlines
 func fillPath(worker *Worker, path raster.Path) []Scanline {
 	r := worker.Rasterizer
 	r.Clear()
@@ -34,7 +35,8 @@ func fillPath(worker *Worker, path raster.Path) []Scanline {
 	return p.Lines
 }
 
-func strokePath(worker *Worker, path raster.Path, width fixed.Int26_6, cr raster.Capper, jr raster.Joiner) []Scanline {
+func strokePath(worker *Worker, path raster.Path, width fixed.Int26_6,
+	cr raster.Capper, jr raster.Joiner) []Scanline {
 	r := worker.Rasterizer
 	r.Clear()
 	r.UseNonZeroWinding = true

@@ -42,7 +42,7 @@ func TestSVGPolygon(t *testing.T) {
 	if SVG !=
 		"<polygon myAttrs points=\"10.200000,23.640000,20.540000,"+
 			"37.760000,63.310000,10.110000,5.760000,8.000000\" />" {
-		t.Error(fmt.Sprintf("Incorect SVG after SVG in Ellipse: %s", SVG))
+		t.Error(fmt.Sprintf("Incorect SVG after SVG in Polygon: %s", SVG))
 	}
 }
 
@@ -62,6 +62,6 @@ func TestRasterizePolygon(t *testing.T) {
 
 	// This value was pre-computed from static inputs
 	if linesState != "a86c6ffb0b4617ed91149a4a4b82ce51" {
-		t.Error(fmt.Sprintf("Incorect state after Rasterize in Ellipse: %s", linesState))
+		t.Error(fmt.Sprintf("Incorect state after Rasterize in Polygon: %s", linesState))
 	}
 }
