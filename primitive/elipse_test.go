@@ -7,22 +7,22 @@ import (
 	"github.com/fogleman/gg"
 )
 
-func TestDraw(t *testing.T) {
+func TestDrawElipse(t *testing.T) {
 
 	worker := NewWorker(imageToRGBA(createTestImage()))
 	context := gg.NewContext(100, 100)
 	context.SetRGBA255(224, 117, 232, 187)
 
-	my_ellipse := Ellipse{worker, 50, 50, 10, 20, false}
+	my_ellipse := Ellipse{worker, 10, 20, 50, 60, false}
 	notify := NewTestStringNotifier()
 
 	my_ellipse.Draw(context, 10, notify)
 	context.Fill()
 
-	contextState := Hash(context)
+	contextState := Hash(context.Image())
 
 	// This value was pre-computed from static inputs
-	if contextState != "99914b932bd37a50b983c5e7c90ae93b" {
+	if contextState != "cf8a9cd574a3b49dd7accda710b3e25f" {
 		t.Error(fmt.Sprintf("Incorect state after Draw in Ellipse: %s", contextState))
 	}
 }
@@ -38,7 +38,7 @@ func TestSVGEllipse(t *testing.T) {
 	}
 }
 
-func TestRasterize(t *testing.T) {
+func TestRasterizeElipse(t *testing.T) {
 	worker := NewWorker(imageToRGBA(createTestImage()))
 	context := gg.NewContext(100, 100)
 	context.SetRGBA255(224, 117, 232, 187)
