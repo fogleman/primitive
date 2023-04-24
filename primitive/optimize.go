@@ -1,6 +1,7 @@
 package primitive
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 )
@@ -12,6 +13,12 @@ type Annealable interface {
 	Copy() Annealable
 }
 
+// HillClimb models the optimzation of trying a mutation function
+// repeatedly to see which version of the mutation is best per
+// the metric modeled by 'Energy()' This code just handles
+// the procedural checking and compraing. Both the mutation
+// function and the comparision function are passed in as methods
+// of the 'Annealable' that is being operated on.
 func HillClimb(state Annealable, maxAge int) Annealable {
 	state = state.Copy()
 	bestState := state.Copy()
@@ -30,9 +37,11 @@ func HillClimb(state Annealable, maxAge int) Annealable {
 		}
 		step++
 	}
+	fmt.Println("Completed hill climb")
 	return bestState
 }
 
+// At present it appears that nothing calls this
 func PreAnneal(state Annealable, iterations int) float64 {
 	state = state.Copy()
 	previous := state.Energy()
@@ -46,6 +55,7 @@ func PreAnneal(state Annealable, iterations int) float64 {
 	return total / float64(iterations)
 }
 
+// At present it appears that nothing calls this
 func Anneal(state Annealable, maxTemp, minTemp float64, steps int) Annealable {
 	factor := -math.Log(maxTemp / minTemp)
 	state = state.Copy()
