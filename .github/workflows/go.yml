@@ -6,8 +6,6 @@ name: Go
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
 
@@ -20,9 +18,6 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.19
-
-    - name: Build
-      run: go build -v ./primitive
-
+        
     - name: Test
       run: go test -v ./primitive
