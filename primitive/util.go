@@ -62,11 +62,11 @@ func LoadImage(path string) (image.Image, error) {
 	file, err := osOpen(path)
 	if err != nil {
 		return nil, err
+	} else {
+		defer file.Close()
+		im, _, err := imageDecode(file)
+		return im, err
 	}
-	defer file.Close()
-	im, _, err := imageDecode(file)
-	return im, err
-
 }
 
 // SaveFile saves the value of the 'contents' string in the specified path
