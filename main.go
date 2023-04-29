@@ -58,7 +58,7 @@ type shapeConfig struct {
 
 type shapeConfigArray []shapeConfig
 
-//Flags must be able to interpret the value of Config as a string
+// Flags must be able to interpret the value of Config as a string
 func (i *shapeConfigArray) String() string {
 	return ""
 }

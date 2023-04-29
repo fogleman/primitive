@@ -18,7 +18,7 @@ import (
 	"strconv"
 )
 
-//Interface types for mocking os.File
+// Interface types for mocking os.File
 type closableWriter interface {
 	Write(p []byte) (n int, err error)
 	WriteString(s string) (n int, err error)
@@ -98,7 +98,7 @@ func SaveJPG(path string, im image.Image, quality int) error {
 		return err
 	}
 	defer file.Close()
-	return jpegEncode(file, im, &jpeg.Options{quality})
+	return jpegEncode(file, im, &jpeg.Options{Quality: quality})
 }
 
 func SaveGIF(path string, frames []image.Image, delay, lastDelay int) error {

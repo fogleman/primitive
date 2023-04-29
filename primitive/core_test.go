@@ -60,8 +60,6 @@ func TestDrawLines(t *testing.T) {
 		pixTotal += int(pix_val)
 	}
 
-	fmt.Printf("%#+v", lines)
-
 	// This value was pre-computed from static inputs
 	if pixTotal != 9353011 {
 		t.Error(fmt.Sprintf("Bad result image after draw in DrawLines: %d", pixTotal))
