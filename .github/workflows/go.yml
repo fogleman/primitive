@@ -20,11 +20,14 @@ jobs:
         go-version: 1.19
         
     - name: Test
-      run: go test -v ./primitive
+      run: go test -v ./...
       
     - name: Format
-      run: go fmt
+      run: go fmt ./...
     
     - name: Vet
-      run: go vet
+      run: go vet ./...
+      
+    - name: Lint
+      run: go lint ./...
       
