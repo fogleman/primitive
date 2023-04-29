@@ -26,7 +26,7 @@ func (htState *hillClimbTestState) DoMove() interface{} {
 
 func (htState *hillClimbTestState) UndoMove(undo interface{}) {
 	//fmt.Println(fmt.Sprintf("Called undoMove. Unmove calls: %d", htState.unmoveCalls))
-	htState.unmoveCalls += 1
+	htState.unmoveCalls++
 }
 
 // So the optimized value is going to be 1/ however many of the
@@ -38,21 +38,21 @@ func (htState *hillClimbTestState) Energy() float64 {
 	// the current value is greater than the test value
 	// i <= htState.matchValues[i] &&
 
-	num_divisible := 0
+	numDivisible := 0
 	for i := 0; i < len(htState.matchValues) &&
 		htState.testValue >= htState.matchValues[i]; i++ {
 		quotient := htState.testValue % htState.matchValues[i]
 		if quotient == 0 {
-			num_divisible++
+			numDivisible++
 		}
 
 	}
 
-	if num_divisible == 0 {
+	if numDivisible == 0 {
 		return 10.0
 	}
 
-	return 1 / float64(num_divisible)
+	return 1 / float64(numDivisible)
 }
 
 func createHillClimbTestState() *hillClimbTestState {
@@ -64,10 +64,10 @@ func createHillClimbTestState() *hillClimbTestState {
 }
 
 type testHillClimbCase struct {
-	age              int
-	expected_energy  float64
-	best_value       int
-	exp_unmove_calls int
+	age            int
+	expectedEnergy float64
+	bestValue      int
+	expUnmoveCalls int
 }
 
 func TestHillClimb(t *testing.T) {
@@ -89,23 +89,23 @@ func TestHillClimb(t *testing.T) {
 		testingState := createHillClimbTestState()
 		resultState := HillClimb(testingState, c.age)
 
-		if fmt.Sprintf("%f", resultState.Energy()) != fmt.Sprintf("%f", c.expected_energy) {
+		if fmt.Sprintf("%f", resultState.Energy()) != fmt.Sprintf("%f", c.expectedEnergy) {
 			t.Error(fmt.Sprintf(
 				"Unexpected energy value in HillClimb for test value %d: %f. Expecting %f",
 				resultState.(*hillClimbTestState).testValue,
 				resultState.(*hillClimbTestState).Energy(),
-				c.expected_energy))
+				c.expectedEnergy))
 			break
 		}
 
-		if resultState.(*hillClimbTestState).testValue != c.best_value {
+		if resultState.(*hillClimbTestState).testValue != c.bestValue {
 			t.Error(fmt.Sprintf(
 				"Unexpected best value in HillClimb: %d",
 				resultState.(*hillClimbTestState).testValue))
 			break
 		}
 
-		if resultState.(*hillClimbTestState).unmoveCalls != c.exp_unmove_calls {
+		if resultState.(*hillClimbTestState).unmoveCalls != c.expUnmoveCalls {
 			t.Error(fmt.Sprintf("Unexpected number of unmove calls: %d for age value: %d",
 				resultState.(*hillClimbTestState).unmoveCalls, c.age))
 			break

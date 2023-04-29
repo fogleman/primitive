@@ -7,12 +7,14 @@ import (
 	"github.com/fogleman/gg"
 )
 
+// Rectangle models a rectangle and implements the 'shape' interface
 type Rectangle struct {
 	Worker *Worker
 	X1, Y1 int
 	X2, Y2 int
 }
 
+// NewRandomRectangle creates a new random rectangle
 func NewRandomRectangle(worker *Worker) *Rectangle {
 	rnd := worker.Rnd
 	x1 := rnd.Intn(worker.W)
@@ -34,6 +36,7 @@ func (r *Rectangle) bounds() (x1, y1, x2, y2 int) {
 	return
 }
 
+// Draw invokes the DrawRectangle method of the current context
 func (r *Rectangle) Draw(dc *gg.Context, scale float64, notify Notifier) {
 	notify.Notify("Draw was called")
 	x1, y1, x2, y2 := r.bounds()
@@ -41,6 +44,7 @@ func (r *Rectangle) Draw(dc *gg.Context, scale float64, notify Notifier) {
 	dc.Fill()
 }
 
+// SVG returns the current rectangle as an SVG string
 func (r *Rectangle) SVG(attrs string) string {
 	x1, y1, x2, y2 := r.bounds()
 	w := x2 - x1 + 1
@@ -50,11 +54,14 @@ func (r *Rectangle) SVG(attrs string) string {
 		attrs, x1, y1, w, h)
 }
 
+// Copy returns a copy of the current rectangle
 func (r *Rectangle) Copy() Shape {
 	a := *r
 	return &a
 }
 
+// Mutate randomly and incrementally changes the dimesnions of the current
+// rectangle
 func (r *Rectangle) Mutate() {
 	w := r.Worker.W
 	h := r.Worker.H
@@ -69,6 +76,7 @@ func (r *Rectangle) Mutate() {
 	}
 }
 
+// Rasterize returns the current rectangle as a slice of scanlines
 func (r *Rectangle) Rasterize() []Scanline {
 	x1, y1, x2, y2 := r.bounds()
 	lines := r.Worker.Lines[:0]
@@ -78,6 +86,8 @@ func (r *Rectangle) Rasterize() []Scanline {
 	return lines
 }
 
+// RotatedRectangle returns a rotated rectangle and implements the 'shape'
+// interface
 type RotatedRectangle struct {
 	Worker *Worker
 	X, Y   int
@@ -85,6 +95,7 @@ type RotatedRectangle struct {
 	Angle  int
 }
 
+// NewRandomRotatedRectangle returns a new ramndom rotated rectangle
 func NewRandomRotatedRectangle(worker *Worker) *RotatedRectangle {
 	rnd := worker.Rnd
 	x := rnd.Intn(worker.W)
@@ -97,6 +108,8 @@ func NewRandomRotatedRectangle(worker *Worker) *RotatedRectangle {
 	return r
 }
 
+// Draw invokes the DrawRectangle method of the corrent context with
+// rotation info
 func (r *RotatedRectangle) Draw(dc *gg.Context, scale float64, notify Notifier) {
 	notify.Notify("Draw was called")
 	sx, sy := float64(r.Sx), float64(r.Sy)
@@ -108,17 +121,20 @@ func (r *RotatedRectangle) Draw(dc *gg.Context, scale float64, notify Notifier) 
 	dc.Fill()
 }
 
+// SVG returns the current rectangle as an svg string
 func (r *RotatedRectangle) SVG(attrs string) string {
 	return fmt.Sprintf(
 		"<g transform=\"translate(%d %d) rotate(%d) scale(%d %d)\"><rect %s x=\"-0.5\" y=\"-0.5\" width=\"1\" height=\"1\" /></g>",
 		r.X, r.Y, r.Angle, r.Sx, r.Sy, attrs)
 }
 
+// Copy returns a copy of the current rectangle
 func (r *RotatedRectangle) Copy() Shape {
 	a := *r
 	return &a
 }
 
+// Mutate randomly, and incrementally changes the current rectangle
 func (r *RotatedRectangle) Mutate() {
 	w := r.Worker.W
 	h := r.Worker.H
@@ -139,6 +155,7 @@ func (r *RotatedRectangle) Mutate() {
 	// }
 }
 
+// Valid checks to see if the coordinates of the current rectangle make sense.
 func (r *RotatedRectangle) Valid() bool {
 	a, b := r.Sx, r.Sy
 	if a < b {
@@ -148,6 +165,7 @@ func (r *RotatedRectangle) Valid() bool {
 	return aspect <= 5
 }
 
+// Rasterize returns the current rectangle as a slice of scanlines
 func (r *RotatedRectangle) Rasterize() []Scanline {
 	w := r.Worker.W
 	h := r.Worker.H

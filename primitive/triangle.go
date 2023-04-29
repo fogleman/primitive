@@ -7,6 +7,7 @@ import (
 	"github.com/fogleman/gg"
 )
 
+// Triangle models a triangle and implements the 'shape' interface
 type Triangle struct {
 	Worker *Worker
 	X1, Y1 int
@@ -14,6 +15,7 @@ type Triangle struct {
 	X3, Y3 int
 }
 
+// NewRandomTriangle creates a new random triangle
 func NewRandomTriangle(worker *Worker) *Triangle {
 	rnd := worker.Rnd
 	x1 := rnd.Intn(worker.W)
@@ -27,6 +29,8 @@ func NewRandomTriangle(worker *Worker) *Triangle {
 	return t
 }
 
+// Draw envokes the LineTo method on the current context for the legs
+// of the current triangle
 func (t *Triangle) Draw(dc *gg.Context, scale float64, notify Notifier) {
 	notify.Notify("Draw was called")
 	dc.LineTo(float64(t.X1), float64(t.Y1))
@@ -36,17 +40,21 @@ func (t *Triangle) Draw(dc *gg.Context, scale float64, notify Notifier) {
 	dc.Fill()
 }
 
+// SVG returns the current triangle as an SVG string
 func (t *Triangle) SVG(attrs string) string {
 	return fmt.Sprintf(
 		"<polygon %s points=\"%d,%d %d,%d %d,%d\" />",
 		attrs, t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3)
 }
 
+// Copy copies the current triangle
 func (t *Triangle) Copy() Shape {
 	a := *t
 	return &a
 }
 
+// Mutate incrementally and randomly changes the dimesnions of the current
+// triangle
 func (t *Triangle) Mutate() {
 	w := t.Worker.W
 	h := t.Worker.H
@@ -70,6 +78,7 @@ func (t *Triangle) Mutate() {
 	}
 }
 
+// Valid confirms that the coordinates of the current triangle make sense
 func (t *Triangle) Valid() bool {
 	const minDegrees = 15
 	var a1, a2, a3 float64
@@ -103,6 +112,7 @@ func (t *Triangle) Valid() bool {
 	return a1 > minDegrees && a2 > minDegrees && a3 > minDegrees
 }
 
+// Rasterize returns the current triangle as a slice of scanlines
 func (t *Triangle) Rasterize() []Scanline {
 	buf := t.Worker.Lines[:0]
 	lines := rasterizeTriangle(t.X1, t.Y1, t.X2, t.Y2, t.X3, t.Y3, buf)

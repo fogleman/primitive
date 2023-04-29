@@ -29,7 +29,8 @@ var (
 	Workers    int
 	Nth        int
 	Repeat     int
-	V, VV      bool
+	V          bool
+	VV         bool
 )
 
 type flagArray []string

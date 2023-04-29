@@ -8,6 +8,7 @@ import (
 	"github.com/golang/freetype/raster"
 )
 
+// Worker models a worker thread for image transforms
 type Worker struct {
 	W, H       int
 	Target     *image.RGBA
@@ -21,6 +22,7 @@ type Worker struct {
 	Counter    int
 }
 
+// NewWorker creates a worker
 func NewWorker(target *image.RGBA) *Worker {
 	w := target.Bounds().Size().X
 	h := target.Bounds().Size().Y
@@ -36,6 +38,7 @@ func NewWorker(target *image.RGBA) *Worker {
 	return &worker
 }
 
+// Init sets default values for a worker and associates it with an image
 func (worker *Worker) Init(current *image.RGBA, score float64) {
 	worker.Current = current
 	worker.Score = score
@@ -43,6 +46,7 @@ func (worker *Worker) Init(current *image.RGBA, score float64) {
 	worker.Heatmap.Clear()
 }
 
+// Energy returns the energy calculation for the worker's shape
 func (worker *Worker) Energy(shape Shape, alpha int) float64 {
 	worker.Counter++
 	lines := shape.Rasterize()
@@ -54,6 +58,7 @@ func (worker *Worker) Energy(shape Shape, alpha int) float64 {
 	return differencePartial(worker.Target, worker.Current, worker.Buffer, worker.Score, lines)
 }
 
+// BestHillClimbState returns the best solution the worker has found
 func (worker *Worker) BestHillClimbState(
 	t ShapeType, alpha, triesPerWorker, age, climbes int) *State {
 	var bestEnergy float64
@@ -72,6 +77,8 @@ func (worker *Worker) BestHillClimbState(
 	return bestState
 }
 
+// BestRandomState returns the best solution found based on a random
+// optimization
 func (worker *Worker) BestRandomState(t ShapeType, alpha, triesPerWorker int) *State {
 	var bestEnergy float64
 	var bestState *State
@@ -86,25 +93,26 @@ func (worker *Worker) BestRandomState(t ShapeType, alpha, triesPerWorker int) *S
 	return bestState
 }
 
+// RandomState returns a random shape wrapped in a state
 func (worker *Worker) RandomState(t ShapeType, alpha int) *State {
 	switch t {
 	default:
 		return worker.RandomState(ShapeType(worker.Rnd.Intn(8)+1), alpha)
-	case ShapeTypeTriangle:
+	case shapeTypeTriangle:
 		return NewState(worker, NewRandomTriangle(worker), alpha)
-	case ShapeTypeRectangle:
+	case shapeTypeRectangle:
 		return NewState(worker, NewRandomRectangle(worker), alpha)
-	case ShapeTypeEllipse:
+	case shapeTypeEllipse:
 		return NewState(worker, NewRandomEllipse(worker), alpha)
-	case ShapeTypeCircle:
+	case shapeTypeCircle:
 		return NewState(worker, NewRandomCircle(worker), alpha)
-	case ShapeTypeRotatedRectangle:
+	case shapeTypeRotatedRectangle:
 		return NewState(worker, NewRandomRotatedRectangle(worker), alpha)
-	case ShapeTypeQuadratic:
+	case shapeTypeQuadratic:
 		return NewState(worker, NewRandomQuadratic(worker), alpha)
-	case ShapeTypeRotatedEllipse:
+	case shapeTypeRotatedEllipse:
 		return NewState(worker, NewRandomRotatedEllipse(worker), alpha)
-	case ShapeTypePolygon:
+	case shapeTypePoligon:
 		return NewState(worker, NewRandomPolygon(worker, 4, false), alpha)
 	}
 }

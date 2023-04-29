@@ -1,5 +1,6 @@
 package primitive
 
+// Scanline models a line of pixels with an alpha mask
 type Scanline struct {
 	Y, X1, X2 int
 	Alpha     uint32

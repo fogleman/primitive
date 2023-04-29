@@ -8,6 +8,7 @@ import (
 	"github.com/golang/freetype/raster"
 )
 
+// Quadratic models a shape based on a parabala
 type Quadratic struct {
 	Worker *Worker
 	X1, Y1 float64
@@ -16,6 +17,7 @@ type Quadratic struct {
 	Width  float64
 }
 
+// NewRandomQuadratic creates a new random quadratic object
 func NewRandomQuadratic(worker *Worker) *Quadratic {
 	rnd := worker.Rnd
 	x1 := rnd.Float64() * float64(worker.W)
@@ -30,6 +32,7 @@ func NewRandomQuadratic(worker *Worker) *Quadratic {
 	return q
 }
 
+// Draw envokes the Quadratic drawing functions in the current context
 func (q *Quadratic) Draw(dc *gg.Context, scale float64, notify Notifier) {
 	notify.Notify("Draw was called")
 	dc.MoveTo(q.X1, q.Y1)
@@ -38,6 +41,7 @@ func (q *Quadratic) Draw(dc *gg.Context, scale float64, notify Notifier) {
 	dc.Stroke()
 }
 
+// SVG outputs the current quadratic shape as an SVG string
 func (q *Quadratic) SVG(attrs string) string {
 	// TODO: this is a little silly
 	attrs = strings.Replace(attrs, "fill", "stroke", -1)
@@ -46,11 +50,14 @@ func (q *Quadratic) SVG(attrs string) string {
 		attrs, q.X1, q.Y1, q.X2, q.Y2, q.X3, q.Y3, q.Width)
 }
 
+// Copy copies the the current quadratic
 func (q *Quadratic) Copy() Shape {
 	a := *q
 	return &a
 }
 
+// Mutate randomly and incrementally changes the dimensions of the current
+// quadratic
 func (q *Quadratic) Mutate() {
 	const m = 16
 	w := q.Worker.W
@@ -76,6 +83,8 @@ func (q *Quadratic) Mutate() {
 	}
 }
 
+// Valid evaulates the dimesnions of the current quadratic to make sure it
+// makes sense.
 func (q *Quadratic) Valid() bool {
 	dx12 := int(q.X1 - q.X2)
 	dy12 := int(q.Y1 - q.Y2)
@@ -89,6 +98,7 @@ func (q *Quadratic) Valid() bool {
 	return d13 > d12 && d13 > d23
 }
 
+// Rasterize returns the current quadratic as a slice of scanlines
 func (q *Quadratic) Rasterize() []Scanline {
 	var path raster.Path
 	p1 := fixp(q.X1, q.Y1)

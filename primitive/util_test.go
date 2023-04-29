@@ -3,7 +3,6 @@ package primitive
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"image"
 	"image/gif"
 	"image/jpeg"
@@ -428,7 +427,7 @@ func TestNumberString(t *testing.T) {
 
 	for _, nstr := range cases {
 		if nstr.str != NumberString(nstr.num) {
-			t.Error(fmt.Sprintf("bad conversion in NumberString on %f -> %s", nstr.num, nstr.str))
+			t.Errorf("bad conversion in NumberString on %f -> %s", nstr.num, nstr.str)
 		}
 	}
 }
@@ -442,14 +441,14 @@ func TestAverageImageColor(t *testing.T) {
 	testAVG := AverageImageColor(testingImage)
 
 	if uint8(testImageAverageRed()) != testAVG.R {
-		t.Error(fmt.Sprintf("wrong average red in AverageImageColor: %d", testAVG.R))
+		t.Errorf("wrong average red in AverageImageColor: %d", testAVG.R)
 	}
 
 	if uint8(testImageAverageGreen()) != testAVG.G {
-		t.Error(fmt.Sprintf("wrong average green in AverageImageColor: %d", testAVG.G))
+		t.Errorf("wrong average green in AverageImageColor: %d", testAVG.G)
 	}
 
 	if uint8(testImageAverageBlue()) != testAVG.B {
-		t.Error(fmt.Sprintf("wrong average blue in AverageImageColor: %d", testAVG.B))
+		t.Errorf("wrong average blue in AverageImageColor: %d", testAVG.B)
 	}
 }

@@ -56,8 +56,8 @@ func TestDrawLines(t *testing.T) {
 	drawLines(rgbaImage2, color, lines, notify)
 
 	pixTotal := 0
-	for _, pix_val := range rgbaImage2.Pix {
-		pixTotal += int(pix_val)
+	for _, pixVal := range rgbaImage2.Pix {
+		pixTotal += int(pixVal)
 	}
 
 	// This value was pre-computed from static inputs

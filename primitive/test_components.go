@@ -338,16 +338,16 @@ ubeK6t3gnXdG4wwziiii/UTKMOg6dbzJLFE4dSCP3rEdeOM8805tDsGMvySgSsS6rM6gk9eAcUUVftZt
 0HwyBXGeRjmrcUhMg2ghezd//rUUVcTKW5s2jZtY/QDaOKKKK8ip8bPRj8KP/9k=
 `
 
-// Get a string which represents a hash of an arbitrary object.
+// Hash gets a string which represents a hash of an arbitrary object.
 // This is a compermise between determinism, expediency, and troubleshooting
 // utility. If you run into a test result that is a hash mismatch, you
 // can compare the JSON from the code with the mismatch to the JSON from the
 // previous code without it for an output that is easier to reason about.
 func Hash(i interface{}) string {
-	json_encoded, _ := json.Marshal(i)
-	//fmt.Println(json_encoded)
-	md5_hashed := md5.Sum(json_encoded)
-	return fmt.Sprintf("%x", md5_hashed)
+	jsonEncoded, _ := json.Marshal(i)
+	//fmt.Println(jsonEncoded)
+	md5Hashed := md5.Sum(jsonEncoded)
+	return fmt.Sprintf("%x", md5Hashed)
 }
 
 func getStaticScanLines() []Scanline {
@@ -1212,19 +1212,19 @@ func createTestModel() *Model {
 	testingImage := createTestImage()
 
 	// generate a small number of workers
-	num_workers := 4
+	numWorkers := 4
 
 	//Generate a background color
 	r := 123
 	g := 234
 	b := 255
 
-	nrgba_color := color.NRGBA{uint8(r), uint8(g), uint8(b), 255}
-	background_color := MakeColor(nrgba_color)
+	nrgbaColor := color.NRGBA{uint8(r), uint8(g), uint8(b), 255}
+	backgroundColor := MakeColor(nrgbaColor)
 
 	// run the function under test with generated values
-	return NewModel(testingImage, background_color,
-		testingImage.Bounds().Max.X*testingImage.Bounds().Max.Y, num_workers)
+	return NewModel(testingImage, backgroundColor,
+		testingImage.Bounds().Max.X*testingImage.Bounds().Max.Y, numWorkers)
 }
 
 // Notifier for unit testing
@@ -1232,25 +1232,31 @@ type Notifier interface {
 	Notify(message string)
 }
 
+// NullNotify models a notifier that does nothing
 type NullNotify struct {
 }
 
+// Notify does nothing
 func (n *NullNotify) Notify(message string) {
 	//do nothing
 }
 
-func NewTestStringNotifier() *testStringNotifier {
+// NewTestStringNotifier is a factory for TestStringNotifier objects
+func NewTestStringNotifier() *TestStringNotifier {
 
-	notifier := new(testStringNotifier)
+	notifier := new(TestStringNotifier)
 	notifier.messages = make(map[string]int)
 
 	return notifier
 }
 
-type testStringNotifier struct {
+// TestStringNotifier collects notification messages in a hash with
+// their frequence of occurance for testing.
+type TestStringNotifier struct {
 	messages map[string]int
 }
 
-func (tsn *testStringNotifier) Notify(message string) {
-	tsn.messages[message] += 1
+// Notify adds a message to the notifier
+func (tsn *TestStringNotifier) Notify(message string) {
+	tsn.messages[message]++
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/fogleman/gg"
 )
 
+// Model contains the state for a transform job
 type Model struct {
 	ScaledWidth  int
 	ScaledHeight int
@@ -23,8 +24,8 @@ type Model struct {
 	Workers      []*Worker
 }
 
-// A model handles state for the operation of reading from an imput image and
-// translating it into primitives.
+// NewModel creates a model which handles state for the operation of
+// reading from an imput image and translating it into primitives.
 // During this process, each iteration is a 'step' initiated by the Step method
 func NewModel(target image.Image, background Color, size, numWorkers int) *Model {
 	width := target.Bounds().Size().X
@@ -85,6 +86,7 @@ func (model *Model) newContext() *gg.Context {
 	return dc
 }
 
+// Frames creates a sequence of frames for outputing to a GIF
 func (model *Model) Frames(scoreDelta float64, notify Notifier) []image.Image {
 	var result []image.Image
 	dc := model.newContext()
@@ -122,6 +124,7 @@ func (model *Model) Frames(scoreDelta float64, notify Notifier) []image.Image {
 	return result
 }
 
+// SVG outputs an svg string from the current state of the model
 func (model *Model) SVG() string {
 	bg := model.Background
 	var lines []string
@@ -143,6 +146,7 @@ func (model *Model) SVG() string {
 	return strings.Join(lines, "\n")
 }
 
+// Add adds a shape to the model
 func (model *Model) Add(shape Shape, alpha int, notify Notifier) {
 	notify.Notify("Model.Add was called")
 	before := copyRGBA(model.Current)
@@ -160,7 +164,7 @@ func (model *Model) Add(shape Shape, alpha int, notify Notifier) {
 	shape.Draw(model.Context, model.Scale, notify)
 }
 
-// Add a shape to the model
+// Step kicks of a new shape creation for adding to the model
 func (model *Model) Step(shapeType ShapeType, alpha, repeat int, notify Notifier) int {
 	resultState := model.runWorkers(shapeType, alpha, 1000, 100, 16)
 	// state = HillClimb(state, 1000).(*State)
@@ -190,25 +194,25 @@ func (model *Model) Step(shapeType ShapeType, alpha, repeat int, notify Notifier
 
 func (model *Model) runWorkers(
 	t ShapeType, alpha, triesPerWorker, age, totalClimbes int) *State {
-	number_of_workers := len(model.Workers)
-	worker_channel := make(chan *State, number_of_workers)
+	numberOfWorkers := len(model.Workers)
+	workerChannel := make(chan *State, numberOfWorkers)
 
-	climbesPerWorker := totalClimbes / number_of_workers
+	climbesPerWorker := totalClimbes / numberOfWorkers
 
 	//Err on the side of more climbes rather than less climbes
-	if climbesPerWorker%number_of_workers != 0 {
+	if climbesPerWorker%numberOfWorkers != 0 {
 		climbesPerWorker++
 	}
-	for i := 0; i < number_of_workers; i++ {
+	for i := 0; i < numberOfWorkers; i++ {
 		worker := model.Workers[i]
 		worker.Init(model.Current, model.Score)
 		go model.runWorker(
-			worker, t, alpha, triesPerWorker, age, climbesPerWorker, worker_channel)
+			worker, t, alpha, triesPerWorker, age, climbesPerWorker, workerChannel)
 	}
 	var bestEnergy float64
 	var bestState *State
-	for i := 0; i < number_of_workers; i++ {
-		state := <-worker_channel
+	for i := 0; i < numberOfWorkers; i++ {
+		state := <-workerChannel
 		energy := state.Energy()
 		if i == 0 || energy < bestEnergy {
 			bestEnergy = energy

@@ -12,13 +12,13 @@ func TestNewModel(t *testing.T) {
 	testingImage := createTestImage()
 
 	// generate a small number of workers
-	num_workers := 4
+	numWorkers := 4
 
-	background_color := MakeColor(color.NRGBA{uint8(32), uint8(17), uint8(202), uint8(240)})
-	new_size := testingImage.Bounds().Dx()*testingImage.Bounds().Dy() - 22
+	backgroundColor := MakeColor(color.NRGBA{uint8(32), uint8(17), uint8(202), uint8(240)})
+	newSize := testingImage.Bounds().Dx()*testingImage.Bounds().Dy() - 22
 
 	// run the function under test with generated values
-	testModel := NewModel(testingImage, background_color, new_size, num_workers)
+	testModel := NewModel(testingImage, backgroundColor, newSize, numWorkers)
 
 	// check scale values
 	// (These were pre-calculated based on this image and this size)
@@ -67,7 +67,7 @@ func TestNewModel(t *testing.T) {
 	}
 
 	// check that we have the correct number of workers
-	if len(testModel.Workers) != num_workers {
+	if len(testModel.Workers) != numWorkers {
 		t.Error("Wrong number of workers in NewModel")
 	}
 
@@ -97,19 +97,19 @@ func TestNewContext(t *testing.T) {
 
 	// Make sure backgrouind color is uniform in the context image
 
-	nrgba_color := testingModel.Background.NRGBA()
-	nrgba_image := imageToRGBA(testingImage)
+	nrgbaColor := testingModel.Background.NRGBA()
+	nrgbaImage := imageToRGBA(testingImage)
 
-	color_check_fail := false
-	for p := 0; p < len(nrgba_image.Pix); p += 4 {
-		if nrgba_image.Pix[p] != nrgba_color.R ||
-			nrgba_image.Pix[p+1] != nrgba_color.G ||
-			nrgba_image.Pix[p+2] != nrgba_color.B {
-			color_check_fail = true
+	colorCheckFail := false
+	for p := 0; p < len(nrgbaImage.Pix); p += 4 {
+		if nrgbaImage.Pix[p] != nrgbaColor.R ||
+			nrgbaImage.Pix[p+1] != nrgbaColor.G ||
+			nrgbaImage.Pix[p+2] != nrgbaColor.B {
+			colorCheckFail = true
 			break
 		}
 	}
-	if color_check_fail {
+	if colorCheckFail {
 		t.Error("Current Image color mismatch in NewModel")
 	}
 }
@@ -128,11 +128,11 @@ func TestStep(t *testing.T) {
 		alpha := 223
 		notify := NewTestStringNotifier()
 		// After the step, the model score should be lower
-		before_score := testingModel.Score
+		beforeScore := testingModel.Score
 		testingModel.Step(ShapeType(i), alpha, 10, notify)
-		after_score := testingModel.Score
+		afterScore := testingModel.Score
 
-		if before_score <= after_score {
+		if beforeScore <= afterScore {
 			t.Error("No score improvement after Model.Step")
 		}
 
@@ -151,28 +151,28 @@ func TestAdd(t *testing.T) {
 	for i := 0; i <= 9; i++ {
 
 		alpha := 227
-		before_score := testingModel.Score
-		before_shapes_len := len(testingModel.Shapes)
-		before_colors_len := len(testingModel.Colors)
-		before_scores_len := len(testingModel.Scores)
+		beforeScore := testingModel.Score
+		beforeShapesLen := len(testingModel.Shapes)
+		beforeColorsLen := len(testingModel.Colors)
+		beforeScoresLen := len(testingModel.Scores)
 		resultState := testingModel.runWorkers(ShapeType(i), alpha, 1000, 100, 16)
 
 		testingModel.Add(resultState.Shape, resultState.Alpha, notify)
-		after_score := testingModel.Score
+		afterScore := testingModel.Score
 
-		if len(testingModel.Shapes) != before_shapes_len+1 {
+		if len(testingModel.Shapes) != beforeShapesLen+1 {
 			t.Error("Shape not added to model in Model.Add")
 		}
 
-		if len(testingModel.Colors) != before_colors_len+1 {
+		if len(testingModel.Colors) != beforeColorsLen+1 {
 			t.Error("Color not added to model in Model.Add")
 		}
 
-		if len(testingModel.Scores) != before_scores_len+1 {
+		if len(testingModel.Scores) != beforeScoresLen+1 {
 			t.Error("Score not added to modle in Model.Add")
 		}
 
-		if after_score >= before_score {
+		if afterScore >= beforeScore {
 			t.Error("No score improvement in model.Add")
 		}
 	}
@@ -194,36 +194,36 @@ func TestFrames(t *testing.T) {
 
 		testingModel.Step(ShapeType(i), alpha, 2, notify)
 
-		num_shapes := len(testingModel.Shapes)
-		min_delta := .001
-		num_qualifying_scores := 1
-		previous_score := float64(10)
+		numShapes := len(testingModel.Shapes)
+		minDelta := .001
+		numQualifyingScores := 1
+		previousScore := float64(10)
 
 		for j, score := range testingModel.Scores {
 			score = testingModel.Scores[j]
-			delta := previous_score - score
+			delta := previousScore - score
 
-			if delta >= min_delta {
-				num_qualifying_scores += 1
-				previous_score = score
+			if delta >= minDelta {
+				numQualifyingScores++
+				previousScore = score
 			}
 		}
 
 		testFrames := testingModel.Frames(0.001, notify)
 
-		if notify.messages["Evaulating shape in Frames"] != num_shapes {
+		if notify.messages["Evaulating shape in Frames"] != numShapes {
 			t.Error(fmt.Sprintf("Wrong number of shape evaluations in Frames: %d",
 				notify.messages["Evaulating shape in Frames"]))
 		}
 
-		if notify.messages["Called Fill"] != num_shapes {
+		if notify.messages["Called Fill"] != numShapes {
 			t.Error("Wrong number of fill executions in Frames")
 		}
 
-		if len(testFrames) != num_qualifying_scores {
+		if len(testFrames) != numQualifyingScores {
 			t.Error(
 				fmt.Sprintf("Mismatch in qualifing frames and returned frames in Frames. Got %d, expected %d.",
-					num_qualifying_scores, len(testFrames)))
+					numQualifyingScores, len(testFrames)))
 		}
 	}
 }

@@ -13,12 +13,12 @@ func TestDrawTriangle(t *testing.T) {
 	context := gg.NewContext(100, 100)
 	context.SetRGBA255(201, 97, 134, 185)
 
-	my_quadratic := Triangle{worker, 10, 21, 63,
+	myTriangle := Triangle{worker, 10, 21, 63,
 		23, 37, 10}
 
 	notify := NewTestStringNotifier()
 
-	my_quadratic.Draw(context, .9, notify)
+	myTriangle.Draw(context, .9, notify)
 	context.Fill()
 
 	contextState := Hash(context.Image())
@@ -31,10 +31,10 @@ func TestDrawTriangle(t *testing.T) {
 
 func TestSVGTriangle(t *testing.T) {
 	worker := NewWorker(imageToRGBA(createTestImage2()))
-	my_quadratic := Triangle{worker, 10, 20, 63,
+	myTriangle := Triangle{worker, 10, 20, 63,
 		23, 37, 10}
 
-	SVG := my_quadratic.SVG("myAttrs")
+	SVG := myTriangle.SVG("myAttrs")
 
 	// This value was pre-computed from static inputs
 	if SVG !=
@@ -48,10 +48,10 @@ func TestRasterizeTriangle(t *testing.T) {
 	context := gg.NewContext(100, 100)
 	context.SetRGBA255(224, 117, 232, 187)
 
-	my_quadratic := Triangle{worker, 11, 21, 63,
+	myTriangle := Triangle{worker, 11, 21, 63,
 		23, 37, 10}
 
-	lines := my_quadratic.Rasterize()
+	lines := myTriangle.Rasterize()
 
 	linesState := Hash(lines)
 

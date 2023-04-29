@@ -2,8 +2,10 @@ package primitive
 
 import "fmt"
 
+// LogLevel is the loglevel for the application
 var LogLevel int
 
+// Log outputs a log entry to standard output
 func Log(level int, format string, a ...interface{}) {
 	if LogLevel >= level {
 		fmt.Printf(format, a...)

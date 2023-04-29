@@ -53,36 +53,38 @@ var gifEncodeAll = gif.EncodeAll
 var imageNewRGBA = image.NewRGBA
 var ioutilTempDir = ioutil.TempDir
 
+// LoadImage decodes an image from an image file into raw format
 func LoadImage(path string) (image.Image, error) {
 	if path == "-" {
 		im, _, err := imageDecode(osStdin())
 		return im, err
-	} else {
-		file, err := osOpen(path)
-		if err != nil {
-			return nil, err
-		}
-		defer file.Close()
-		im, _, err := imageDecode(file)
-		return im, err
 	}
+	file, err := osOpen(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	im, _, err := imageDecode(file)
+	return im, err
+
 }
 
+// SaveFile saves the value of the 'contents' string in the specified path
 func SaveFile(path, contents string) error {
 	if path == "-" {
 		_, err := fmtFprint(osStdout(), contents)
 		return err
-	} else {
-		file, err := osCreate(path)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		_, err = file.WriteString(contents)
+	}
+	file, err := osCreate(path)
+	if err != nil {
 		return err
 	}
+	defer file.Close()
+	_, err = file.WriteString(contents)
+	return err
 }
 
+// SavePNG saves the passed in image as a png
 func SavePNG(path string, im image.Image) error {
 	file, err := osCreate(path)
 	if err != nil {
@@ -92,6 +94,7 @@ func SavePNG(path string, im image.Image) error {
 	return pngEncode(file, im)
 }
 
+// SaveJPG saves the passed in image as a jpeg
 func SaveJPG(path string, im image.Image, quality int) error {
 	file, err := osCreate(path)
 	if err != nil {
@@ -101,6 +104,7 @@ func SaveJPG(path string, im image.Image, quality int) error {
 	return jpegEncode(file, im, &jpeg.Options{Quality: quality})
 }
 
+// SaveGIF saves the passed in images slice as a gif
 func SaveGIF(path string, frames []image.Image, delay, lastDelay int) error {
 	g := gif.GIF{}
 	for i, src := range frames {
@@ -121,6 +125,7 @@ func SaveGIF(path string, frames []image.Image, delay, lastDelay int) error {
 	return gifEncodeAll(file, &g)
 }
 
+// SaveGIFImageMagick saves the passed in slice of images
 func SaveGIFImageMagick(path string, frames []image.Image, delay, lastDelay int) error {
 	dir, err := ioutilTempDir("", "")
 	if err != nil {
@@ -148,6 +153,7 @@ func SaveGIFImageMagick(path string, frames []image.Image, delay, lastDelay int)
 	return osRemoveAll(dir)
 }
 
+// NumberString translates a float64 into a filesize string
 func NumberString(bf float64) string {
 	for _, unit := range []string{"", "K", "M", "G", "T", "P", "E", "Z"} {
 		if math.Abs(bf) < 1000.0 {
@@ -230,6 +236,8 @@ func uniformRGBA(r image.Rectangle, c color.Color) *image.RGBA {
 	return im
 }
 
+// AverageImageColor Takes the average of all the colors in an
+// image to create a good default background color
 func AverageImageColor(im image.Image) color.NRGBA {
 	rgba := imageToRGBA(im)
 	size := rgba.Bounds().Size()

@@ -13,10 +13,10 @@ func TestDrawRectangle(t *testing.T) {
 	context := gg.NewContext(100, 100)
 	context.SetRGBA255(224, 117, 232, 187)
 
-	my_rectangle := Rectangle{worker, 11, 22, 49, 59}
+	myRectangle := Rectangle{worker, 11, 22, 49, 59}
 	notify := NewTestStringNotifier()
 
-	my_rectangle.Draw(context, 10, notify)
+	myRectangle.Draw(context, 10, notify)
 	context.Fill()
 
 	contextState := Hash(context.Image())
@@ -29,8 +29,8 @@ func TestDrawRectangle(t *testing.T) {
 
 func TestSVGRectangle(t *testing.T) {
 	worker := NewWorker(imageToRGBA(createTestImage2()))
-	my_rectangle := Rectangle{worker, 123, 134, 21, 55}
-	SVG := my_rectangle.SVG("myAttrs")
+	myRectangle := Rectangle{worker, 123, 134, 21, 55}
+	SVG := myRectangle.SVG("myAttrs")
 
 	// This value was pre-computed from static inputs
 	if SVG != "<rect myAttrs x=\"21\" y=\"55\" width=\"103\" height=\"80\" />" {
@@ -43,9 +43,9 @@ func TestRasterizeRectangle(t *testing.T) {
 	context := gg.NewContext(100, 100)
 	context.SetRGBA255(224, 117, 232, 187)
 
-	my_rectangle := Rectangle{worker, 47, 60, 12, 23}
+	myRectangle := Rectangle{worker, 47, 60, 12, 23}
 
-	lines := my_rectangle.Rasterize()
+	lines := myRectangle.Rasterize()
 
 	linesState := Hash(lines)
 

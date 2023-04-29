@@ -2,6 +2,8 @@ package primitive
 
 import "github.com/fogleman/gg"
 
+// Shape is an interface that models a shope configuration such as rectangle
+// or triangle
 type Shape interface {
 	Rasterize() []Scanline
 	Copy() Shape
@@ -10,16 +12,17 @@ type Shape interface {
 	SVG(attrs string) string
 }
 
+// ShapeType specifies the type of shape that is modeled
 type ShapeType int
 
 const (
-	ShapeTypeAny ShapeType = iota
-	ShapeTypeTriangle
-	ShapeTypeRectangle
-	ShapeTypeEllipse
-	ShapeTypeCircle
-	ShapeTypeRotatedRectangle
-	ShapeTypeQuadratic
-	ShapeTypeRotatedEllipse
-	ShapeTypePolygon
+	shapeTypeAny ShapeType = iota
+	shapeTypeTriangle
+	shapeTypeRectangle
+	shapeTypeEllipse
+	shapeTypeCircle
+	shapeTypeRotatedRectangle
+	shapeTypeQuadratic
+	shapeTypeRotatedEllipse
+	shapeTypePoligon
 )

@@ -13,12 +13,12 @@ func TestDrawQuadratic(t *testing.T) {
 	context := gg.NewContext(100, 100)
 	context.SetRGBA255(201, 97, 144, 185)
 
-	my_quadratic := Quadratic{worker, 10.21, 20.54, 63.31,
+	myQuadratic := Quadratic{worker, 10.21, 20.54, 63.31,
 		23.64, 37.76, 10.11, 8}
 
 	notify := NewTestStringNotifier()
 
-	my_quadratic.Draw(context, .9, notify)
+	myQuadratic.Draw(context, .9, notify)
 	context.Fill()
 
 	contextState := Hash(context.Image())
@@ -31,10 +31,10 @@ func TestDrawQuadratic(t *testing.T) {
 
 func TestSVGQuadratic(t *testing.T) {
 	worker := NewWorker(imageToRGBA(createTestImage2()))
-	my_quadratic := Quadratic{worker, 10.21, 20.54, 63.31,
+	myQuadratic := Quadratic{worker, 10.21, 20.54, 63.31,
 		23.64, 37.76, 10.11, 8}
 
-	SVG := my_quadratic.SVG("myAttrs")
+	SVG := myQuadratic.SVG("myAttrs")
 
 	// This value was pre-computed from static inputs
 	if SVG !=
@@ -51,10 +51,10 @@ func TestRasterizeQuadratic(t *testing.T) {
 	context := gg.NewContext(100, 100)
 	context.SetRGBA255(224, 117, 232, 187)
 
-	my_quadratic := Quadratic{worker, 11.21, 20.54, 63.31,
+	myQuadratic := Quadratic{worker, 11.21, 20.54, 63.31,
 		23.64, 37.76, 10.12, 8}
 
-	lines := my_quadratic.Rasterize()
+	lines := myQuadratic.Rasterize()
 
 	linesState := Hash(lines)
 

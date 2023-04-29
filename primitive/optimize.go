@@ -5,6 +5,7 @@ import (
 	"math/rand"
 )
 
+// Annealable models an object that can do Hillclimb operations
 type Annealable interface {
 	Energy() float64
 	DoMove() interface{}
@@ -40,7 +41,7 @@ func HillClimb(state Annealable, maxAge int) Annealable {
 	return bestState
 }
 
-// At present it appears that nothing calls this
+// PreAnneal ..at present it appears that nothing calls this
 func PreAnneal(state Annealable, iterations int) float64 {
 	state = state.Copy()
 	previous := state.Energy()
@@ -54,7 +55,7 @@ func PreAnneal(state Annealable, iterations int) float64 {
 	return total / float64(iterations)
 }
 
-// At present it appears that nothing calls this
+// Anneal ..at present it appears that nothing calls this
 func Anneal(state Annealable, maxTemp, minTemp float64, steps int) Annealable {
 	factor := -math.Log(maxTemp / minTemp)
 	state = state.Copy()

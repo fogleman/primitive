@@ -13,10 +13,10 @@ func TestDrawEllipse(t *testing.T) {
 	context := gg.NewContext(100, 100)
 	context.SetRGBA255(224, 117, 232, 187)
 
-	my_ellipse := Ellipse{worker, 10, 20, 50, 60, false}
+	myEllipse := Ellipse{worker, 10, 20, 50, 60, false}
 	notify := NewTestStringNotifier()
 
-	my_ellipse.Draw(context, 10, notify)
+	myEllipse.Draw(context, 10, notify)
 	context.Fill()
 
 	contextState := Hash(context.Image())
@@ -29,8 +29,8 @@ func TestDrawEllipse(t *testing.T) {
 
 func TestSVGEllipse(t *testing.T) {
 	worker := NewWorker(imageToRGBA(createTestImage2()))
-	my_ellipse := Ellipse{worker, 123, 5234, 21, 55, false}
-	SVG := my_ellipse.SVG("myAttrs")
+	myEllipse := Ellipse{worker, 123, 5234, 21, 55, false}
+	SVG := myEllipse.SVG("myAttrs")
 
 	// This value was pre-computed from static inputs
 	if SVG != "<ellipse myAttrs cx=\"123\" cy=\"5234\" rx=\"21\" ry=\"55\" />" {
@@ -43,9 +43,9 @@ func TestRasterizeEllipse(t *testing.T) {
 	context := gg.NewContext(100, 100)
 	context.SetRGBA255(224, 117, 232, 187)
 
-	my_ellipse := Ellipse{worker, 40, 60, 12, 23, false}
+	myEllipse := Ellipse{worker, 40, 60, 12, 23, false}
 
-	lines := my_ellipse.Rasterize()
+	lines := myEllipse.Rasterize()
 
 	linesState := Hash(lines)
 

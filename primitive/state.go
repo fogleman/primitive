@@ -1,5 +1,6 @@
 package primitive
 
+// State models a shape with a worker, alpha, and score
 type State struct {
 	Worker      *Worker
 	Shape       Shape
@@ -8,6 +9,7 @@ type State struct {
 	Score       float64
 }
 
+// NewState produces a new state from passed in constituates
 func NewState(worker *Worker, shape Shape, alpha int) *State {
 	var mutateAlpha bool
 	if alpha == 0 {
@@ -17,6 +19,7 @@ func NewState(worker *Worker, shape Shape, alpha int) *State {
 	return &State{worker, shape, alpha, mutateAlpha, -1}
 }
 
+// Energy computes the energy of the current state
 func (state *State) Energy() float64 {
 	if state.Score < 0 {
 		state.Score = state.Worker.Energy(state.Shape, state.Alpha)
@@ -24,6 +27,7 @@ func (state *State) Energy() float64 {
 	return state.Score
 }
 
+// DoMove mutates the current state
 func (state *State) DoMove() interface{} {
 	rnd := state.Worker.Rnd
 	oldState := state.Copy()
@@ -35,6 +39,7 @@ func (state *State) DoMove() interface{} {
 	return oldState
 }
 
+// UndoMove returns the State to the previous state
 func (state *State) UndoMove(undo interface{}) {
 	oldState := undo.(*State)
 	state.Shape = oldState.Shape
@@ -42,6 +47,7 @@ func (state *State) UndoMove(undo interface{}) {
 	state.Score = oldState.Score
 }
 
+// Copy copies the current state
 func (state *State) Copy() Annealable {
 	return &State{
 		state.Worker, state.Shape.Copy(), state.Alpha, state.MutateAlpha, state.Score}

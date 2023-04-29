@@ -8,6 +8,7 @@ import (
 	"github.com/golang/freetype/raster"
 )
 
+// Polygon models an arbitrary shape and implementes the 'shape' interface
 type Polygon struct {
 	Worker *Worker
 	Order  int
@@ -15,6 +16,7 @@ type Polygon struct {
 	X, Y   []float64
 }
 
+// NewRandomPolygon creates a new random polygon
 func NewRandomPolygon(worker *Worker, order int, convex bool) *Polygon {
 	rnd := worker.Rnd
 	x := make([]float64, order)
@@ -30,6 +32,7 @@ func NewRandomPolygon(worker *Worker, order int, convex bool) *Polygon {
 	return p
 }
 
+// Draw calls the NewSubPath method of the current context object
 func (p *Polygon) Draw(dc *gg.Context, scale float64, notify Notifier) {
 	notify.Notify("Draw was called")
 	dc.NewSubPath()
@@ -40,6 +43,7 @@ func (p *Polygon) Draw(dc *gg.Context, scale float64, notify Notifier) {
 	dc.Fill()
 }
 
+// SVG outputs the polygon as an SVG string
 func (p *Polygon) SVG(attrs string) string {
 	ret := fmt.Sprintf(
 		"<polygon %s points=\"",
@@ -52,6 +56,7 @@ func (p *Polygon) SVG(attrs string) string {
 	return ret + strings.Join(points, ",") + "\" />"
 }
 
+// Copy copys the current polygon
 func (p *Polygon) Copy() Shape {
 	a := *p
 	a.X = make([]float64, p.Order)
@@ -61,6 +66,7 @@ func (p *Polygon) Copy() Shape {
 	return &a
 }
 
+// Mutate incrementally and randomly changes the dimensions of the polygon
 func (p *Polygon) Mutate() {
 	const m = 16
 	w := p.Worker.W
@@ -82,6 +88,8 @@ func (p *Polygon) Mutate() {
 	}
 }
 
+// Valid checks to make sure the addresses of the polygon describes a polygon
+// that makes sense.
 func (p *Polygon) Valid() bool {
 	if !p.Convex {
 		return true
@@ -109,6 +117,7 @@ func cross3(x1, y1, x2, y2, x3, y3 float64) float64 {
 	return dx1*dy2 - dy1*dx2
 }
 
+// Rasterize returns the current polygon as a slice of scanlines
 func (p *Polygon) Rasterize() []Scanline {
 	var path raster.Path
 	for i := 0; i <= p.Order; i++ {

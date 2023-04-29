@@ -8,6 +8,7 @@ import (
 	"github.com/golang/freetype/raster"
 )
 
+// Ellipse models an Ellips shape and implements the 'shape' interface
 type Ellipse struct {
 	Worker *Worker
 	X, Y   int
@@ -15,6 +16,7 @@ type Ellipse struct {
 	Circle bool
 }
 
+// NewRandomEllipse creates and returns a random ellipse
 func NewRandomEllipse(worker *Worker) *Ellipse {
 	rnd := worker.Rnd
 	x := rnd.Intn(worker.W)
@@ -24,6 +26,7 @@ func NewRandomEllipse(worker *Worker) *Ellipse {
 	return &Ellipse{worker, x, y, rx, ry, false}
 }
 
+// NewRandomCircle creates and returns a random ellipse that is a circle
 func NewRandomCircle(worker *Worker) *Ellipse {
 	rnd := worker.Rnd
 	x := rnd.Intn(worker.W)
@@ -32,23 +35,27 @@ func NewRandomCircle(worker *Worker) *Ellipse {
 	return &Ellipse{worker, x, y, r, r, true}
 }
 
+// Draw calls the DrawEllips method of the passed in context
 func (c *Ellipse) Draw(dc *gg.Context, scale float64, notify Notifier) {
 	notify.Notify("Draw was called")
 	dc.DrawEllipse(float64(c.X), float64(c.Y), float64(c.Rx), float64(c.Ry))
 	dc.Fill()
 }
 
+// SVG outputs an SVG string which models the ellipse pointed to by c
 func (c *Ellipse) SVG(attrs string) string {
 	return fmt.Sprintf(
 		"<ellipse %s cx=\"%d\" cy=\"%d\" rx=\"%d\" ry=\"%d\" />",
 		attrs, c.X, c.Y, c.Rx, c.Ry)
 }
 
+// Copy returns copy of the c pointer
 func (c *Ellipse) Copy() Shape {
 	a := *c
 	return &a
 }
 
+// Mutate randomly and incrementally modifies the ellipse pointed to by c
 func (c *Ellipse) Mutate() {
 	w := c.Worker.W
 	h := c.Worker.H
@@ -70,6 +77,7 @@ func (c *Ellipse) Mutate() {
 	}
 }
 
+// Rasterize returns the current ellipse as a slice of scanlines
 func (c *Ellipse) Rasterize() []Scanline {
 	w := c.Worker.W
 	h := c.Worker.H
@@ -100,6 +108,7 @@ func (c *Ellipse) Rasterize() []Scanline {
 	return lines
 }
 
+// RotatedEllipse models an ellipse which has been rotated
 type RotatedEllipse struct {
 	Worker *Worker
 	X, Y   float64
@@ -107,6 +116,7 @@ type RotatedEllipse struct {
 	Angle  float64
 }
 
+// NewRandomRotatedEllipse returns a copy of the current Ellipse
 func NewRandomRotatedEllipse(worker *Worker) *RotatedEllipse {
 	rnd := worker.Rnd
 	x := rnd.Float64() * float64(worker.W)
@@ -117,6 +127,7 @@ func NewRandomRotatedEllipse(worker *Worker) *RotatedEllipse {
 	return &RotatedEllipse{worker, x, y, rx, ry, a}
 }
 
+// Draw calls the DrawEllipse method of hte passed in context with rotation values
 func (c *RotatedEllipse) Draw(dc *gg.Context, scale float64, notify Notifier) {
 	notify.Notify("Draw was called")
 	dc.Push()
@@ -126,17 +137,20 @@ func (c *RotatedEllipse) Draw(dc *gg.Context, scale float64, notify Notifier) {
 	dc.Pop()
 }
 
+// SVG returns the current ellipse as an SVG string
 func (c *RotatedEllipse) SVG(attrs string) string {
 	return fmt.Sprintf(
 		"<g transform=\"translate(%f %f) rotate(%f) scale(%f %f)\"><ellipse %s cx=\"0\" cy=\"0\" rx=\"1\" ry=\"1\" /></g>",
 		c.X, c.Y, c.Angle, c.Rx, c.Ry, attrs)
 }
 
+// Copy creates a copy of the current ellipse
 func (c *RotatedEllipse) Copy() Shape {
 	a := *c
 	return &a
 }
 
+// Mutate randomly and incrementally changes the current ellipse shape
 func (c *RotatedEllipse) Mutate() {
 	w := c.Worker.W
 	h := c.Worker.H
@@ -153,6 +167,7 @@ func (c *RotatedEllipse) Mutate() {
 	}
 }
 
+// Rasterize returns the current ellipse as a slice of scanlines
 func (c *RotatedEllipse) Rasterize() []Scanline {
 	var path raster.Path
 	const n = 16
