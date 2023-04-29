@@ -25,7 +25,7 @@ func (htState *hillClimbTestState) DoMove() interface{} {
 }
 
 func (htState *hillClimbTestState) UndoMove(undo interface{}) {
-	fmt.Println(fmt.Sprintf("Called undoMove. Unmove calls: %d", htState.unmoveCalls))
+	//fmt.Println(fmt.Sprintf("Called undoMove. Unmove calls: %d", htState.unmoveCalls))
 	htState.unmoveCalls += 1
 }
 
@@ -85,7 +85,7 @@ func TestHillClimb(t *testing.T) {
 
 	for _, c := range cases {
 
-		fmt.Println(fmt.Sprintf("\n Starting test case for age %d", c.age))
+		//fmt.Println(fmt.Sprintf("\n Starting test case for age %d", c.age))
 		testingState := createHillClimbTestState()
 		resultState := HillClimb(testingState, c.age)
 

@@ -1,7 +1,6 @@
 package primitive
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 )
@@ -37,7 +36,7 @@ func HillClimb(state Annealable, maxAge int) Annealable {
 		}
 		step++
 	}
-	fmt.Println("Completed hill climb")
+	//fmt.Println("Completed hill climb")
 	return bestState
 }
 
