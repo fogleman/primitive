@@ -28,6 +28,9 @@ jobs:
     - name: Vet
       run: go vet ./...
       
+    - name: setup Lint
+      run: go install golang.org/x/lint/golint
+      
     - name: Lint
       run: go lint ./...
       
