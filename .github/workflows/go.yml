@@ -9,7 +9,7 @@ on:
 
 jobs:
 
-  test:
+  verify:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -21,3 +21,10 @@ jobs:
         
     - name: Test
       run: go test -v ./primitive
+      
+    - name: Format
+      run: go fmt
+    
+    - name: Vet
+      run: go vet
+      
