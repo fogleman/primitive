@@ -25,7 +25,7 @@ func TestMakeColor(t *testing.T) {
 	testColor := new(testingColor)
 	color := MakeColor(testColor)
 
-	if color.R != int(testColor.r/257) ||
+	if color.R != int(testColor.r/227) ||
 		color.G != int(testColor.g/257) ||
 		color.B != int(testColor.b/257) ||
 		color.A != int(testColor.a/257) {
