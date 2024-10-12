@@ -3,7 +3,6 @@ package primitive
 import (
 	"image"
 	"math/rand"
-	"time"
 
 	"github.com/golang/freetype/raster"
 )
@@ -21,7 +20,7 @@ type Worker struct {
 	Counter    int
 }
 
-func NewWorker(target *image.RGBA) *Worker {
+func NewWorker(target *image.RGBA, seed int64) *Worker {
 	w := target.Bounds().Size().X
 	h := target.Bounds().Size().Y
 	worker := Worker{}
@@ -32,7 +31,7 @@ func NewWorker(target *image.RGBA) *Worker {
 	worker.Rasterizer = raster.NewRasterizer(w, h)
 	worker.Lines = make([]Scanline, 0, 4096) // TODO: based on height
 	worker.Heatmap = NewHeatmap(w, h)
-	worker.Rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
+	worker.Rnd = rand.New(rand.NewSource(seed))
 	return &worker
 }
 

@@ -28,6 +28,7 @@ var (
 	Workers    int
 	Nth        int
 	Repeat     int
+	Seed       int64
 	V, VV      bool
 )
 
@@ -73,6 +74,10 @@ func init() {
 	flag.IntVar(&Workers, "j", 0, "number of parallel workers (default uses all cores)")
 	flag.IntVar(&Nth, "nth", 1, "save every Nth frame (put \"%d\" in path)")
 	flag.IntVar(&Repeat, "rep", 0, "add N extra shapes per iteration with reduced search")
+	flag.Func("seed", "seed to feed the RNG", func(value string) (err error) {
+		Seed, err = strconv.ParseInt(value, 10, 64)
+		return
+	})
 	flag.BoolVar(&V, "v", false, "verbose")
 	flag.BoolVar(&VV, "vv", false, "very verbose")
 }
@@ -126,7 +131,10 @@ func main() {
 	}
 
 	// seed random number generator
-	rand.Seed(time.Now().UTC().UnixNano())
+	if Seed == 0 {
+		Seed = time.Now().UTC().UnixNano()
+	}
+	rand.Seed(Seed)
 
 	// determine worker count
 	if Workers < 1 {
@@ -153,7 +161,7 @@ func main() {
 	}
 
 	// run algorithm
-	model := primitive.NewModel(input, bg, OutputSize, Workers)
+	model := primitive.NewModel(input, bg, OutputSize, Workers, Seed+1)
 	primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
 	start := time.Now()
 	frame := 0

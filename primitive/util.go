@@ -61,7 +61,7 @@ func SaveJPG(path string, im image.Image, quality int) error {
 		return err
 	}
 	defer file.Close()
-	return jpeg.Encode(file, im, &jpeg.Options{quality})
+	return jpeg.Encode(file, im, &jpeg.Options{Quality: quality})
 }
 
 func SaveGIF(path string, frames []image.Image, delay, lastDelay int) error {

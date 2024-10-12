@@ -22,7 +22,7 @@ type Model struct {
 	Workers    []*Worker
 }
 
-func NewModel(target image.Image, background Color, size, numWorkers int) *Model {
+func NewModel(target image.Image, background Color, size, numWorkers int, seed int64) *Model {
 	w := target.Bounds().Size().X
 	h := target.Bounds().Size().Y
 	aspect := float64(w) / float64(h)
@@ -48,7 +48,7 @@ func NewModel(target image.Image, background Color, size, numWorkers int) *Model
 	model.Score = differenceFull(model.Target, model.Current)
 	model.Context = model.newContext()
 	for i := 0; i < numWorkers; i++ {
-		worker := NewWorker(model.Target)
+		worker := NewWorker(model.Target, seed)
 		model.Workers = append(model.Workers, worker)
 	}
 	return model
