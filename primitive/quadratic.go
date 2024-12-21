@@ -56,7 +56,7 @@ func (q *Quadratic) Mutate() {
 	h := q.Worker.H
 	rnd := q.Worker.Rnd
 	for {
-		switch rnd.Intn(3) {
+		switch rnd.Intn(4) {
 		case 0:
 			q.X1 = clamp(q.X1+rnd.NormFloat64()*16, -m, float64(w-1+m))
 			q.Y1 = clamp(q.Y1+rnd.NormFloat64()*16, -m, float64(h-1+m))
